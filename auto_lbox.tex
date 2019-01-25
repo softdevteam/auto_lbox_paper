@@ -24,13 +24,14 @@
 \SetAlCapHSkip{0pt}
 \IncMargin{-\parindent}
 
-\acmJournal{PACMPL}
-\acmVolume{1}
-\acmNumber{CONF} % CONF = POPL or ICFP or OOPSLA
-\acmArticle{1}
-\acmYear{2018}
-\acmMonth{1}
-\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+%\acmJournal{SLE}
+%\acmVolume{1}
+%\acmNumber{CONF} % CONF = POPL or ICFP or OOPSLA
+%\acmArticle{1}
+%\acmYear{2019}
+%\acmMonth{1}
+%\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+\acmConference[SLE'19]{Software Language Engineering}{October 2019}{Athens, Greece}
 \startPage{1}
 
 \lstset{
@@ -198,8 +199,8 @@ improved further by manually tweaking compositions to deal with some language
 specific edge cases.
 
 The paper is structured as follows: Section \ref{sec_background} gives an
-overview on incremental lexing and parsing which is the basis for language
-composition via language boxes. Section \ref{sec_finding_lbox_candidates}
+overview on incremental lexing and parsing as well as language composition
+using language boxes. Section \ref{sec_finding_lbox_candidates}
 describes how we can use parsing errors to find automatic language boxes, how
 we can present multiple solutions to the user, and how automatically inserted
 language boxes can also automatically be removed again. Section
@@ -325,59 +326,28 @@ tree, which thus forms part of the wider \inputtree.}
 \end{center}
 \end{figure}
 
-When an end-user creates a new file in \eco, they are asked to specify
-which language that file will be written in. Let us assume that they choose the
-composed language named (unimaginatively) HTML+Python+SQL which composes
-the modular HTML, Python, and SQL languages within \eco. Although
-users can write whatever code they want in \eco, this composed language
-has the following syntactic constraints: the outer language must
-be HTML; in the outer HTML language, Python language boxes can be inserted
-wherever HTML elements are valid (i.e.~not inside HTML tags); SQL language boxes
-can be inserted anywhere a Python statement is valid; and HTML language boxes
-can be inserted anywhere a Python statement is valid (but one cannot nest
-Python inside such an inner HTML language box). Each language uses \eco's
-incremental parser-based editor.
-
-From the user's perspective, their
-typical workflow for a blank document is to start typing HTML exactly as they
-would in any other editor: they can add, alter, remove, or copy and paste text without
-restriction. The HTML is continually parsed by the outer language
-box's incremental parser and a parse tree constructed and updated appropriately
-within the language box.
-Syntax errors are highlighted as the user types with red squiggles.
-The HTML grammar has been modified to specify where
-Python+SQL language boxes are syntactically valid by referencing a
-separate, modular Python grammar.  When the user wishes to insert Python code,
-they press \hotkeynewlbox, which opens a menu of available languages (see Figure~\ref{fig:langmenu}); they
-then select Python+SQL from the languages listed which inserts a Python
-language box into the HTML they had been typing. The Python+SQL language box can
-appear at any point in the text; however, until it is put into a place consistent
-with the HTML grammar's reference to the Python+SQL grammar, the language box will
-be highlighted as a syntax error. Note that this does not affect the user's
-ability to edit the text inside or outside the box, and the editing experience
-retains the feel of a normal text editor. As Figure~\ref{fig:errors} shows, \eco
-happily tolerates syntactic errors -- including language boxes in positions
-which are syntactically invalid -- in multiple places.
+Language boxes need to be inserted manually by the user. Though the user may
+choose to insert a language box at any place in the program, the validity of
+that insertion is restricted by the grammar of the composition. For example,
+Figure \ref{fig:langmenu} shows the composition of HTML, Python, and SQL.  The
+HTML grammar has been modified to allow Python language boxes to be inserted
+anywhere between HTML tags, while the Python grammar has been altered to allow
+SQL language boxes wherever Python expressions are valid.  In the example, the
+user has already inserted a Python language box into HTML and is about to
+insert an SQL language box after the `\texttt{print}' (while arbitrary language
+boxes can be inserted, the editor highlights those that are valid in the
+current context). If a language box is put into a place where it isn't valid it
+will be highlighted as a syntax error. Note that this does not affect the
+user's ability to edit the text inside or outside the box, and the editing
+experience retains the feel of a normal text editor.
 
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=0.5\textwidth]{images/dropdown.png}
+\includegraphics[width=0.48\textwidth]{images/dropdown.png}
 \caption{Inserting a language box opens up a menu of the languages that \eco
 knows about. Languages which \eco knows are valid in the current context are
 highlighted in bold to help guide the user.}
 \label{fig:langmenu}
-\end{center}
-\end{figure}
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=0.5\textwidth]{images/errors.png}
-\caption{Editing a file with multiple syntax errors.  Lines 6, 8 and 11
-contain syntax errors in the traditional sense, and are indicated with
-horizontal red squiggles. A different kind of syntax error has
-occurred on line 4: the SQL language box is invalid in its current position
-(indicated by a vertical squiggle).}
-\label{fig:errors}
 \end{center}
 \end{figure}
 
@@ -386,17 +356,17 @@ encompass its contents. Language boxes can be thought of
 as being similar to the quoting mechanism in traditional text-based approaches
 which use brackets such as $\llbracket~\rrbracket$; unlike text-based brackets,
 language boxes can never conflict with the text contained within them. Users can
-leave a language box by clicking outside it, using the cursor keys, or pressing
-\hotkeyleavelbox. Within the parse tree, the
-language box is represented by a token whose type is Python+SQL and whose
+leave a language box by clicking outside it or using the cursor keys.
+Within the parse tree, the
+language box is represented by a token whose type describes its language and whose
 value is irrelevant to the incremental parser. As this may suggest, conceptually the top-level
-language of the file (HTML in this case) is a language box itself. Each language
+language of the file is a language box itself. Each language
 box has its own editor, which in this example means each has an incremental
 parser.
 
 At the end of the editing process, assuming that the user has a file with no syntax
 errors, they will be left with a parse tree with multiple nested language boxes inside
-it as in Figure \ref{fig:example1}. In other words, the user will have entered a
+it. In other words, the user will have entered a
 composed program with no restrictions on where language boxes can be placed; with no
 requirement to pick a bracketing mechanism which may conflict with nested
 languages; with no potential for ambiguity; and without sacrificing the ability
@@ -409,11 +379,14 @@ branches of a parse tree, or even those which span different language boxes).
 % glr style: check on every shift if a box is valid: subsection "Improving
 % detection"
 
-To humans it is often obvious where a user intended to embed a different
-language.  For an algorithm however this is no easy task.  The challenge for
-automatic language boxes is to find a heuristic that identifies as many
+Looking at a composed program it is generally quite easy for a humans
+to figure out where a user intended to embed a different
+language. For an algorithm, however, this is no easy feat. In fact, since
+many composition are inherently ambiguous, it is impossible to determine
+where one language ends and the other begins; in some cases this is true
+even for humans. The challenge is thus to find a heuristic that identifies as many
 opportunities for the insertion of language boxes as possible. In order to not
-interrupt the user, this heuristic must be fast.  More importantly though, we
+interrupt the user, this heuristic must be fast. More importantly though, we
 must minimize the insertion of false positives, which would otherwise force the
 user to perform unexpected manual work to revert the algorithm's mistakes which
 is generally considered
@@ -439,8 +412,8 @@ with a language box (see Figure \ref{fig_heuristic_example} for an example).
   \end{subfigure}
 \caption{Two examples showing the attempted composition of languages without the
 use of a language box. Both compositions result in an error, which can be used
-to search the surrounding for potential language box locations. \textbf{a)}
-Here we have to search backwards to \texttt{SELECT} at which location the
+to search the surrounding area for potential language box locations. \textbf{a)}
+Here we have to search backwards to `\texttt{SELECT}' at which location the
 insertion of an SQL box is possible. \textbf{b)} Here a box can be inserted
 immediately at the location of the error.}
 \label{fig_heuristic_example}
@@ -457,7 +430,7 @@ insertion around the error would render the input successful. The main
 challenge is therefore in finding suitable candidates.
 
 We start by searching backwards from the error to find locations where a
-language box would be valid. From here, for each language in the composition,
+language box would be valid. At each location, for each language in the composition,
 we then try to match as much text as possible. If consumed text is valid in one
 of the languages, a candidate is produced. Each language can produce multiple
 candidates by consuming more text, even if a candidate for that language has
@@ -509,16 +482,17 @@ shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
 \end{figure}
 
-Even though language box candidates are found during parsing, they are only
-inserted (either automatically or via selection by the user) after parsing has
-finished. The reason for this is simply that inserting them after parsing
-triggers another reparse, which then creates a new parse tree version. This
-allows us to easily undo automatically inserted language boxes again by simply
-going back to the parse tree version just before the language box was inserted.
-To undo an automatic insertion, the user simply needs to press \keys{Ctrl+Z}.
-When the user reverts an automatic language box insertion, the editor remembers
-this decision and does not attempt to insert the same language box again, so
-that the user doesn't have to repeatedly fix the algorithm's mistakes.
+If only a single language box candidate is found, the language box
+can be inserted immediately during the parsing phase. However, we need to make
+sure that the user can easily undo the insertion of the box, since it may not
+always be what the user wanted to do. In practise it is therefore easier to
+always insert language boxes after the parsing phase has finished, and then trigger
+another parse with the now inserted box. This allows us to go
+back to the version before the language box insertion without having to re-parse
+the program once more to retrieve the parsing errors.
+When the user reverts an automatic language box insertion, we also need to remember
+this decision so we do not attempt to insert the same language box twice, which the
+user then has to undo again.
 
 \subsection{Finding candidates}
 
@@ -541,7 +515,7 @@ This program currently has a parsing error at \qtt{:}\footnote{The parser
 expected an opening bracket here, as Java parses \qtt{def x()} as a function
 definition \qtt{x} of the type \qtt{def} which needs to be followed by opening
 and closing brackets.}. We now try to find a valid location on the parse stack,
-where a \texttt{pyfuncdef} language box can be pushed, which we find just
+where a \texttt{pyfuncdef} language box can be inserted. Such a location is just
 before \qtt{def}.
 In the next step we try to find candidates by consuming text, starting at
 \qtt{def}.  The language \texttt{pyfuncdef} can consume everything up to, but
@@ -569,29 +543,30 @@ However, as before, we stop upon reaching \qtt{\}} which is not valid in
 \texttt{pyfuncdef}. Having found a candidate, we now need to check if it fixes
 the error and doesn't introduce any other errors immediately following the box,
 when it's applied to the users input. We replace the consumed text with a
-language box of \texttt{pyfuncdef} and start a reparse in the outer language,
-Java, at its location. As soon as we successfully parsed \qtt{\}} we can stop
-the reparse, confirming that the insertion of the candidate doesn't introduce
+language box of \texttt{pyfuncdef} and attempt a parse in the outer language,
+Java, starting at the location of the language box.
+As soon as we successfully parsed \qtt{\}} we can stop,
+confirming that the insertion of the candidate doesn't introduce
 any new errors (Section \ref{sec:parse_after_lbox} discusses why it is
 sufficient to stop parsing after \qtt{\}} and why we don't have to parse the
-entire program to determine if the candidate is valid).  Finally, we check if
+entire program to determine if the candidate is valid). Finally, we check if
 the original error has been eliminated, which is the case here, as the error
 node \qtt{:} was included in the candidate language box. The candidate is thus
-a valid candidate and can be automatically inserted into the program.
+valid and can be automatically inserted into the program.
 
 \subsection{Confirming candidates}
 \label{sec:parse_after_lbox}
 
-In order to confirm if an automatic language box candidate is valid, we need to
+In order to confirm if a candidate is valid, we need to
 check that it does not introduce new errors when it is inserted into the parse
-tree, and also that is fixes the initial parsing error.  To check if a
+tree, and also that is fixes the initial parsing error. In order to determine if a
 candidate doesn't introduce new errors, we can simply check if the first
 non-whitespace token that follows it can be shifted.  The reasons for this are
-twofold. Firstly, we don't want to parse too far past the language box, for
+twofold. Firstly, we don't want to parse too far past the language box for
 performance reasons, and because this could lead to candidates being falsely
 rejected (see Figure \ref{fig_autoboxerrorafterinsert} for an example).
 Secondly, whitespace tokens, which most programming languages use, have the
-property, that they can almost always be shifted after another terminal. This
+property, that they can almost always be shifted after another token. This
 means that a whitespace token following a language box candidate would always
 confirm the candidate, even if the insertion of the box would cause an error
 immediately after that whitespace. This can sometimes lead to invalid
@@ -647,7 +622,7 @@ multiple options for the insertion of a language box. This can be either that
 there are multiple languages that can be inserted, or that there are multiple
 variants of consumed text for a single language.  An example for the latter is
 shown in the following composition of PHP and Python, which allows any Python
-box wherever a PHP expression would be valid.
+box wherever a PHP expression is valid.
 
 \begin{center}
 \includegraphics[width=0.25\textwidth]{images/autoboxmultioption.png}
@@ -658,7 +633,7 @@ the insertion of a Python box. We can include everything from \qtt{def} up to,
 and including \qtt{return 12}, or we can stop after \qtt{x = 11}.  Since both
 options are valid and fix the error, we can't automatically pick one.
 Instead, we display an indicator that there are multiple solutions available
-(in \eco this is done via a light bulb icon next to the line numbers). From
+(in the examples this is shown via a light bulb icon next to the line numbers). From
 there the user can choose one of the solutions from a drop-down list. Clicking
 on one of the options then automatically inserts a language box and replaces
 the relevant code:
@@ -684,36 +659,34 @@ Python that allows SQL and HTML wherever Python expressions are valid:
 
 We can see that the error at \qtt{table} can be solved by either wrapping
 \qtt{SELECT * FROM table} into a SQL language box, or by just wrapping
-\qtt{FROM table} into a HTML language box. To a human, however, it is obvious
-that the user meant to insert a SQL box here. While this is impossible for the
-algorithm to detect, the creator of the language composition can add hints that
-limit the insertion of some language boxes in certain scenarios.  For example,
-for the above, we could define that a HTML box should only be inserted if the
-box starts with a HTML tag, e.g.~\qtt{<img}.  When composing languages, \eco's
-language composition interface provides a function \texttt{add\_limit(lang,
-tokens)}, which takes as input the sublanguage we want to limit, and a list of
-tokens which are allowed to trigger automatic language box insertion.  This way
-we can restrict the Python and HTML composition and solve the above problem,
-via the simple addition of \texttt{pythonhtml.add\_limit("HTML",
-["tag\_open"])}.
+\qtt{FROM table} into a HTML language box. While a human can easily guess
+that the user meant to insert a SQL box here, this scenario is impossible for the
+algorithm to detect. To remedy this the creator of the language composition can add hints that
+limit the insertion of some language boxes in such cases.   There are two ways in which
+a language author can add limitations to a composition: 1) They can define
+the symbols that an automatically inserted language box must start with 2)
+or they can exclude specific symbols that must not appear at the beginning of a
+language box. For example, to solve the above problem, they user could define
+that a HTML box should only be inserted if the box starts with a HTML tag,
+e.g.~\qtt{<img}.
 
-Of course, another valid solution would also be to simply define a more
+Of course, another valid solution is to simply define a more
 fine-grained composition. For example, instead of creating a Python/HTML
 composition that allows all HTML to be valid wherever Python expressions are
 valid, the composition could be restricted to only allow HTML-tags
 (e.g.~\qtt{<img}, \qtt{<html}, etc) by embedding only a subset of the HTML
-grammar.  Although, this may not always be possible if the grammar doesn't
-separate rules on such a fine grained level.
+grammar. However, this depends on the make-up of the grammar, and may not
+always be possible it doesn't separate rules on such a fine-grained
+level.
 
 \subsection{Automatically removing boxes}
 \label{subsec_autoremoval}
 
-Despite the solutions described in \ref{subsec:limitingautoinserts} it is
-impossible to always predict where language boxes should be inserted and there
-will be cases where automatically inserted language boxes do not match the
-user's intentions. While the user can always undo a wrong insertion by pressing
-\keys{Ctrl+Z}, we do not want to burden them with the task of repeatedly
-cleaning up the algorithm's mistakes.  The following composition of Python and
+Despite the solutions described in \ref{subsec:limitingautoinserts} there
+will always be some remaining cases where automatically inserted language boxes do not match the
+user's intentions. While the user can always undo a wrong insertion,
+we do not want to burden them with the task of repeatedly
+cleaning up the algorithm's mistakes. The following composition of Python and
 SQL, though admittedly a rather unlikely scenario, exemplifies the problem:
 
 \begin{lstdefault}[language=Python]
@@ -735,14 +708,14 @@ automatically remove inserted language boxes again once more information has
 become available.  In this example, once the user inserts the missing \qtt{*}
 between \qtt{FROM} and \qtt{table}, the SQL language box becomes invalid. This
 gives us a good clue that the language box was inserted accidentally and needs
-to be removed; with the restriction, that its entire content can be parsed in
+to be removed; with the restriction, that its entire content must be valid in
 the outer language.
 However, sometimes an automatically inserted language box can become valid in
 both the inner as well as the outer language, after the user made additional
 changes.  In those cases \eco prioritises the outer language and removes the
 box, but only if the boxes contents \emph{and} its surrounding context can be
 parsed in the outer language.  The following constraints summarise the above
-(an example using the constraints is given in Figure \ref{fig_autoremoval}):
+(an example using these constraints is given in Figure \ref{fig_autoremoval}):
 \begin{enumerate}
   \item Only automatically inserted boxes can be automatically removed again.
   \item If the language box content is invalid, it will be removed only if
@@ -755,7 +728,7 @@ parsed in the outer language.  The following constraints summarise the above
 Using these constraints for the example from before, the inserted box would be
 removed as soon as the user inserts a \qtt{*} between \qtt{FROM} and
 \qtt{table}; however, it stays if more SQL code is added even it that makes the
-SQL box temporarily invalid. Note that language boxes that were inserted by the
+SQL code temporarily invalid. Note that language boxes that were inserted by the
 user, via choosing one of the suggested candidates, count as manual insertions
 and won't be automatically removed, even if they become invalid.
 
@@ -794,10 +767,9 @@ language, and remove it again.}
 \section{Limitations}
 \label{sec_lbox_limitations}
 
-This section gives some examples of ambiguities that cannot be resolved with
-automatic language boxes and thus display their limitations. This results in
-unwanted language boxes being inserted, or no language boxes being inserted,
-opposing the user's intentions.
+This section highlights the limitations of the heuristic used, by giving some
+examples of ambiguities that cannot be resolved with automatic language boxes,
+resulting either in unwanted or no language boxes being inserted.
 
 \subsection{No detection}
 
@@ -847,7 +819,7 @@ clearly not what the user intended.
 Sometimes the structure of a grammar can be responsible for the failure to
 generate automatic language boxes. For example, let's consider a composition of
 PHP and Python, that allows Python expressions wherever PHP expressions are
-valid, into which the user types the following input:
+valid. The user then edits the composition as follows:
 
 \begin{center}
 \includegraphics[width=0.45\textwidth]{images/autobox_limitphpgrammar.png}
@@ -871,11 +843,11 @@ makes it impossible to find a location on the stack that allows \qtt{1 or not
 \end{center}
 \caption{An example showing how sometimes the grammar of a language can
 keep the automatic language box detection from finding appropriate candidates.
-On the left is shown the elided parse tree after the user edited the PHP expression
+Shown on the left is the elided parse tree after the user edited the PHP expression
 \qtt{\$x = 1;} by inserting the Python code \qtt{or not 2}. However, we
 can see on the right, that by the time the error occurs, PHP has already reduced \qtt{\$x = 1} to \texttt{expr\textsubscript{2}}, and shifted
 \texttt{or} onto the stack. The only valid locations for a language
-box we can thus find are before \texttt{expr\textsubscript{2}} and \texttt{or}. In particular,
+box we can thus find are before \texttt{expr\textsubscript{2}} and \qtt{or}. In particular,
 we cannot find the location before \qtt{1} which would allow us to wrap the entire expression
 into a box.}
 \label{fig_auto_phplimit}
@@ -939,21 +911,16 @@ language box is created.}
 \label{lst_consume_text}
 \end{figure}
 
-\subsection{Custom recogniser for Python}
+\subsection{Recognising Python}
 \label{sec:impl_wsrec}
 
 In order to produce language box candidates for whitespace-sensitive languages
 like Python, we need to be able to create indentation tokens during the
-consumption of input. Section \ref{sec:indentation} described how support for
-whitespace-sensitive languages was added by allowing an additional phase
-between lexing and parsing that inserts indentation tokens into the parse tree.
-This method can't be used here, since we do not know yet where the input ends.
-Fortunately, since the recogniser is not incremental (and doesn't need to be),
-this is not necessary and indentation tokens can be generated on the fly. To do
-this, the recogniser for Python uses a wrapper around the lexer which inspects
+consumption of input. To do
+this, we implement a separate recogniser for Python which uses a wrapper around the lexer that inspects
 the tokens that the lexer produces and, when appropriate, returns indentation
 tokens instead. While the Python recogniser inherits most of the behaviour of
-the default one, it also needs to keep track of the indentation levels. Listing
+the default recogniser, it also needs to keep track of the indentation levels. Listing
 \ref{lst_next_token_indent} shows how the recogniser wraps around the lexer and
 produces indentation tokens whenever they are needed.
 
