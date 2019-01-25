@@ -813,6 +813,16 @@ extended into the Java function, and used the keyword \qtt{public} as the body
 of the Python function.  This is valid, since the keyword is optional in Java,
 so the insertion of that box does not create any errors, even though it is
 clearly not what the user intended.
+This problem can be circumvented by restricting the tokens that are allowed to
+be parsed to only the most recent ones. Since the user is most likely to type
+from top to bottom, we can disallow any tokens to be included in the language
+box that are older than the starting token. Since the \qtt{public} token was
+typed before the user started typing the Python code, it won't be included in
+the box, thus avoiding this issue\lukas{This also affects the last example in
+Section 3.3}. The downside to this is, however, that it won't be possible for
+the user to type language boxes out-of-order.  For example, they can't start
+typing the body of a Python function and add the method header afterwards, as
+then the body will be older than the header.
 
 \subsection{Grammar limitations}
 
