@@ -161,6 +161,20 @@
 
 \section{Introduction}
 
+\laurie{i think the big question here is: what's the best way to present the
+ideas in this paper? one option (which is more-or-less what you've done here) is
+to start from incremental parsing, and present this as an addition to it.
+another option is to start with grammar composition as the problem. my
+inclination is to try the latter option, although it might not work very well.
+basically, the argument might run along the lines of: grammar composition is a
+hard problem because it's difficult to know when you've moded to/from an
+embedded language; batch solutions have to be able to select a single parse of a
+complex input, running into problems of ambiguity (generalised parsing) or
+expressivity (e.g.~copper/silver); by moving to an online solution, we can try a
+"best effort" parse, falling back on the user when it fails; our experiment
+shows that we don't have to fall back too often (this is why the experiment will
+be crucial).}
+
 Incremental parsers are based on traditional parsing algorithms. However,
 instead of parsing a whole file each time the program is executed, incremental
 parsers generate and update a parse tree from the user input as the user types.
