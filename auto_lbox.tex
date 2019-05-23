@@ -777,6 +777,16 @@ language, and remove it again.}
 %E.g. changing \qtt{x = SELECT * FROM table;} to \qtt{x = SELECT * FROM} will remove the box again
 %as the content is valid Python now and not valid SQL anymore.
 
+\subsection{Resizing language boxes}
+
+Language boxes may automatically resize if this allows both the language box as
+well as the outer program to parse correctly. A language box may shrink, if it
+contains an error which can be resolved by moving contents into the outer
+language. It may expand if tokens following it can be included in the box,
+especially if those tokens are syntactically incorrect in the outer language
+\lukas{We have a design choice here: Should a language box always encompass the
+maximum amount of code, or should it only grow if it can remove errors in the
+outer language doing so?}
 
 \section{Limitations}
 \label{sec_lbox_limitations}
