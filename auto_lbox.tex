@@ -877,6 +877,58 @@ into a box.}
 \label{fig_auto_phplimit}
 \end{figure}
 
+Other compositions suffer from the same issue:
+\begin{itemize}
+    \item[JavaLua] \verb|int x = 1, 2|, can't wrap \verb|1, 2| in a Lua
+        language box, since Java has already reduced parts of the parse tree
+        after seeing the \texttt{,}, so that neither heuristic can reach the
+        beginning of the expression.
+    \item[JavaSQL] \verb|int x = BEGIN; SELECT a FROM t;|. Since `BEGIN;` is a
+        valid Java expression, it has already been reduced to a subtree which
+        can't be reached from the error that occurs in \texttt{FROM}.
+    \item[LuaJava] \verb|x = new int[1]|. Error occurs after the Java expr, at
+        which point it has already been reduced in Lua.
+    \item[LuaSQL] \verb|local x = SELECT a, b FROM t1;|. After parsing
+        \texttt{,}, the parse tree is reduced in a way that makes reaching the
+        beginning of the expression impossible for the heuristics.
+    \item[LuaSQL] \verb|local x = SELECT a.b FROM t1;]|. Same as the above but
+        with \texttt{.} instead of \texttt{,}.
+\end{itemize}
+
+\subsection{Problems with comments}
+
+Sometimes comments can be the reason for a failed insertion. For example, when
+composing Lua and Java, a possible composed program may look like this:
+
+\begin{verbatim}
+function decrease(x)
+    y = --x
+    return y
+end
+\end{verbatim}
+
+where \verb|--x| is meant to be a Java expression. However, since \texttt{--}
+in Lua is a comment, the error happens later in \texttt{return}, making it
+impossible for the heuristic to find the beginning of the expression.
+
+Another problem with comments appears in compositions of PHP and SQL:
+
+\begin{verbatim}
+$x = SELECT a FROM t1 -- comment;
+$y = 2;
+\end{verbatim}
+
+At first, when typing the SQL statement, as language box is correctly inserted
+around \verb|SELECT a FROM t1|. However, after typing the first \texttt{-}
+inside the language box, the box is shrunken, moving the \texttt{-} to the
+outside. One would assume that the box gets expanded again as soon as we
+continue typing the comment. However, when testing if the box can be expanded,
+the lexer for SQLite lexes the entire comment to the end of the line, including
+the semicolon finishing the PHP statement. Without this semicolon, PHP cannot
+parse successfully, breaking the condition for the expansion, which is thus
+aborted. The same problem can appear in other compositions where semicolons are
+used to end a statement, e.g.~Java.
+
 \section{Recognisers}
 \label{sec:impl_defaultrec}
 
