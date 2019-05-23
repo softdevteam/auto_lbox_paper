@@ -393,7 +393,7 @@ branches of a parse tree, or even those which span different language boxes).
 % glr style: check on every shift if a box is valid: subsection "Improving
 % detection"
 
-Looking at a composed program it is generally quite easy for a humans
+Looking at a composed program it is generally quite easy for humans
 to figure out where a user intended to embed a different
 language. For an algorithm, however, this is no easy feat. In fact, since
 many composition are inherently ambiguous, it is impossible to determine
@@ -496,17 +496,17 @@ shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
 \end{figure}
 
-If only a single language box candidate is found, the language box
-can be inserted immediately during the parsing phase. However, we need to make
-sure that the user can easily undo the insertion of the box, since it may not
-always be what the user wanted to do. In practise it is therefore easier to
-always insert language boxes after the parsing phase has finished, and then trigger
-another parse with the now inserted box. This allows us to go
-back to the version before the language box insertion without having to re-parse
-the program once more to retrieve the parsing errors.
-When the user reverts an automatic language box insertion, we also need to remember
-this decision so we do not attempt to insert the same language box twice, which the
-user then has to undo again.
+If only a single language box candidate is found, the language box can be
+inserted immediately during the parsing phase. Despite best efforts, it is
+unavoidable that inserted language boxes turn out to be not what the user
+intended.  The user thus may undo an inserted language box anytime using the,
+for editors typical, \keys{Ctrl+Z} key combination. Automatically inserted
+language boxes are initially marked as \emph{loose} boxes, which means they may
+be automatically removed again or resized to encompass less or more code. The
+box remains loose as long as the cursor remains inside it, but as soon as the
+user manually moves the cursor out of the box, it gets \emph{fixed} and stays this
+way. However, the user may manually mark boxes as loose or fix as they wish,
+via a submenu\lukas{Not yet implemented in Eco}.
 
 \subsection{Finding candidates}
 
