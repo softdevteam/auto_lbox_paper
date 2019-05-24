@@ -1114,41 +1114,67 @@ up to the box (lines 10--18).}
 \section{Related Work}
 \label{autobox_related_work}
 
-The following discusses two other examples for language composition that are
-related to language boxes.
 
 Scannerless parsing~\cite{visser97scannerless, vandenbrand02disambiguation} is well
 suited for language composition since it can parse any context-free grammars
 which are closed under composition. A notable example of this is
 Spoofax~\cite{kats10spoofax}, a language workbench for extending and composing
-context-free grammars. However, Spoofax's grammar definition SDF, which allows
-arbitrary CFGs, can give no guarantees that its grammars are unambiguous, even
-more so when they are composed together, since composing two unambiguous
-grammars can lead to an ambiguous one.  Spoofax thus uses reject grammars,
-which solve this problem, but make such grammars
-context-sensitive~\cite{eijck__lets_accept_rejects}.
+context-free grammars.
+Although scannerless parsing can parse ambiguous programs by creating a parse
+forest, it is still necessary to reduce the parse forest into a single
+parse tree in order to compile or interpret it. A common way to reduce the parse forest is to
+remove all parse trees that are invalid when considering additional information
+about the input, such as types~\cite{vinju05typedriven}. Using type information can avoid the
+need for separators to disambiguate languages in many cases, however still
+requires a set of disambiguation rules, such as preferring identifiers in the
+outer language (i.e.~the meta language) over those in the inner language
+(i.e.~the object language), or choosing the shortest path if multiple valid
+options are available. Unfortunately, not all ambiguities can be solved this
+way, making the use of separators still a necessity.
+
+Choosing separators is not trivial, since they can still introduce ambiguities
+if the same separator symbol is used for different nonterminals of the embedded
+language. This requires \textit{explicit disambiguation}, i.e.~using a
+different separator for each embedding with a different nonterminal symbol,
+e.g.~\verb|cls{...}cls| for embedding classes and \verb|func{...}func| for
+functions~\cite{batory98jts}. Since this can
+quickly cause ``syntactic clutter``~\cite[p.~4]{bravenboer05generalized},
+an alternative solution is to use type information to automatically disambiguate
+embeddings, thus reducing the amount of unique separators that would otherwise
+be required~\cite{zook04generating, bravenboer05generalized}.
+Unfortunately, since these approaches are dependent on types, they do not work
+for dynamically typed languages. Furthermore, heuristics such as picking the
+shortest path on multiple valid options can hide options the user cares about
+(as shown in Section~\ref{auto_handling_multiple_solutions}).
+
+Despite these improvements, Spoofax's grammar definition SDF,
+which allows arbitrary CFGs, can give no guarantees that its grammars are unambiguous,
+even more so when they are composed together, since composing two unambiguous grammars can lead to an ambiguous one.
+Spoofax thus uses reject grammars, which solve this problem, but
+make such grammars context-sensitive~\cite{eijck__lets_accept_rejects}.
 
 Another notable example for language composition is Copper~\cite{wyk07context}
 which implements a context-aware scanner to solve ambiguities in language
 compositions. The basic idea is that the parser can tell the scanner which
-tokens it can parse next and the scanner can only return results from that
-list.  This means that if two composed languages have similar tokens
-(e.g.~keywords, identifiers), the lexer solves ambiguities by returning the
-token for the language that it is currently parsing (i.e.~that is currently in
-context). This allows Copper to compose languages by extending the host
-language's grammar rules with references to rules in the embedded language.
-However, at the point where another language can be embedded, i.e.~where the
-two languages meet, a token may be valid in both the host as well as the
-embedded language.  Copper solves this problem via \texttt{dominates} clauses
-which are defined within the lexing rules. For example, if an identifier in the
-host language clashes with a keyword in the embedded language, then we can
-define a clause that says that the keyword dominates the identifier and needs
-to be prioritised. Unfortunately, this has the downside that those tokens
-cannot be used in the host language at that point, restricting the host
-language's expressiveness. This also means that each composition needs to
-determine all of those cases and modify grammar and lexer in ways that solve
-these ambiguities, making it impossible to create a one-size-fits-all solution
-for arbitrary compositions.
+tokens it can parse next and the scanner can only return results from that list.
+This means that if two composed languages have similar tokens (e.g.~keywords,
+identifiers), the lexer solves ambiguities
+by returning the token for the language that it is currently parsing (i.e.~that is currently in context). This allows
+Copper to compose languages by extending the host language's grammar rules
+with references to rules in the embedded language. However, at the point where
+another language can be embedded, i.e.~where the two languages meet, a token
+may be valid in both the host as well as the embedded language.
+Copper solves this problem
+via \texttt{dominates} clauses which are defined within the lexing rules. For example, if an
+identifier in the host language clashes with a keyword in the embedded language,
+then we can define a clause that says that the keyword dominates the identifier
+and needs to be prioritised. Unfortunately, this has the
+downside that those tokens cannot be used in the host language at that point,
+restricting the host language's expressiveness. This also means that each
+composition needs to determine all of those cases and modify grammar and lexer in ways that solve
+these ambiguities, making it impossible to create a one-size-fits-all solution for
+arbitrary compositions.
+
 
 \bibliography{bib}
 
