@@ -153,15 +153,16 @@
 
 
 \begin{abstract}
-Since composed grammars are often ambiguous, grammar composition requires an
-approach for dealing with ambiguity: either ruling it out entirely through
+Since composed grammars are often ambiguous, grammar composition requires a
+mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or providing static disambiguation operators to select the desired
-parse. In this paper we show that grammar composition based on incremental
-parsing using the `language boxes' approach can be extended to explore the grey
+parse. In this paper we show that \emph{language boxes} -- a delimiter-based
+mechanism atop incremental parsing -- can be extended to explore the grey
 area in-between these two extremes. In essence, we retain the use of
 delimiters, but selectively reparse input to discover when the user has
 switched from using one grammar in a composition to another, intelligently
-inserting and updating delimiters. By definition this cannot always achieve a
+inserting and updating delimiters, and making use of the user's editing history.
+By definition this cannot always achieve a
 perfect result, but our experiments show that it works surprisingly well.
 \laurie{can we put a figure on this? i think this would need a baseline to
 compare against though...}
