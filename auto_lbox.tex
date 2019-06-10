@@ -173,20 +173,28 @@ compare against though...}
 
 \section{Introduction}
 
-\laurie{i think the big question here is: what's the best way to present the
-ideas in this paper? one option (which is more-or-less what you've done here) is
-to start from incremental parsing, and present this as an addition to it.
-another option is to start with grammar composition as the problem. my
-inclination is to try the latter option, although it might not work very well.
-basically, the argument might run along the lines of: grammar composition is a
-hard problem because it's difficult to know when you've moded to/from an
-embedded language; batch solutions have to be able to select a single parse of a
-complex input, running into problems of ambiguity (generalised parsing) or
-expressivity (e.g.~copper/silver); by moving to an online solution, we can try a
-"best effort" parse, falling back on the user when it fails; our experiment
-shows that we don't have to fall back too often (this is why the experiment will
-be crucial).}
+Language composition offers an enticing solution for problems such as the
+development of domain-specific languages and the migration of legacy software.
+Unfortunately, approaches thus far have failed to meet expectations, largely
+due to the difficulty of writing composed programs. The main difficulty is to
+detect when the program has moved to or from an embedded language. This problem
+manifests in different ways, depending on which parsing approach is used. For
+example, composing two LR grammars together may result in a non-LR grammar,
+which means we don't know what language the resulting grammar expresses. While
+generalised parsing can parse any context-free grammar, including ambiguous
+ones, the ambiguities we get from parsing composed programs lead to so many
+parse trees, that it becomes difficult to find the one parse that the user
+intended. One solution to these problems are separators between languages
+(e.g.~\cite{wyk07context,batory98jts}). Unfortunately, this comes at the cost
+of expressivity, as separators must not appear in any of the composed
+languages. An alterntive to these approaches, is to move to an online solution,
+which tries to automatically detect the boundaries between languages and falls
+back on the user when this fails. The basis for this approach is incremental
+parsing~\cite{wagner98practicalalgorithms} and language
+boxes~\cite{diekmann14eco}.
 
+\lukas{The following two or three paragraphs can probably be removed
+or merged into the Background section.}
 Incremental parsers are based on traditional parsing algorithms. However,
 instead of parsing a whole file each time the program is executed, incremental
 parsers generate and update a parse tree from the user input as the user types.
@@ -212,7 +220,7 @@ boxes, and language boxes can be nested arbitrarily deep.
 
 The main problem with language boxes is that they need to be inserted manually
 by the user, which in some cases can seem tedious and unnecessary. In this
-paper we propose a solution on how how language boxes can be inserted
+paper we propose a solution on how language boxes can be inserted
 automatically and without the need for user interaction in many useful
 scenarios. This paper introduces a new algorithm that allows an editor to
 detect when a user writes code that is intended for a language box. It can then
