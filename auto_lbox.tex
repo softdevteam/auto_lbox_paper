@@ -155,13 +155,13 @@
 \begin{abstract}
 Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
-delimiters, or providing static disambiguation operators to select the desired
+delimiters\lukas{I think in the remainder of this paper we call these separators, so we have to decide which one we prefer}, or providing static disambiguation operators to select the desired
 parse. In this paper we show that \emph{language boxes} -- a delimiter-based
-mechanism atop incremental parsing -- can be extended to in way that fits
+mechanism atop incremental parsing -- can be extended in a way that fits
 between these two extremes. In essence, we retain the use of delimiters, but
 when errors appear in the user's input, we selectively reparse the user's
-input, taking into account the user's editor history, and inserting, removing,
-or moving delimiters -- leading to what we call \emph{automatic language
+input, taking into account the user's editor history, and insert, remove,
+or move delimiters -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
 cannot always match a user's intention, so rather our aim is to find a simple
 heuristic that does the right thing in most cases, while rarely surprising the
