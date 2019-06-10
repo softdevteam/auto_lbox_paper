@@ -174,25 +174,74 @@ user when it cannot. Our case studies show that \laurie{XXX}.
 
 \section{Introduction}
 
-Language composition offers an enticing solution for problems such as the
-development of domain-specific languages and the migration of legacy software.
-Unfortunately, approaches thus far have failed to meet expectations, largely
-due to the difficulty of writing composed programs. The main difficulty is to
-detect when the program has moved to or from an embedded language. This problem
-manifests in different ways, depending on which parsing approach is used. For
-example, composing two LR grammars together may result in a non-LR grammar,
-which means we don't know what language the resulting grammar expresses. While
-generalised parsing can parse any context-free grammar, including ambiguous
-ones, the ambiguities we get from parsing composed programs lead to so many
-parse trees, that it becomes difficult to find the one parse that the user
-intended. One solution to these problems are separators between languages
-(e.g.~\cite{wyk07context,batory98jts}). Unfortunately, this comes at the cost
-of expressivity, as separators must not appear in any of the composed
-languages. An alterntive to these approaches, is to move to an online solution,
-which tries to automatically detect the boundaries between languages and falls
-back on the user when this fails. The basis for this approach is incremental
-parsing~\cite{wagner98practicalalgorithms} and language
-boxes~\cite{diekmann14eco}.
+Language composition -- the ability to build larger languages out of multiple
+small languages -- offers an enticing solution to problems such as the
+development of domain-specific languages or the migration of legacy software.
+Unfortunately, writing and editing composed programs is more painful
+than it is for non-composed programs. The basic problem is that grammar
+composition -- which underpins language composition -- can cause
+two provably unambiguous grammars to become ambiguous when composed,
+and determining whether a grammar is unambiguous or not is
+undecidable~\cite{cantor62ambiguity}. There are several ways
+of dealing with the consequences of this: to require the user to insert
+explicit delimiters when their input moves from one sub-language in the
+composition to another (e.g.~\cite{wyk07context}; to use syntax directed
+editing; or to use a generalised parsing algorithm that can cope with ambiguity
+(e.g.~\cite{visser97sdf}). Each approach has different downsides: delimiters
+are visually intrusive; syntax directed makes editing programs
+awkward~\cite[p.~2]{khwaja93syntax}; and one can never know if all possible
+ambiguous parses have been covered by disambiguation operators.
+
+An alternative to these approaches are \emph{language boxes} which aim to
+combine the advantages of explicit delimiters and syntax-based
+editing~\cite{diekmann14eco}. Building atop the incremental parsing algorithm
+of \citet{wagner98practicalalgorithms}, language boxes are nodes in the parse
+tree that represent a different language: the language box is surrounded by
+explicit, but invisible, delimiters. Unlike traditional delimiter-based
+approaches, there are no visually intrusive delimiters; unlike traditional
+syntax-based editors, the program can be syntactically incorrect in arbitrary
+ways during editing. However, language boxes lack the most appealing aspect of
+ambiguous parsing: users must explicitly, and tediously, state when they want
+to insert language boxes.
+
+The fundamental research question underlying this paper is whether it is
+possible to reduce the need for the users to explicitly insert of language
+boxes. For example, in a composition of Java and SQL (where SQL is allowed
+wherever a Java expression is valid), can such a system automatically insert an
+SQL language box for the input \texttt{for (n: SELECT name FROM table) \{ ...
+\}}?. It is important to acknowledge from the outset that a `perfect' solution
+is impossible, since there will always be some cases where there are multiple
+ways of splitting the same input across different language boxes. Realistic
+solutions must also take into account other considerations: performance must
+not be unduly impacted; and users should be able to broadly predict if, and
+why, language boxes are inserted or not.
+
+The solution we present to this problem are \emph{automatic language boxes}. In
+essence, we present a heuristic which can insert, remove, and update language
+boxes in many useful cases. The heuristic is triggered only when there is a
+syntax error in the input of the language the user is currently typing in
+(making it fairly predictable). When an error does occur, text is selectively
+reparsed to see if inserting or removing language boxes would fix the error
+(leading to only a small performance overhead). One of the main challenges is
+to determine what text to reparse: we present several sub-heuristics (including
+the ability to take the user's previous input into consideration) which, when
+combined, lead to an effective heuristic for many cases. \laurie{at this point
+we need a nice figure which shows our solution in action}
+
+The paper is structured as follows: Section \ref{sec_background} gives an
+overview on incremental lexing and parsing as well as language composition
+using language boxes. Section \ref{sec_finding_lbox_candidates}
+describes how we can use parsing errors to find automatic language boxes, how
+we can present multiple solutions to the user, and how automatically inserted
+language boxes can also automatically be removed again. Section
+\ref{sec_lbox_limitations} describes some of the limitations of automatic
+language boxes, e.g.~where either unwanted language boxes are inserted or
+detection fails and no language box is inserted at all. Section
+\ref{sec:impl_defaultrec} describes the implementation of recognisers, which
+are used during the detection of automatic language boxes.
+
+\section{Background}
+\label{sec_background}
 
 \lukas{The following two or three paragraphs can probably be removed
 or merged into the Background section.}
@@ -232,21 +281,6 @@ it is impossible to perfectly predict the user's intentions. Fortunately, it is
 possible to do a decent enough job by employing heuristics, which can be
 improved further by manually tweaking compositions to deal with some language
 specific edge cases.
-
-The paper is structured as follows: Section \ref{sec_background} gives an
-overview on incremental lexing and parsing as well as language composition
-using language boxes. Section \ref{sec_finding_lbox_candidates}
-describes how we can use parsing errors to find automatic language boxes, how
-we can present multiple solutions to the user, and how automatically inserted
-language boxes can also automatically be removed again. Section
-\ref{sec_lbox_limitations} describes some of the limitations of automatic
-language boxes, e.g.~where either unwanted language boxes are inserted or
-detection fails and no language box is inserted at all. Section
-\ref{sec:impl_defaultrec} describes the implementation of recognisers, which
-are used during the detection of automatic language boxes.
-
-\section{Background}
-\label{sec_background}
 
 Traditional parsing is a batch process: an entire file is fed through a parser
 and a parse tree is created from it. Incremental parsing, in contrast, is an
