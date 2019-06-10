@@ -157,15 +157,15 @@ Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or providing static disambiguation operators to select the desired
 parse. In this paper we show that \emph{language boxes} -- a delimiter-based
-mechanism atop incremental parsing -- can be extended to explore the grey
-area in-between these two extremes. In essence, we retain the use of
-delimiters, but selectively reparse input to discover when the user has
-switched from using one grammar in a composition to another, intelligently
-inserting and updating delimiters, and making use of the user's editing history.
-By definition this cannot always achieve a
-perfect result, but our experiments show that it works surprisingly well.
-\laurie{can we put a figure on this? i think this would need a baseline to
-compare against though...}
+mechanism atop incremental parsing -- can be extended to in way that fits
+between these two extremes. In essence, we retain the use of delimiters, but
+when errors appear in the user's input, we selectively reparse the user's
+input, taking into account the user's editor history, and inserting, removing,
+or moving delimiters -- leading to what we call \emph{automatic language
+boxes}. The very nature of the problem means that automatic language boxes
+cannot always match a user's intention, so rather our aim is to find a simple
+heuristic that does the right thing in most cases, while rarely surprising the
+user when it cannot. Our case studies show that \laurie{XXX}.
 \end{abstract}
 
 \keywords{Parsing, language composition, programming languages}
