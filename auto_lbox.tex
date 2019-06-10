@@ -11,6 +11,7 @@
 \usepackage[autolanguage]{numprint}
 \usepackage{proof}
 \usepackage{softdev}
+\usepackage{stmaryrd}
 \usepackage{subcaption}
 \usepackage{wrapfig}
 \usepackage{xspace}
@@ -187,8 +188,8 @@ of dealing with the consequences of this: to require the user to insert
 explicit delimiters when their input moves from one sub-language in the
 composition to another (e.g.~\cite{wyk07context}; to use syntax directed
 editing; or to use a generalised parsing algorithm that can cope with ambiguity
-(e.g.~\cite{visser97sdf}). Each approach has different downsides: delimiters
-are visually intrusive; syntax directed editing of programs is
+(e.g.~\cite{visser97scannerless}). Each approach has different downsides: delimiters
+are visually intrusive; syntax directed makes editing programs
 awkward~\cite[p.~2]{khwaja93syntax}; and one can never know if all possible
 ambiguous parses have been covered by disambiguation operators.
 
@@ -208,7 +209,7 @@ The fundamental research question underlying this paper is whether it is
 possible to reduce the need for the users to explicitly insert language
 boxes. For example, in a composition of Java and SQL (where SQL is allowed
 wherever a Java expression is valid), can such a system automatically insert an
-SQL language box for the input \texttt{for (n: SELECT name FROM table) \{ ...
+SQL language box for the input \texttt{for (String n: SELECT name FROM table) \{ ...
 \}}? It is important to acknowledge from the outset that a `perfect' solution
 is impossible, since there will always be some cases where there are multiple
 ways of splitting the same input across different language boxes. Realistic
@@ -242,8 +243,76 @@ detection fails and no language box is inserted at all. Section
 \ref{sec:impl_defaultrec} describes the implementation of recognisers, which
 are used during the detection of automatic language boxes.
 
+
+
 \section{Background}
 \label{sec_background}
+
+In this section, we briefly survey existing approaches to editing composed
+programs, before giving a brief overview of incremental parsing, sufficient for
+this paper's purposes.
+
+\subsection{Explicit delimiter approaches}
+
+The traditional approach to language composition is to use explicit delimiters
+to make clear when the user has switched from one sub-language to another. The
+most obvious way of achieving this is using special brackets to make clear a
+switch from an outer to an inner language (e.g.~\texttt{for (String e: <<SELECT name
+FROM table>>) \{ ... \}}), though this is visually intrusive, and prevents the
+special brackets being used within the sub-language (e.g.~the sub language
+cannot use `>>' as a bit-wise operator).
+
+Naive approaches inherit a severe restriction from traditional parsing, which
+separates lexing (i.e.~the splitting of the user's input into tokens) from
+parsing (i.e.~the structuring of tokens into a parse tree): all the languages
+must share the same lexing rules. This restriction can be somewhat eased if the
+lexer recognises the special brackets and extracts text between them wholesale
+for separate lexing and parsing (see e.g.~\cite[p.~13-14]{tratt08domain}),
+though it is then hard for the lexer to accurately keep track of nested special
+brackets (e.g.~it might incorrectly count special brackets in comments).  A
+more sophisticated approach is for the lexer and parser to interact (see
+e.g.~\cite{wyk07context}), such that the lexer switches lexing rules
+appropriately when the parser detects that an inner language is being used.
+This has the advantage that brackets do not always need to be quite as visually
+intrusive (e.g.~if an inner language has different keywords to the outer
+language, that can be used to indicate the switch from one language to
+another), though in the general case traditional special brackets must still be
+used to resolve ambiguities.
+
+
+\subsection{Scannerless parsing}
+
+Generalised parsing can parse any Context-Free Grammar (CFG), even those that
+are ambiguous. Scannerless parsing~\cite{visser97scannerless} extends this such
+that lexing and parsing are specified together. This removes the need for
+special brackets entirely, but does so at the expense of causing many more
+ambiguities (e.g.~\texttt{SELECT} is a valid Java identifier and an SQL
+keyword) which must then be statically disambiguated by the composition author.
+This is challenging because ambiguity is, in general,
+undecidable~\cite{cantor62ambiguity} and even the best ambiguity heuristics fail
+to find all possible sources of ambiguity~\cite{vasudevan13detecting}. Thus one
+can never be sure if one has statically covered all possible points of
+ambiguity, meaning that users can provide inputs for which there is no single
+parse.  Furthermore, our current disambiguation operators can cause scannerless
+parsers to become context-sensitive~\cite{eijck__lets_accept_rejects}, the
+consequences of which are still unclear.
+
+
+\subsection{Syntax directed editing}
+
+Traditional syntax directed editing avoids parsing text entirely. In essence,
+users edit an AST directly, with uncompleted parts of a program being
+represented by holes. This avoids the need for explicit delimiters, and
+sidesteps issues of ambiguity completely. However, such systems are awkward to
+use, for example only allowing whole nodes in the AST to be selected at a time,
+and quickly fell out of fashion. The modern syntax directed editor
+MPS~\cite{pech13mps} alleviates some, though not all, of these problems though
+it requires significant expertise on the part of the composition author to make
+editing a pleasant experience.
+
+
+
+\subsection{Probably for deletion}
 
 \lukas{The following two or three paragraphs can probably be removed
 or merged into the Background section.}
@@ -283,6 +352,9 @@ it is impossible to perfectly predict the user's intentions. Fortunately, it is
 possible to do a decent enough job by employing heuristics, which can be
 improved further by manually tweaking compositions to deal with some language
 specific edge cases.
+
+
+\subsection{Incremental parsing}
 
 Traditional parsing is a batch process: an entire file is fed through a parser
 and a parse tree is created from it. Incremental parsing, in contrast, is an
