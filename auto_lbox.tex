@@ -188,7 +188,7 @@ explicit delimiters when their input moves from one sub-language in the
 composition to another (e.g.~\cite{wyk07context}; to use syntax directed
 editing; or to use a generalised parsing algorithm that can cope with ambiguity
 (e.g.~\cite{visser97sdf}). Each approach has different downsides: delimiters
-are visually intrusive; syntax directed makes editing programs
+are visually intrusive; syntax directed editing of programs is
 awkward~\cite[p.~2]{khwaja93syntax}; and one can never know if all possible
 ambiguous parses have been covered by disambiguation operators.
 
@@ -205,11 +205,11 @@ ambiguous parsing: users must explicitly, and tediously, state when they want
 to insert language boxes.
 
 The fundamental research question underlying this paper is whether it is
-possible to reduce the need for the users to explicitly insert of language
+possible to reduce the need for the users to explicitly insert language
 boxes. For example, in a composition of Java and SQL (where SQL is allowed
 wherever a Java expression is valid), can such a system automatically insert an
 SQL language box for the input \texttt{for (n: SELECT name FROM table) \{ ...
-\}}?. It is important to acknowledge from the outset that a `perfect' solution
+\}}? It is important to acknowledge from the outset that a `perfect' solution
 is impossible, since there will always be some cases where there are multiple
 ways of splitting the same input across different language boxes. Realistic
 solutions must also take into account other considerations: performance must
@@ -222,7 +222,9 @@ boxes in many useful cases. The heuristic is triggered only when there is a
 syntax error in the input of the language the user is currently typing in
 (making it fairly predictable). When an error does occur, text is selectively
 reparsed to see if inserting or removing language boxes would fix the error
-(leading to only a small performance overhead). One of the main challenges is
+(leading to only a small performance overhead\lukas{this depends on the language
+inserted, since opening a PHP quote will lex the entire remaining program. Tho
+this is not really the fault of the heuristic}). One of the main challenges is
 to determine what text to reparse: we present several sub-heuristics (including
 the ability to take the user's previous input into consideration) which, when
 combined, lead to an effective heuristic for many cases. \laurie{at this point
