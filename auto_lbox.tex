@@ -227,8 +227,22 @@ reparsed to see if inserting or removing language boxes would fix the error
 compositions can hit worse cases). One of the main challenges is
 to determine what text to reparse: we present several sub-heuristics (including
 the ability to take the user's previous input into consideration) which, when
-combined, lead to an effective heuristic for many cases. \laurie{at this point
-we need a nice figure which shows our solution in action}
+combined, lead to an effective heuristic for many cases (see Figure \ref{intro_example} for an example).
+
+\begin{figure}
+    \includegraphics[width=0.3\textwidth]{images/auto_remove_insert_sql_java}
+    \caption{Example showing automatic language boxes in action. Here the user
+    is editing a program using a composition of SQLite and Java. \textbf{a)}
+    The user starts with a valid SQLite program. \textbf{b)} After typing
+    `\texttt{,}' an error occurs which is fixed by automatically wrapping
+    `\texttt{FROM}' inside a Java language box.  \textbf{c)} After typing
+    `\texttt{c}' the language box is removed again, since `\texttt{FROM}' is
+    valid in the outer language again. Typing `\texttt{\textasciicircum3}' produces an error
+    which is fixed by wrapping the expression `\texttt{c\textasciicircum3}' inside a Java
+    language box.
+}
+\label{intro_example}
+\end{figure}
 
 \laurie{this needs revisiting}The paper is structured as follows: Section \ref{sec_background} gives an
 overview on incremental lexing and parsing as well as language composition
