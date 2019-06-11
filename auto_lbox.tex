@@ -193,7 +193,8 @@ ambiguous parses have been covered by disambiguation operators.
 
 An alternative to traditional delimiter-based approaches are \emph{language boxes} which aim to
 combine the advantages of explicit bracketing and syntax-based
-editing~\cite{diekmann14eco}. Building atop the incremental parsing algorithm
+editing without the disadvantages~\cite{diekmann14eco}. Building atop the
+incremental parsing algorithm
 of \citet{wagner98practicalalgorithms}, language boxes are nodes in the parse
 tree that represent a different language: the language box is surrounded by
 explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
@@ -221,15 +222,14 @@ boxes in many useful cases. The heuristic is triggered only when there is a
 syntax error in the input of the language the user is currently typing in
 (making it fairly predictable). When an error does occur, text is selectively
 reparsed to see if inserting or removing language boxes would fix the error
-(leading to only a small performance overhead\lukas{this depends on the language
-inserted, since opening a PHP quote will lex the entire remaining program. Tho
-this is not really the fault of the heuristic}). One of the main challenges is
+(in general leading to only a small performance overhead, though some
+compositions can hit worse cases). One of the main challenges is
 to determine what text to reparse: we present several sub-heuristics (including
 the ability to take the user's previous input into consideration) which, when
 combined, lead to an effective heuristic for many cases. \laurie{at this point
 we need a nice figure which shows our solution in action}
 
-The paper is structured as follows: Section \ref{sec_background} gives an
+\laurie{this needs revisiting}The paper is structured as follows: Section \ref{sec_background} gives an
 overview on incremental lexing and parsing as well as language composition
 using language boxes. Section \ref{sec_finding_lbox_candidates}
 describes how we can use parsing errors to find automatic language boxes, how
