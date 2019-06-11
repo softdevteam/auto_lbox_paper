@@ -310,48 +310,6 @@ however, it requires significant expertise on the part of the composition author
 editing a pleasant experience.
 
 
-\subsection{Probably for deletion}
-
-\lukas{The following two or three paragraphs can probably be removed
-or merged into the Background section.}
-Incremental parsers are based on traditional parsing algorithms. However,
-instead of parsing a whole file each time the program is executed, incremental
-parsers generate and update a parse tree from the user input as the user types.
-When editing a program, this parse tree is then modified directly,
-e.g.~changing the name of a variable directly updates the value of the token in
-the parse tree that represents that variable. After each edit the incremental
-parser updates and reparses the relevant parts of the parse tree, attempting to
-reuse as many unchanged parts of the tree as possible. This is not only faster
-than parsing the entire program from scratch, but also has the added benefit
-that meta-data on parse tree nodes is kept intact when the program is reparsed.
-
-Editing programs this way allows us to embed languages into one another without
-separators, by using language boxes. These boxes can be manually inserted by
-the user to write code in another language. When creating a new language box,
-it is inserted directly into the parse tree. Each language box has its own
-parse tree which is maintained by its own incremental parser. This way
-languages stay completely separated from each other which bypasses all
-ambiguity problems. For example, when editing a program in language \emph{X},
-the user can at any point insert a language box for language \emph{Y}. Typing
-inside of that box edits in language \emph{Y}, while typing outside of the box
-edits in language \emph{X}. Programs may contain any number of languages
-boxes, and language boxes can be nested arbitrarily deep.
-
-The main problem with language boxes is that they need to be inserted manually
-by the user, which in some cases can seem tedious and unnecessary. In this
-paper we propose a solution on how language boxes can be inserted
-automatically and without the need for user interaction in many useful
-scenarios. This paper introduces a new algorithm that allows an editor to
-detect when a user writes code that is intended for a language box. It can then
-create that box automatically and wrap the written code in it. The goal is to
-improve the user's workflow, which previously required them to insert language
-boxes explicitly and manually.  Since many language compositions are ambiguous
-it is impossible to perfectly predict the user's intentions. Fortunately, it is
-possible to do a decent enough job by employing heuristics, which can be
-improved further by manually tweaking compositions to deal with some language
-specific edge cases.
-
-
 \subsection{Incremental parsing}
 
 Traditional parsing is a batch process: an entire file is fed through a parser
