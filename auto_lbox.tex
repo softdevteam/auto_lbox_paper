@@ -531,7 +531,8 @@ that when an error is encountered, we search for language box candidates whose
 insertion around the error would render the input successful. The main
 challenge is therefore in finding suitable candidates.
 
-We start by searching backwards from the error to find locations where a
+We propose three different heuristics for finding suitable candidates. Each heuristic
+starts by searching backwards from the error to find locations where a
 language box would be valid. At each location, for each language in the composition,
 we then try to match as much text as possible. If consumed text is valid in one
 of the languages, a candidate is produced. Each language can produce multiple
@@ -539,13 +540,20 @@ candidates by consuming more text, even if a candidate for that language has
 already been produced. Afterwards, each candidate language box is virtually
 applied to the user's input (replacing the consumed text). If it introduces
 extra errors or does not fix the initial parsing error, the candidate is
-discarded. The algorithm for finding candidates is shown in Listing
-\ref{lst_find_candidates}.  If at the end no candidates are found, the error
+discarded. If at the end no candidates are found, the error
 remains, as normal; if one candidate is found, we automatically insert the
 appropriate language box; and if multiple candidates are found, we ask the user
 for help.
+Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
+candidates.
+For performance reasons we cannot simply scan the entire input preceding the error,
+so each heuristic uses a different approach to reduce the amount of locations that
+need to be tests. Neither approach is perfect, since skipping the majority of locations
+leads to missed opportunities. However, in conjunction, the heuristics detect a sufficient
+number to make automatic language boxes viable.
 
-\begin{figure}[t]
+\begin{figure*}[t]
+\begin{minipage}{0.333\textwidth}
 \begin{lstdefault}
 def find_candidates_stack(error):
   valid_boxes = []
@@ -561,24 +569,8 @@ def find_candidates_stack(error):
       cut -= 1
   return valid_boxes
 \end{lstdefault}
-\caption{Algorithm for finding language box candidates, for readability divided into
-several steps. First, for each language $l$ in the composition, we scan the text
-before the error to find valid locations where a language box of $l$ can be
-inserted -- this step is similar to and was inspired by the finding of isolation
-nodes, in that it also uses the parse stack to find such locations (lines 2--8). For each of
-those locations we then try to consume its following text, using $l$'s lexer and
-parser, and produce a candidate whenever the consumed text is a valid program in
-$l$ (lines 10--14); \texttt{consume\_text} stops when we can't consume any more text, because either the remaining
-text is invalid in $l$, or there is no more text to consume. Afterwards, we
-confirm the produced candidates by checking if they fix the previous error and
-don't introduce any new ones (lines 16--19).
-Candidates are returned in the order they are found: the closer to the error and
-shorter they are, the higher they are in the list.}
-\label{lst_find_candidates}
-\end{figure}
-
-
-\begin{figure}[t]
+\end{minipage}
+\begin{minipage}{0.333\textwidth}
 \begin{lstdefault}
 def find_candidates_history(error):
   valid_boxes = []
@@ -594,11 +586,8 @@ def find_candidates_history(error):
       parent = parent.parent
   return valid_boxes
 \end{lstdefault}
-\caption{}
-\label{lst_find_candidates}
-\end{figure}
-
-\begin{figure}[t]
+\end{minipage}
+\begin{minipage}{0.333\textwidth}
 \begin{lstdefault}
 def find_candidates_line(error):
   valid_boxes = []
@@ -613,12 +602,30 @@ def find_candidates_line(error):
             valid_boxes.append(c)
       if <!\textit{term is newline or BOS}!>:
         break
-      term = error.previous_terminal()
+      term = term.previous_terminal()
   return valid_boxes
 \end{lstdefault}
-\caption{}
+\end{minipage}
+\caption{
+Each heuristic starts by iterating over all languages $l$ that are part
+of the current composition. For each language $l$, it scans the text
+before the error to find valid locations where a language box of $l$ can be
+inserted. The approach used to scan the preceding text depends on the heuristic.
+The stack-based heuristic uses the positions on the current parse stack; the
+history-based heuristic traverses the ancestors of the error node in the previous
+parse tree; the line-based heursitic scans the terminals preceding the error up to the
+beginning of the line.
+For each of
+those locations the heuristic then tries to consume the following input, using $l$'s lexer and
+parser, producing a candidate whenever the consumed text is a valid program in
+$l$; \texttt{consume\_text} stops when it can't consume any more input, because either the remaining
+input is invalid in $l$, or there is no more text to consume. Afterwards, the heuristic needs to
+confirm that the produced candidates fix the previous error and
+don't introduce any new ones.
+Candidates are returned in the order they are found: the closer to the error and
+the shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
-\end{figure}
+\end{figure*}
 
 If only a single language box candidate is found, the language box can be
 inserted immediately during the parsing phase. Despite best efforts,
