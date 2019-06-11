@@ -156,15 +156,15 @@
 \begin{abstract}
 Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
-delimiters\lukas{I think in the remainder of this paper we call these separators, so we have to decide which one we prefer}, or providing static disambiguation operators to select the desired
-parse. In this paper we show that \emph{language boxes} -- a delimiter-based
+delimiters, or by selecting the desired parse tree from the parse forest.  In
+this paper we show that \emph{language boxes} -- a delimiter-based
 mechanism atop incremental parsing -- can be extended in a way that fits
 between these two extremes. In essence, we retain the use of delimiters, but
 when errors appear in the user's input, we selectively reparse the user's
 input, taking into account the user's editor history, and insert, remove,
 or move delimiters -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
-cannot always match a user's intention, so rather our aim is to find a simple
+cannot always match a user's intention: rather, our aim is to find a simple
 heuristic that does the right thing in most cases, while rarely surprising the
 user when it cannot. Our case studies show that \laurie{XXX}.
 \end{abstract}
@@ -178,30 +178,28 @@ user when it cannot. Our case studies show that \laurie{XXX}.
 Language composition -- the ability to build larger languages out of multiple
 small languages -- offers an enticing solution to problems such as the
 development of domain-specific languages or the migration of legacy software.
-Unfortunately, writing and editing composed programs is more painful
-than it is for non-composed programs. The basic problem is that grammar
+Unfortunately, writing and editing composed programs is often cumbersome.
+The basic problem is that grammar
 composition -- which underpins language composition -- can cause
 two provably unambiguous grammars to become ambiguous when composed,
 and determining whether a grammar is unambiguous or not is
-undecidable~\cite{cantor62ambiguity}. There are several ways
-of dealing with the consequences of this: to require the user to insert
-explicit delimiters when their input moves from one sub-language in the
-composition to another (e.g.~\cite{wyk07context}; to use syntax directed
-editing; or to use a generalised parsing algorithm that can cope with ambiguity
-(e.g.~\cite{visser97scannerless}). Each approach has different downsides: delimiters
-are visually intrusive; syntax directed makes editing programs
-awkward~\cite[p.~2]{khwaja93syntax}; and one can never know if all possible
+undecidable~\cite{cantor62ambiguity}. There are two fundamental approaches
+of coping with ambiguity: either ruling it out through the use of
+delimiters (either via explicit bracketing or syntax-directed
+editing); or to use a generalised parsing algorithm that can cope with ambiguity
+(e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
+are visually intrusive and/or awkward to work with; and one can never know if all possible
 ambiguous parses have been covered by disambiguation operators.
 
-An alternative to these approaches are \emph{language boxes} which aim to
-combine the advantages of explicit delimiters and syntax-based
+An alternative to traditional delimiter-based approaches are \emph{language boxes} which aim to
+combine the advantages of explicit bracketing and syntax-based
 editing~\cite{diekmann14eco}. Building atop the incremental parsing algorithm
 of \citet{wagner98practicalalgorithms}, language boxes are nodes in the parse
 tree that represent a different language: the language box is surrounded by
-explicit, but invisible, delimiters. Unlike traditional delimiter-based
-approaches, there are no visually intrusive delimiters; unlike traditional
+explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
+there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
-ways during editing. However, language boxes lack the most appealing aspect of
+ways and places during editing. However, language boxes lack the most appealing aspect of
 ambiguous parsing: users must explicitly, and tediously, state when they want
 to insert language boxes.
 
