@@ -487,31 +487,26 @@ branches of a parse tree, or even those which span different language boxes).
 % glr style: check on every shift if a box is valid: subsection "Improving
 % detection"
 
-For a programmer inspecting a composed program it is generally easy
-to determine where one language ends and another begins.
-For an algorithm, however, that doesn't know about context, this is more difficult.
-In some cases, the composed grammars are so similar that even a programmar would
-struggle to separate certain compositions.
-For this reason, the challenge is not to find a perfect solution for the detection
-of embeddings -- in fact this would be impossible due to inherent ambiguities -- but
-to find a heuristic that is good enough to identify as many
-opportunities for the insertion of language boxes as possible.
-Since we want to give users instant feedback as they are typing, we must restrict
-the time spent searching for possible language box insertions.
-More importantly though, we
-must minimize the insertion of false positives, which would otherwise force the
-user to perform unexpected manual work to revert the algorithm's mistakes which
-is generally considered
-unacceptable~\cite{vanter00displaying,lewis95designing,vanter94practical}.
+In order to insert language boxes automatically we need to be able to determine
+where one language ends and another beings. However, since languages may share
+a similar syntax this is even for an experienced programmar sometimes an
+impossible task. The challenge is thus not to find a perfect solution, but to
+find a heuristic good enough to identify as many opportunities for the
+automatic insertion of language boxes as possible. Such a heuristic has two
+major requirements: it needs to be fast enough to not interfer during editing;
+and, more importantly, it must keep the insertion of wrong language boxes to a
+mininum, as to not force the user to perform unexpected manual work to revert
+the heuristic's mistakes.
 
-A good indicator that a user may have wanted to insert a language box is when
-the parser detects a syntax error. Of course, not every error means a
-language box was meant to be inserted, and not every language box the user
-wants to insert is guaranteed to produce a parsing error. However, it is a good
-initial heuristic, since most languages have a different enough syntax, that, when
-composed together, sooner or later leads to
-syntax errors (see Figure \ref{fig_heuristic_example}
-for an example).
+Embedding one language into another typically results in a parse error, unless
+the embedded input is completely valid in the outer language. Of course, not
+every error means that a user intended to insert a language box, and not every
+language box a user wants to insert is guaranteed to produce a parsing error.
+However, since most languages have a different enough syntax, and searching for
+automatic language boxes on every keypress would implicate performance, parse
+errors serve as a a good initial heuristic. Figure \ref{fig_heuristic_example}
+shows two examples where the embedding of a language into another results in
+parse errors which could be used to automatically insert language boxes.
 
 \begin{figure}
     \begin{subfigure}{0.4\textwidth}
@@ -531,22 +526,21 @@ immediately at the location of the error.}
 \label{fig_heuristic_example}
 \end{figure}
 
-To decide if a parsing error can be fixed via insertion of a language box, we
-need to analyse errors as soon as they appear during the parsing process. This
-has the advantage that we have additional parsing information available, like
-the parse stack, to help us decide whether the insertion of a box is a valid
-and sensible choice. The basic idea is
-that when an error is encountered, we search for language box candidates whose
-insertion around the error would render the input successful. The main
-challenge is therefore in finding suitable candidates.
+When a parse error occurs during parsing, it is analysed immediately. This has
+the advantage that we have additional information available (e.g.~the parse
+stack) to help help us decide whether the insertion of a box is a valid choice.
+The basic idea is that analyse the area surrounding the error to find language
+box candidates whose insertion remove the error by making the input
+syntactically valid. The main challenge is therefore in finding suitable
+candidates.
 
 We propose three different heuristics for finding suitable candidates. Each heuristic
 starts by searching backwards from the error to find locations where a
 language box would be valid. At each location, for each language in the composition,
-we then try to match as much text as possible. If consumed text is valid in one
+it then tries to match as much text as possible. If consumed text is valid in one
 of the languages, a candidate is produced. Each language can produce multiple
 candidates by consuming more text, even if a candidate for that language has
-already been produced. Afterwards, each candidate language box is virtually
+already been found. Afterwards, each candidate language box is virtually
 applied to the user's input (replacing the consumed text). If it introduces
 extra errors or does not fix the initial parsing error, the candidate is
 discarded. If at the end no candidates are found, the error
@@ -557,9 +551,9 @@ Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
 candidates.
 For performance reasons we cannot simply scan the entire input preceding the error,
 so each heuristic uses a different approach to reduce the amount of locations that
-need to be tests. Neither approach is perfect, since skipping the majority of locations
+need to be tested. Neither approach is optimal, since skipping the majority of locations
 leads to missed opportunities. However, in conjunction, the heuristics detect a sufficient
-number to make automatic language boxes viable.
+number of locations to make automatic language boxes viable.
 
 \begin{figure*}[t]
 \begin{minipage}{0.333\textwidth}
@@ -636,16 +630,15 @@ the shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
 \end{figure*}
 
-If only a single language box candidate is found, the language box can be
-inserted immediately during the parsing phase. Despite best efforts,
+Despite best efforts,
 we will encounter cases where an inserted language boxes is not what the user
 intended. The user thus may undo an inserted language box anytime using the,
 for editors typical, \keys{Ctrl+Z} key combination. Automatically inserted
 language boxes are initially marked as \emph{loose} boxes, which means they may
 be automatically removed again or resized to encompass less or more code. The
 box remains loose as long as the cursor remains inside it, but as soon as the
-user manually moves the cursor out of the box, it becomes \emph{fixed} and stays this
-way. However, the user may manually mark boxes as loose or fix as they wish,
+user manually moves the cursor out of the box, it becomes \emph{fixed}\lukas{better: locked?} and stays this
+way. However, the user may manually mark boxes as loose or fixed as they wish,
 via the editor's submenu\lukas{Not yet implemented in Eco}.
 
 \subsection{Finding candidates}
