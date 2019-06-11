@@ -312,19 +312,14 @@ editing a pleasant experience.
 
 \subsection{Incremental parsing}
 
-Traditional parsing is a batch process: an entire file is fed through a parser
-and a parse tree is created from it. Incremental parsing, in contrast, is an
-online (i.e.~interactive) process: it parses text as the user types and
-continually updates a parse tree.  In other words, incremental parsing allows
-an editor to reparse a program after every keypress, resulting in an always
-up-to-date parse tree, which can then be used for semantic analysis or syntax
-highlighting.  A number of incremental parsing algorithms were published from
-the late 70s~\cite{ghezzi79incremental, jalili82building, larcheveque95optimal,
-petrone95reusing} to the late 90s, gradually improving efficiency and
-flexibility~\cite{li97new,ferro94efficient}.  The last major work in this area
-was done in 1998 by \cite{wagner98practicalalgorithms} who defined a number of
-incremental parsing algorithms. His LR-based incremental parser has two major
-benefits: it handles the full class of $\textrm{LR}(k)$ grammars; and has
+Parsing is traditionally a batch process: an entire file is fed through a parser
+and a parse tree is created from it. Incremental parsing, in contrast,
+continually parses text as the user types and
+updates a parse tree. In this paper we make use of the incremental lexing and
+LR incremental parsing algorithms of~\citet{wagner98practicalalgorithms}
+\laurie{we should add a footnote here along the lines of ``Taking into account
+the fixes from Lukas'd Phd thesis [cite]``}: it handles the full class of
+$\textrm{LR}(k)$ grammars; and has
 formal guarantees that the algorithm is optimal (i.e.~the number of steps
 needed to integrate user changes into an existing parse tree is minimal).
 Furthermore, Wagner presents an algorithm for incremental lexical analysis,
