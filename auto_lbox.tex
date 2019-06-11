@@ -1067,6 +1067,18 @@ parse successfully, breaking the condition for the expansion, which is thus
 aborted. The same problem can appear in other compositions where semicolons are
 used to end a statement, e.g.~Java.
 
+\subsection{Problems with strings}
+
+Some languages, like PHP, allow newlines within strings. Embedding such a
+language inside another language can thus sometimes require the entire file to
+be lexed during automatic language box detection. For example when typing the
+PHP expression \texttt{\$x = 'a'} into Java, this will cause the entire
+remaining Java program to be lexed as long as the single quote has not been
+closed. However, since the lexing only happens virtually and is not applied to
+the input (unless this result in the insertion of a new language box), this
+does not affect the parse tree of the outer language. And since lexing is
+generally quite fast, the performance impact will also be insignificant.
+
 \section{Recognisers}
 \label{sec:impl_defaultrec}
 
