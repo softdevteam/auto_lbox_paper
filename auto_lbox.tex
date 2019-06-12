@@ -490,8 +490,8 @@ branches of a parse tree, or even those which span different language boxes).
 % detection"
 
 In order to insert language boxes automatically we need to be able to determine
-where one language ends and another beings. However, since languages may share
-a similar syntax this is even for an experienced programmar sometimes an
+where one language ends and another begins. However, since languages may share
+a similar syntax this is sometimes even for an experienced programmar an
 impossible task. The challenge is thus not to find a perfect solution, but to
 find a heuristic good enough to identify as many opportunities for the
 automatic insertion of language boxes as possible. Such a heuristic has two
@@ -530,8 +530,8 @@ immediately at the location of the error.}
 
 When a parse error occurs during parsing, it is analysed immediately. This has
 the advantage that we have additional information available (e.g.~the parse
-stack) to help help us decide whether the insertion of a box is a valid choice.
-The basic idea is that analyse the area surrounding the error to find language
+stack) to help us decide whether the insertion of a box is a valid choice.
+The basic idea is to analyse the area surrounding the error to find language
 box candidates whose insertion remove the error by making the input
 syntactically valid. The main challenge is therefore in finding suitable
 candidates.
@@ -612,6 +612,9 @@ def find_candidates_line(error):
 \end{lstdefault}
 \end{minipage}
 \caption{
+\lukas{This needs some more work, e.g.~the body of the heuristics is the same and
+could be moved to its own function. There is also the question if we need to show
+an algorithm at all or if we can abstract this more.}
 Each heuristic starts by iterating over all languages $l$ that are part
 of the current composition. For each language $l$, it scans the text
 before the error to find valid locations where a language box of $l$ can be
