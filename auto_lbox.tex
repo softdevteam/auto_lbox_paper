@@ -356,10 +356,10 @@ to understand the rest of this paper.
 
 The incremental lexer and parse both operate on the parse tree. Parse tree nodes
 are either \emph{nonterminals} (representing rules in the grammar) or
-\emph{tokens} (representing terminal symbols). Nonterminal nodes are immutable
-(i.e.~their type cannot change) and have zero or more ordered child nodes
-(which are not immutable and can be updated). Tokens have a type (e.g.~`int')
-and a value (e.g.~`3') and are mutable. Figure \ref{fig_example_parsetree}
+\emph{tokens} (representing terminal symbols). Nonterminal nodes have an
+immutable type (e.g.~`expr') but the quantity and types of their children can change.
+Tokens have a mutable type \laurie{is it true that nonterminals have an immutable type but terminals have a mutable type?} (e.g.~`int')
+and a mutable value (e.g.~`3') and are mutable. Figure \ref{fig_example_parsetree}
 shows an example of a parse tree.
 
 \begin{figure}
@@ -389,24 +389,15 @@ children of \emph{Root} and are contained between \emph{BOS} and \emph{EOS}.}
 \label{fig_example_parsetree}
 \end{figure}
 
-When the user types, the incremental lexer first either creates, or updates,
-tokens in the parse tree. The lexer considers where the cursor is in the tree
-(i.e.~where the user is typing) and uses lookahead knowledge stored in the
-tokens to work out the affected area of the change. Newly created tokens are
-then merged back into the tree.  In the simple case where a token's value, but
-not its type, was changed, no further action is needed. In all other cases, the
-path from each changed token up to the root is first marked with \textit{nested
-change} flags which are then used by the incremental parser to update the parse
-tree. The incremental parser starts at the beginning of the tree and tries to
-reparse all subtrees that contain changes. Assuming the user's input is
-syntactically valid, nonterminals are created or removed, as appropriate.
-Unchanged subtrees are reused as is whenever possible. Since nonterminals are
-immutable, subtrees which can't be reused must be recreated from scratch.
+After input from the user is received, the incremental lexer is run first.
+Using lookahead information, it works out the affected area of the change,
+updates or creates tokens as necessary, and marks the path from each updated or
+created token to the root as changed. The incremental parser then runs,
+reparsing all subtrees with changes in them, and creating or removing
+nonterminals as needed. Syntax errors mean that a fully correct parse tree
+cannot be created, in which case some tokens will be attached, in a sense
+temporarily, to the nearest parent, until a correct parse can be created.
 
-Syntactically incomplete programs lead to temporarily incorrect parse trees.
-In such cases, the incremental parser typically attaches tokens to a single
-parent. When the user eventually creates a syntactically valid program, the
-tree is rewritten.
 
 \subsection{Language boxes}
 
