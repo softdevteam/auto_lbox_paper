@@ -233,20 +233,27 @@ combined, lead to an effective heuristic for many cases (see Figure \ref{intro_e
 \begin{figure}
     \includegraphics[width=0.25\textwidth]{images/auto_remove_insert_sql_java}
     \begin{picture}(0,0)
-        \put(-145,78){\textcolor{black}{\textbf{(a)}}}
-        \put(-145,59){\textcolor{black}{\textbf{(b)}}}
-        \put(-145,41){\textcolor{black}{\textbf{(c)}}}
-        \put(-145,23){\textcolor{black}{\textbf{(d)}}}
+        \put(-145,77){\textcolor{black}{\textbf{(a)}}}
+        \put(-145,58.7){\textcolor{black}{\textbf{(b)}}}
+        \put(-145,40.6){\textcolor{black}{\textbf{(c)}}}
+        \put(-145,22.5){\textcolor{black}{\textbf{(d)}}}
+        \put(-145,4.5){\textcolor{black}{\textbf{(e)}}}
     \end{picture}
     \caption{Automatic language boxes in action with a composition of SQL
       and Java, where Java expressions can be used wherever SQL expressions
       are valid. The initial input is `\texttt{SELECT a FROM b;}', with the user
-      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\textasciicircum3}'.
-    \textbf{a)} The user starts with a valid SQLite program. \textbf{b)} After typing
-    `\texttt{,}' an error occurs which is fixed by automatically wrapping
-    `\texttt{FROM}' inside a Java language box.  \textbf{c)} After typing
+      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\textasciicircum3}':
+      language boxes (with a pink background) are inserted and removed as the
+      user types.  \textbf{a)} The user starts with a valid SQL statement and
+      puts the cursor immediately after \texttt{a} \laurie{we need to use a
+      variable other than `a', because otherwise it's confused with a) b) c)
+    etc.}. \textbf{b)} After typing `,', the SQL \texttt{SELECT a, FROM b} causes
+    a syntax error. At this point, the automatic language box heuristic
+    is used: by inserting a Java language box around \texttt{FROM} (a valid
+    Java identifier), the overall program becomes syntactically correct (since
+    a Java language box is syntactically valid after the `,`). \textbf{c)} After typing
     `\texttt{c}' the language box is removed again, since `\texttt{FROM}' is
-    valid in the outer language again. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
+    valid in the outer language again\laurie{this is the loose/fixed thing: how do we decide when to rerun the parser? is it just because ``a,b, FROM'' is syntactically invalid?}. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
     which is fixed by wrapping the expression `\texttt{c\textasciicircum3}' inside a Java
     language box.
 }
