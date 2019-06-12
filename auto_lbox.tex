@@ -16,6 +16,7 @@
 \usepackage{wrapfig}
 \usepackage{xspace}
 \usepackage{menukeys}
+\usepackage[normalem]{ulem}
 
 \usepackage[ruled]{algorithm2e} % For algorithms
 \renewcommand{\algorithmcfname}{ALGORITHM}
@@ -656,10 +657,8 @@ via the editor's submenu\lukas{Not yet implemented in Eco}.
 
 As an example, let's consider a composition of Java and Python, where Python
 functions are allowed wherever Java functions are valid. For this we embed into
-Java a subset of the Python grammar, accepting only Python functions, which we
-call \texttt{pyfuncdef}\footnote{This grammar can be constructed from the
-Python grammar (shown in Appendix \ref{app_python_grm}) by changing the start
-rule to \texttt{funcdef}.}. We now assume the user wrote the following program:
+Java a subset of Python that only accepts functions; we call this subset
+\texttt{pyfuncdef}. We now assume the user wrote the following program:
 
 % Normal example
 \begin{lstdefault}[language=Java]
@@ -715,19 +714,19 @@ valid and can be automatically inserted into the program.
 \subsection{Confirming candidates}
 \label{sec:parse_after_lbox}
 
-In order to confirm if a candidate is valid, we need to
+In order to confirm if a candidate is a valid choice, we need to
 check that it does not introduce new errors when it is inserted into the parse
-tree, and also that is fixes the initial parsing error. In order to determine if a
-candidate doesn't introduce new errors, we can simply check if the first
-non-whitespace token that follows it can be shifted.  The reasons for this are
-twofold. Firstly, we don't want to parse too far past the language box for
-performance reasons, and because this could lead to candidates being falsely
-rejected (see Figure \ref{fig_autoboxerrorafterinsert} for an example).
+tree, and that it fixes the initial parsing error. To determine the former, we
+can simply check if the first non-whitespace token that follows the inserted
+language box can be shifted. The reasons for this are
+twofold. Firstly, parsing too far past the language box can, apart from
+implicating performance, lead to candidates being falsely
+rejected if the entire input is not syntactically valid (see Figure \ref{fig_autoboxerrorafterinsert} for an example).
 Secondly, whitespace tokens, which most programming languages use, have the
-property, that they can almost always be shifted after another token. This
+unfortunate property in an LR parser, that they can almost always be shifted after another token. This
 means that a whitespace token following a language box candidate would always
 confirm the candidate, even if the insertion of the box would cause an error
-immediately after that whitespace. This can sometimes lead to invalid
+immediately after that whitespace. This can lead to invalid
 candidates being accepted (see Figure \ref{fig_autobox_nonwhitespace} for an
 example).
 
@@ -740,35 +739,31 @@ a language box candidate, can lead to the candidate being falsely rejected.
 The example shows a composition of Java and Python, that allows Python
 expressions wherever Java expressions are valid. The user inserted a Python list
 into the program (left), which produced a language box candidate (right). To validate
-the candidate we insert it into the program and parse it. However, after parsing \qtt{*},
-an error occurs which would invalidate the constraint that an automatic
-language box shall not introduce new errors, and thus reject the candidate,
-despite this being an otherwise valid insertion.}
+the candidate we insert it into the program and parse it. We can succesfully
+parse \qtt{*}, confirming the candidate. However, if we continue parsing beyond that an error occurs
+at \qtt{;} which would lead to the false rejection of the candidate.}
 \label{fig_autoboxerrorafterinsert}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{images/autobox_nonwhitespace.png}
 \vspace{0.3em}
+\begin{picture}(0,0)
+  \small
+  \put(-110,0){\textbf{(a)} Using first token}
+  \put(-20,0){\textbf{(b)} Using first non-whitespace token}
+\end{picture}
 \caption{An example showing how using only non-whitespace tokens to confirm language
 box candidates gives better results. The example uses a composition of Java
 and Python, which allows Python expressions in place of Java expressions. The
 user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
-between \qtt{=} and \qtt{;}. \textbf{a)} If we use any first token to confirm
-candidates, we get three results. The first option, \qtt{1 or 2},
-is a valid candidate, because the following token is whitespace, which can
-be shifted, confirming the candidate; however the following
-\qtt{and} then causes an error. The same is true for the third option, \qtt{1 or 2 and 3;}, which is
-followed by a newline, which confirms this candidate, even though the \qtt{\}} then
-errors because the semicolon of the assignment was included in the Python
-language box. \textbf{b)} When using the first non-whitespace token for candidate
-confirmation, we reduce the three options to one, which can then be automatically
-inserted.}
-\begin{picture}(0,0)
-  \small
-  \put(-110,225){\textbf{(a)} Using first token}
-  \put(-20,225){\textbf{(b)} Using first non-whitespace token}
-\end{picture}
+between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
+candidates, we find three. Each candidate was confirmed by a following whitespace token,
+however, when inserting the first or second candidate, they produce an error
+immediately after the whitespace (upon parsing \qtt{and}/\qtt{\}}).
+\textbf{b)} If instead we use the first non-whitespace token for candidate
+confirmation, this reduces the three candidates to a single one, which can
+then automatically be inserted into the program.}
 \label{fig_autobox_nonwhitespace}
 \end{figure}
 
