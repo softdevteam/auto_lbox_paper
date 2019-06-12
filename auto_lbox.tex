@@ -187,7 +187,8 @@ and determining whether a grammar is unambiguous or not is
 undecidable~\cite{cantor62ambiguity}. There are two fundamental approaches
 of coping with ambiguity: either ruling it out through the use of
 delimiters (either via explicit bracketing or syntax-directed
-editing); or to use a generalised parsing algorithm that can cope with ambiguity
+editing); or using generalised parsing algorithm that can create a parse
+forest, capturing all ambiguities
 (e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
 are visually intrusive and/or awkward to work with; and one can never know if all possible
 ambiguous parses have been covered by disambiguation operators.
@@ -203,10 +204,10 @@ there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
 ways and places during editing. However, language boxes lack the most appealing aspect of
 ambiguous parsing: users must explicitly, and tediously, state when they want
-to insert language boxes.
+to insert or remove language boxes.
 
 The fundamental research question underlying this paper is whether it is
-possible to reduce the need for the users to explicitly insert language
+possible to reduce the need for the users to explicitly insert and remove language
 boxes. For example, in a composition of Java and SQL (where SQL is allowed
 wherever a Java expression is valid), can such a system automatically insert an
 SQL language box for the input \texttt{for (String n: SELECT name FROM table) \{ ...
@@ -216,23 +217,23 @@ ways of splitting the same input across different language boxes. Realistic
 solutions must also take into account other considerations: it should not
 require significant extra work for the authors of composed languages; performance must
 not be unduly impacted; and users should be able to broadly predict if, and
-why, language boxes are inserted or not.
+why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
 essence, we present a heuristic which can insert, remove, and update language
-boxes in many useful cases. The heuristic to insert a language box is triggered
-only when there is a syntax error in the input of the language the user is
-currently typing in (making it fairly predictable): we then run a recogniser
-which attempts to insert language boxes to see if that leads to a successful
-parse(s). However, further input can change our idea of what language boxes
-should be inserted. We thus use a simple model of ``I'm not finished typing
-yet''. Automatically inserted language boxes are initially considered
-\emph{uncommitted}, and are checked for updating or removal on subsequent key
-presses until such time as they are \emph{committed} (e.g.~when the user
-explicitly moves the cursor). One of the main challenges with automatic
-language boxes is to determine what text to reparse: we present several sub-heuristics (including
-the ability to take the user's previous input into consideration) which, when
-combined, lead to an effective heuristic for many cases (see Figure \ref{intro_example} for an example).
+boxes in many useful cases. We quickly found that manipulating arbitrary language
+boxes is surprising and irritating. Instead we use a simple model to capture
+the notion of ``I'm still typing here'', where automatically language boxes
+start as \emph{uncommitted} (when they can still be updated or removed) and
+\emph{committed} (when the heuristic takes them as a given). Language boxes
+move from uncommitted to committed when the user, directly or indirectly, shows
+that they are finished editing at the current point (e.g.~when they move the
+cursor); users can manually change a committed box to uncommitted if they later
+want it to be subject to the heuristic again. One of the main challenges with
+automatic language boxes is to determine what text to reparse: we present
+several sub-heuristics (including the ability to take the user's previous input
+into consideration) which, when combined, lead to an effective heuristic for
+many cases (see Figure \ref{intro_example} for a simple example).
 
 \begin{figure}
     \includegraphics[width=0.25\textwidth]{images/auto_remove_insert_sql_java}
