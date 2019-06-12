@@ -652,13 +652,13 @@ the shorter they are, the higher they are in the list.}
 Despite best efforts,
 we will encounter cases where an inserted language boxes is not what the user
 intended. The user thus may undo an inserted language box anytime using the,
-for editors typical, \keys{Ctrl+Z} key combination. Automatically inserted
-language boxes are initially marked as \emph{loose} boxes, which means they may
+for editors typical, \keys{Ctrl+Z} key combination. By default, automatically inserted
+language boxes are marked as \emph{unlocked}, which means they may
 be automatically removed again or resized to encompass less or more code. The
-box remains loose as long as the cursor remains inside it, but as soon as the
-user manually moves the cursor out of the box, it becomes \emph{fixed}\lukas{better: locked?} and stays this
-way. However, the user may manually mark boxes as loose or fixed as they wish,
-via the editor's submenu\lukas{Not yet implemented in Eco}.
+box remains unlocked as long as the cursor remains inside it, but as soon as the
+user manually moves the cursor outside of the box it becomes \emph{locked} and stays this
+way. Explicitly inserted language boxes are \emph{locked} by default, however, any
+box may be manually locked or unlocked by using the editor's submenu.
 
 \subsection{Finding candidates}
 
