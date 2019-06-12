@@ -220,13 +220,17 @@ why, language boxes are inserted or not.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
 essence, we present a heuristic which can insert, remove, and update language
-boxes in many useful cases. The heuristic is triggered only when there is a
-syntax error in the input of the language the user is currently typing in
-(making it fairly predictable). When an error does occur, text is selectively
-reparsed to see if inserting or removing language boxes would fix the error
-(in general leading to only a small performance overhead, though some
-compositions can hit worse cases). One of the main challenges is
-to determine what text to reparse: we present several sub-heuristics (including
+boxes in many useful cases. The heuristic to insert a language box is triggered
+only when there is a syntax error in the input of the language the user is
+currently typing in (making it fairly predictable): we then run a recogniser
+which attempts to insert language boxes to see if that leads to a successful
+parse(s). However, further input can change our idea of what language boxes
+should be inserted. We thus use a simple model of ``I'm not finished typing
+yet''. Automatically inserted language boxes are initially considered
+\emph{uncommitted}, and are checked for updating or removal on subsequent key
+presses until such time as they are \emph{committed} (e.g.~when the user
+explicitly moves the cursor). One of the main challenges with automatic
+language boxes is to determine what text to reparse: we present several sub-heuristics (including
 the ability to take the user's previous input into consideration) which, when
 combined, lead to an effective heuristic for many cases (see Figure \ref{intro_example} for an example).
 
