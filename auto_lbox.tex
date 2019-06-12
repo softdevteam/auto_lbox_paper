@@ -241,20 +241,18 @@ combined, lead to an effective heuristic for many cases (see Figure \ref{intro_e
     \end{picture}
     \caption{Automatic language boxes in action with a composition of SQL
       and Java, where Java expressions can be used wherever SQL expressions
-      are valid. The initial input is `\texttt{SELECT a FROM b;}', with the user
-      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\textasciicircum3}':
+      are valid. The initial input is `\texttt{SELECT x FROM z;}', with the user
+      putting their cursor immediately after `\texttt{x}' and typing `\texttt{,y\textasciicircum3}':
       language boxes (with a pink background) are inserted and removed as the
       user types.  \textbf{a)} The user starts with a valid SQL statement and
-      puts the cursor immediately after \texttt{a} \laurie{we need to use a
-      variable other than `a', because otherwise it's confused with a) b) c)
-    etc.}. \textbf{b)} After typing `,', the SQL \texttt{SELECT a, FROM b} causes
+      puts the cursor immediately after \texttt{x}. \textbf{b)} After typing `,', the SQL input \qtt{SELECT x, FROM z} causes
     a syntax error. At this point, the automatic language box heuristic
-    is used: by inserting a Java language box around \texttt{FROM} (a valid
+    is used: by inserting a Java language box around \qtt{FROM} (a valid
     Java identifier), the overall program becomes syntactically correct (since
     a Java language box is syntactically valid after the `,`). \textbf{c)} After typing
-    `\texttt{c}' the language box is removed again, since `\texttt{FROM}' is
+    `\texttt{y}' the language box is removed again, since `\texttt{FROM}' is
     valid in the outer language again. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
-    which is fixed by wrapping the expression `\texttt{c\textasciicircum3}' inside a Java
+    which is fixed by wrapping the expression `\texttt{y\textasciicircum3}' inside a Java
     language box.
 }
 \label{intro_example}
