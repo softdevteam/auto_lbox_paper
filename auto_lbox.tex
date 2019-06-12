@@ -253,7 +253,7 @@ combined, lead to an effective heuristic for many cases (see Figure \ref{intro_e
     Java identifier), the overall program becomes syntactically correct (since
     a Java language box is syntactically valid after the `,`). \textbf{c)} After typing
     `\texttt{c}' the language box is removed again, since `\texttt{FROM}' is
-    valid in the outer language again\laurie{this is the loose/fixed thing: how do we decide when to rerun the parser? is it just because ``a,b, FROM'' is syntactically invalid?}. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
+    valid in the outer language again. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
     which is fixed by wrapping the expression `\texttt{c\textasciicircum3}' inside a Java
     language box.
 }
@@ -885,9 +885,15 @@ parsed in the outer language. The following constraints summarise the above
   \item If the language box content is valid in both the inner and outer
     language, it will be removed only if its removal doesn't introduce new errors (i.e.~if its contents \emph{and} the first non-whitespace token following it
     can be parsed).
+  \item If the language box itself is invalid in the outer language, it will be removed
+      if its content can be parsed in the outer language.
 \end{enumerate}
 
-Appluing these constraints to the example above, the inserted box would be
+While constraints 1, 2, and 4 only need to be checked when either the content of
+the language box, or the language box itself become invalid, constraint 3 requires
+a check anytime content is changed, i.e.~on every reparse.
+
+Applying these constraints to the example above, the inserted box would be
 removed as soon as the user inserts a \qtt{*} between \qtt{from} and
 \qtt{t}; however, it stays if more SQL code is added even it that makes the
 SQL code temporarily invalid. Note, that language boxes that were inserted by the
