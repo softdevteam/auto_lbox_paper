@@ -220,15 +220,15 @@ not be unduly impacted; and users should be able to broadly predict if, and
 why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
-essence, we present a heuristic which can insert, remove, and update language
+essence, we present a heuristic which can insert, remove, and update\lukas{the only update mechanism is expanding or shrinkig, so we may just say resize here instead} language
 boxes in many useful cases. We quickly found that manipulating arbitrary language
 boxes is surprising and irritating. Instead we use a simple model to capture
-the notion of ``I'm still typing here'', where automatically language boxes
-start as \emph{uncommitted} (when they can still be updated or removed) and
-\emph{committed} (when the heuristic takes them as a given). Language boxes
+the notion of ``I'm still typing here'', where automatically inserted language boxes
+start as \emph{uncommitted} (meaning they can still be updated or removed) and
+\emph{committed} (which means the heuristic treats them as explicit insertions by the user). Language boxes
 move from uncommitted to committed when the user, directly or indirectly, shows
 that they are finished editing at the current point (e.g.~when they move the
-cursor); users can manually change a committed box to uncommitted if they later
+cursor outside of the language box); users can manually change a committed box to uncommitted if they later
 want it to be subject to the heuristic again. One of the main challenges with
 automatic language boxes is to determine what text to reparse: we present
 several sub-heuristics (including the ability to take the user's previous input
