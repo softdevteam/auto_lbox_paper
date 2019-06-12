@@ -231,8 +231,10 @@ combined, lead to an effective heuristic for many cases (see Figure \ref{intro_e
 
 \begin{figure}
     \includegraphics[width=0.3\textwidth]{images/auto_remove_insert_sql_java}
-    \caption{Example showing automatic language boxes in action. Here the user
-    is editing a program using a composition of SQLite and Java. \textbf{a)}
+    \caption{\laurie{we need to add line numbers or a) b) c) annotations to the side (in \LaTeX, not in the image)}Automatic language boxes in action with a composition of SQL
+      and Java, where Java expressions can be used wherever SQL expressions
+      are valid. The initial input is \texttt{SELECT a FROM b;}, with the user
+      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\^3}'.
     The user starts with a valid SQLite program. \textbf{b)} After typing
     `\texttt{,}' an error occurs which is fixed by automatically wrapping
     `\texttt{FROM}' inside a Java language box.  \textbf{c)} After typing
