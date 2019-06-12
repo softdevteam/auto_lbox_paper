@@ -572,8 +572,8 @@ leads to missed opportunities. However, in conjunction, the heuristics detect a 
 number of locations to make automatic language boxes viable.
 
 \begin{figure*}[t]
-\begin{minipage}{0.333\textwidth}
-\begin{lstdefault}
+    \begin{minipage}[t]{0.33\textwidth}
+    \begin{lstdefault}[numbers=none]
 def find_candidates_stack(error):
   valid_boxes = []
   for lang in <!\textit{composition}!>:
@@ -589,8 +589,8 @@ def find_candidates_stack(error):
   return valid_boxes
 \end{lstdefault}
 \end{minipage}
-\begin{minipage}{0.333\textwidth}
-\begin{lstdefault}
+\begin{minipage}[t]{0.33\textwidth}
+\begin{lstdefault}[numbers=none]
 def find_candidates_history(error):
   valid_boxes = []
   parent = error.parent
@@ -606,8 +606,8 @@ def find_candidates_history(error):
   return valid_boxes
 \end{lstdefault}
 \end{minipage}
-\begin{minipage}{0.333\textwidth}
-\begin{lstdefault}
+\begin{minipage}[t]{0.33\textwidth}
+\begin{lstdefault}[numbers=none]
 def find_candidates_line(error):
   valid_boxes = []
   term = error
@@ -777,20 +777,21 @@ then automatically be inserted into the program.}
 % Multiple choice example
 \subsection{Handling multiple solutions per language}
 
-While many compositions only have one valid outcome, sometimes there are
-multiple options for the insertion of a language box. This can be either that
-there are multiple languages that can be inserted, or that there are multiple
-variants of consumed text for a single language.  An example for the latter is
-shown in the following composition of PHP and Python, which allows any Python
-box wherever a PHP expression is valid.
+When inserting input of one language into another we can sometime find
+not one, but multiple candidates; either because there are multiple embedded
+languages the inserted input can be wrapped in; or because there are multiple
+substrings of the inserted input that can be replaced by a language box.
+An example for the latter is
+shown in the following composition of PHP and Python, which allows Python code
+wherever a PHP expression is valid.
 
 \begin{center}
 \includegraphics[width=0.25\textwidth]{images/autoboxmultioption.png}
 \end{center}
 
-In the example there are two options to fix the error at \qtt{y} in line 2, via
-the insertion of a Python box. We can include everything from \qtt{def} up to,
-and including \qtt{return 12}, or we can stop after \qtt{x = 11}.  Since both
+In the example there are two options to fix the error at \qtt{y} in line 2:
+we include everything from \qtt{def} up to,
+and including \qtt{return 12}; or we stop after \qtt{x = 11}. Since both
 options are valid and fix the error, we can't automatically pick one.
 Instead, we display an indicator that there are multiple solutions available
 (in the examples this is shown via a light bulb icon next to the line numbers). From
@@ -805,10 +806,10 @@ the relevant code:
 \subsection{Limiting automatic insertions}
 \label{subsec:limitingautoinserts}
 
-Some grammars can be very unrestrictive, allowing almost any text to be valid.
+Some language grammars have parsing and lexing rules that allow almost any text to be valid.
 In HTML, for example, any combination of characters that does not contain
-\qtt{<} or \qtt{>} is a valid program. Unfortunately, this means that in a
-composition with HTML most errors can be solved by simply wrapping them with a
+\qtt{<} or \qtt{>} is a valid program. Unfortunately, this means that when
+embedding HTML into another language most errors can be resolved by simply wrapping input inside a
 HTML language box, often resulting in something the user didn't intend. For
 instance, the following example shows a program written in a composition of
 Python that allows SQL and HTML wherever Python expressions are valid:
@@ -817,81 +818,81 @@ Python that allows SQL and HTML wherever Python expressions are valid:
 \includegraphics[width=0.5\textwidth]{images/auto_html.png}
 \end{center}
 
-We can see that the error at \qtt{table} can be solved by either wrapping
-\qtt{SELECT * FROM table} into a SQL language box, or by just wrapping
-\qtt{FROM table} into a HTML language box. While a human can easily guess
-that the user meant to insert a SQL box here, this scenario is impossible for the
-algorithm to detect. To remedy this the creator of the language composition can add hints that
-limit the insertion of some language boxes in such cases.   There are two ways in which
-a language author can add limitations to a composition: 1) They can define
-the symbols that an automatically inserted language box must start with 2)
+The suggested solutions to fix the error at \qtt{table} are to either wrap
+\qtt{SELECT * FROM table} into an SQL language box, or to wrap
+\qtt{FROM table} into a HTML language box. Looking at the context, it is obvious
+that the user meant to insert an SQL language box here, however the heuristics don't
+know about that. To remedy this the creator of the language composition can add hints that
+restrict the insertion of a language box in such cases. There are two ways in which
+a language author can add such a restriction to a composition: they can define
+the symbols that an automatically inserted language box must start with;
 or they can exclude specific symbols that must not appear at the beginning of a
-language box. For example, to solve the above problem, they user could define
-that a HTML box should only be inserted if the box starts with a HTML tag,
+language box. For example, to solve the above problem, the author could define
+that a HTML box can only be automatically inserted if the input starts with a HTML tag,
 e.g.~\qtt{<img}.
 
 Of course, another valid solution is to simply define a more
 fine-grained composition. For example, instead of creating a Python/HTML
-composition that allows all HTML to be valid wherever Python expressions are
+composition that allows any HTML to be valid wherever Python expressions are
 valid, the composition could be restricted to only allow HTML-tags
 (e.g.~\qtt{<img}, \qtt{<html}, etc) by embedding only a subset of the HTML
-grammar. However, this depends on the make-up of the grammar, and may not
-always be possible it doesn't separate rules on such a fine-grained
+language. However, this depends on the make-up of the grammar, and may not
+always be possible if grammar rules are not separated to such a fine-grained
 level.
 
 \subsection{Automatically removing boxes}
 \label{subsec_autoremoval}
 
-Despite the solutions described in \ref{subsec:limitingautoinserts} there
-will always be some remaining cases where automatically inserted language boxes do not match the
-user's intentions. While the user can always undo a wrong insertion,
-we do not want to burden them with the task of repeatedly
-cleaning up the algorithm's mistakes. The following composition of Python and
+As mentioned before, by definition we cannot perfectly detect language boxes
+and ther ewill be cases where an automatically inserted language box is not
+what the user wanted.
+And while the user can always undo a wrong insertion,
+this can quickly become an irritating task.
+The following composition of Python and
 SQL, though admittedly a rather unlikely scenario, exemplifies the problem:
 
 \begin{lstdefault}[language=Python]
   def x():
-    SELECT = 1
-    FROM = 2
-    table = 3
-    x = SELECT * FROM table
+    select = 1
+    from = 2
+    t = 3
+    x = select * from t
 \end{lstdefault}
 \vspace{1em}
 
-After typing in this program, an SQL language box will have been automatically
-inserted, replacing the text \qtt{SELECT * FROM table}. From a syntax
+After typing this program, an SQL language box surrounding the input
+\qtt{select * from t} will have been automatically inserted. From a syntactical
 perspective, this was a valid decision. However, we can see from the variable
-declarations that the user's intention was to multiply the three poorly named
-variables and simply forgot a \qtt{*} between \qtt{FROM} and \qtt{table}.
-Instead of requiring the user to manually undo the insertion, \eco can
-automatically remove inserted language boxes again once more information has
+declarations that the user intented to multiply the three poorly named
+variables and simply forgot a \qtt{*} between \qtt{from} and \qtt{t}.
+Instead of requiring the user to manually undo the insertion, language boxes
+can be automatically removed again once more information has
 become available.  In this example, once the user inserts the missing \qtt{*}
-between \qtt{FROM} and \qtt{table}, the SQL language box becomes invalid. This
-gives us a good clue that the language box was inserted accidentally and needs
-to be removed; with the restriction, that its entire content must be valid in
+between \qtt{from} and \qtt{t}, the SQL language box becomes invalid. This
+suggests that the language box was inserted accidentally and needs
+to be removed, however, with the restriction, that its entire content must be valid in
 the outer language.
-However, sometimes an automatically inserted language box can become valid in
+In some cases an automatically inserted language box can become valid in
 both the inner as well as the outer language, after the user made additional
-changes.  In those cases \eco prioritises the outer language and removes the
+changes.  In those cases we prioritise the outer language and remove the
 box, but only if the boxes contents \emph{and} its surrounding context can be
-parsed in the outer language.  The following constraints summarise the above
+parsed in the outer language. The following constraints summarise the above
 (an example using these constraints is given in Figure \ref{fig_autoremoval}):
 \begin{enumerate}
-  \item Only automatically inserted boxes can be automatically removed again.
+  \item Only automatically inserted, unlocked boxes can be automatically removed again.
   \item If the language box content is invalid, it will be removed only if
         its content can be parsed in the outer language.
-  \item If the language box's content is valid in both the inner and outer
+  \item If the language box content is valid in both the inner and outer
     language, it will be removed only if its removal doesn't introduce new errors (i.e.~if its contents \emph{and} the first non-whitespace token following it
     can be parsed).
 \end{enumerate}
 
-Using these constraints for the example from before, the inserted box would be
-removed as soon as the user inserts a \qtt{*} between \qtt{FROM} and
-\qtt{table}; however, it stays if more SQL code is added even it that makes the
-SQL code temporarily invalid. Note that language boxes that were inserted by the
-user, via choosing one of the suggested candidates, count as manual insertions
+Appluing these constraints to the example above, the inserted box would be
+removed as soon as the user inserts a \qtt{*} between \qtt{from} and
+\qtt{t}; however, it stays if more SQL code is added even it that makes the
+SQL code temporarily invalid. Note, that language boxes that were inserted by the
+user by choosing one of the suggested candidates, count as manual insertions
 and won't be automatically removed, even if they become invalid.
-
 
 \begin{figure}
 \begin{center}
@@ -925,14 +926,17 @@ language, and remove it again.}
 
 \subsection{Resizing language boxes}
 
-Language boxes may automatically resize if this allows both the language box as
+Language boxes may automatically be resized if this allows both the language box as
 well as the outer program to parse correctly. A language box may shrink, if it
-contains an error which can be resolved by moving contents into the outer
-language. It may expand if tokens following it can be included in the box,
-especially if those tokens are syntactically incorrect in the outer language
+contains an error which can be resolved by moving content into the outer
+language. It may expand if tokens following the language box can be included in it,
+especially if those tokens are syntactically incorrect in the outer language.
+Similar to the removal of language boxes, this only applies if the language box
+is unlocked.
 \lukas{We have a design choice here: Should a language box always encompass the
 maximum amount of code, or should it only grow if it can remove errors in the
 outer language doing so?}
+\lukas{Add example showing shrinking/expansion}
 
 \section{Limitations}
 \label{sec_lbox_limitations}
