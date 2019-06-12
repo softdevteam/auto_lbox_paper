@@ -358,8 +358,8 @@ The incremental lexer and parse both operate on the parse tree. Parse tree nodes
 are either \emph{nonterminals} (representing rules in the grammar) or
 \emph{tokens} (representing terminal symbols). Nonterminal nodes have an
 immutable type (e.g.~`expr') but the quantity and types of their children can change.
-Tokens have a mutable type \laurie{is it true that nonterminals have an immutable type but terminals have a mutable type?} (e.g.~`int')
-and a mutable value (e.g.~`3') and are mutable. Figure \ref{fig_example_parsetree}
+Tokens have a mutable type \laurie{is it true that nonterminals have an immutable type but terminals have a mutable type?}\lukas{yes} (e.g.~`int')
+and a mutable value (e.g.~`3') but cannot have children at all. Figure \ref{fig_example_parsetree}
 shows an example of a parse tree.
 
 \begin{figure}
