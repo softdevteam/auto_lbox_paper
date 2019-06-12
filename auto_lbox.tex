@@ -284,14 +284,14 @@ In this section, we briefly survey existing approaches to editing composed
 programs, before giving a brief overview of incremental parsing, sufficient for
 this paper's purposes.
 
-\subsection{Explicit delimiter approaches}
+\subsection{Delimiter-based approaches}
 
 The traditional approach to language composition is to use delimiters
 to make clear when the user has switched from one sub-language to another. The
 most obvious way of achieving this is to use explicit brackets to make clear a
 switch from an outer to an inner language (e.g.~\texttt{for (String e: <<SELECT name
 FROM table>>) \{ ... \}}), though this is visually intrusive, and prevents the
-special brackets being used within the sub-language (e.g.~in this case, the sub language
+brackets being used within the sub-language (e.g.~in this case, the sub language
 cannot use `>>' as a bit-wise operator).
 
 Naive approaches inherit a severe restriction from traditional parsing, which
@@ -300,15 +300,15 @@ parsing (i.e.~the structuring of tokens into a parse tree): all the languages
 must share the same lexing rules. This restriction can be somewhat eased if the
 lexer recognises the explicit brackets and extracts text between them wholesale
 for separate lexing and parsing (see e.g.~\cite[p.~13-14]{tratt08domain}),
-though it is then hard for the lexer to accurately keep track of nested special
-brackets (e.g.~should brackets in comments be counted or not?).  A
+though it is then hard for the lexer to accurately keep track of nested
+brackets (e.g.~should brackets in comments be counted or not? and how does
+one know what format comments in the inner language(s) are in?).  A
 more sophisticated approach is for the lexer and parser to interact (see
 e.g.~\cite{wyk07context}), such that the parse causes a switch in lexing rules
 when input shifts to an inner language.
 This has the advantage that brackets do not always need to be quite as visually
-intrusive (e.g.~if an inner language has different keywords to the outer
-language, that can be used to indicate the switch from one language to
-another), though in the general case explicit brackets must still be
+intrusive (e.g.~one can use a difference in keywords to identify a switch from
+one language to another), though in the general case explicit brackets must still be
 used to resolve ambiguities.
 
 
@@ -317,7 +317,7 @@ used to resolve ambiguities.
 Generalised parsing can parse any Context-Free Grammar (CFG), even those that
 are ambiguous. Scannerless parsing~\cite{visser97scannerless} extends this such
 that lexing and parsing are specified together. This removes the need for
-special brackets entirely, but does so at the expense of causing many more
+explicit brackets entirely, but does so at the expense of causing many more
 ambiguities (since traditional lexers implicitly resolve many ambiguities, such
 as between identifiers and keywords, before parsing).
 This is challenging because ambiguity is, in general,
@@ -327,40 +327,35 @@ no matter how many static disambiguation operators one uses, in general one
 cannot be sure if all possible points of ambiguity have been covered.
 Furthermore, our current disambiguation operators can cause scannerless
 parsers to become context-sensitive~\cite{eijck__lets_accept_rejects}, the
-consequences of which are still unclear.
+consequences of which remain unclear.
 
 
 \subsection{Syntax directed editing}
 
 Traditional syntax directed editing avoids parsing text entirely. In essence,
-users edit an AST directly, with uncompleted parts of a program being
+users edit an AST directly, with incomplete parts of a program being
 represented by holes. This avoids the need for explicit delimiters, and
 sidesteps issues of ambiguity completely. However, such systems are awkward to
-use\cite[p.~2]{khwaja93syntax}, for example only allowing whole nodes in the AST to be selected at a time,
+use~\cite[p.~2]{khwaja93syntax}, for example only allowing whole nodes in the AST to be selected at a time,
 and quickly fell out of fashion. The modern syntax directed editor
-MPS~\cite{pech13mps} alleviates some, though not all, of these problems;
-however, it requires significant expertise on the part of the composition author to make
-editing a pleasant experience.
+MPS~\cite{pech13mps} alleviates some, though not all, of these problems.
+However, it requires significant expertise on the part of the composition
+author to make editing a pleasant experience, as the AST structure places
+constraints on many editing operations.
 
 
 \subsection{Incremental parsing}
 
 Parsing is traditionally a batch process: an entire file is fed through a parser
-and a parse tree is created from it. Incremental parsing, in contrast,
-continually parses text as the user types and
-updates a parse tree. In this paper we make use of the incremental lexing and
-LR incremental parsing algorithms of~\citet{wagner98practicalalgorithms}
-\laurie{we should add a footnote here along the lines of ``Taking into account
-the fixes from Lukas'd Phd thesis [cite]``}: it handles the full class of
-$\textrm{LR}(k)$ grammars; and has
-formal guarantees that the algorithm is optimal (i.e.~the number of steps
-needed to integrate user changes into an existing parse tree is minimal).
-Furthermore, Wagner presents an algorithm for incremental lexical analysis,
-improving on works such as \cite{fischer84poe, bahlke86psg, ballance92pan,
-fischer92aladin}. The following gives a brief overview of incremental lexing
-and parsing.
+and a parse tree created from it. Incremental parsing, in contrast,
+continually parses text and updates a parse tree as the user types.
+In this paper we make use of the incremental lexing and
+LR incremental parsing algorithms of~\citet{wagner98practicalalgorithms},
+taking into account the several fixes found in~\cite{diekmann18editing}.
+In this subsection we provide a brief overview of this algorithm sufficient
+to understand the rest of this paper.
 
-An incremental parser and lexer both operate on a parse tree. Parse tree nodes
+The incremental lexer and parse both operate on the parse tree. Parse tree nodes
 are either \emph{nonterminals} (representing rules in the grammar) or
 \emph{tokens} (representing terminal symbols). Nonterminal nodes are immutable
 (i.e.~their type cannot change) and have zero or more ordered child nodes
