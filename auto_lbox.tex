@@ -230,16 +230,22 @@ the ability to take the user's previous input into consideration) which, when
 combined, lead to an effective heuristic for many cases (see Figure \ref{intro_example} for an example).
 
 \begin{figure}
-    \includegraphics[width=0.3\textwidth]{images/auto_remove_insert_sql_java}
-    \caption{\laurie{we need to add line numbers or a) b) c) annotations to the side (in \LaTeX, not in the image)}Automatic language boxes in action with a composition of SQL
+    \includegraphics[width=0.25\textwidth]{images/auto_remove_insert_sql_java}
+    \begin{picture}(0,0)
+        \put(-145,78){\textcolor{black}{\textbf{(a)}}}
+        \put(-145,59){\textcolor{black}{\textbf{(b)}}}
+        \put(-145,41){\textcolor{black}{\textbf{(c)}}}
+        \put(-145,23){\textcolor{black}{\textbf{(d)}}}
+    \end{picture}
+    \caption{Automatic language boxes in action with a composition of SQL
       and Java, where Java expressions can be used wherever SQL expressions
-      are valid. The initial input is \texttt{SELECT a FROM b;}, with the user
-      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\^3}'.
-    The user starts with a valid SQLite program. \textbf{b)} After typing
+      are valid. The initial input is `\texttt{SELECT a FROM b;}', with the user
+      putting their cursor immediately after `\texttt{a}' and typing `\texttt{,c\textasciicircum3}'.
+    \textbf{a)} The user starts with a valid SQLite program. \textbf{b)} After typing
     `\texttt{,}' an error occurs which is fixed by automatically wrapping
     `\texttt{FROM}' inside a Java language box.  \textbf{c)} After typing
     `\texttt{c}' the language box is removed again, since `\texttt{FROM}' is
-    valid in the outer language again. Typing `\texttt{\textasciicircum3}' produces an error
+    valid in the outer language again. \textbf{d)} Typing `\texttt{\textasciicircum3}' produces an error
     which is fixed by wrapping the expression `\texttt{c\textasciicircum3}' inside a Java
     language box.
 }
