@@ -159,13 +159,12 @@ Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or by selecting the desired parse tree from the parse forest.  In
 this paper we show that \emph{language boxes} -- a delimiter-based
-mechanism atop incremental parsing -- can be extended in a way that fits
+mechanism atop incremental parsing -- can be extended in a way that places it
 between these two extremes. In essence, we retain the use of delimiters, but
-when errors appear in the user's input, we selectively reparse the user's
-input, taking into account the user's editor history, and insert, remove,
-or move delimiters -- leading to what we call \emph{automatic language
+introduce a heuristic which can automatically insert, remove, or resize
+language boxes -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
-cannot always match a user's intention: rather, our aim is to find a simple
+cannot always match a user's intention: rather, we present a simple
 heuristic that does the right thing in most cases, while rarely surprising the
 user when it cannot. Our case studies show that \laurie{XXX}.
 \end{abstract}
@@ -220,11 +219,11 @@ not be unduly impacted; and users should be able to broadly predict if, and
 why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
-essence, we present a heuristic which can insert, remove, and update\lukas{the only update mechanism is expanding or shrinkig, so we may just say resize here instead} language
+essence, we present a heuristic which can automatically insert, remove, or resize language
 boxes in many useful cases. We quickly found that manipulating arbitrary language
 boxes is surprising and irritating. Instead we use a simple model to capture
-the notion of ``I'm still typing here'', where automatically inserted language boxes
-start as \emph{uncommitted} (meaning they can still be updated or removed) and
+the notion of ``I'm not finished typing here'', where automatically inserted language boxes
+start as \emph{uncommitted} (meaning they can still be updated, removed, or resized) and
 \emph{committed} (which means the heuristic treats them as explicit insertions by the user). Language boxes
 move from uncommitted to committed when the user, directly or indirectly, shows
 that they are finished editing at the current point (e.g.~when they move the
