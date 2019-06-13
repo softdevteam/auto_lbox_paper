@@ -365,33 +365,6 @@ Tokens have a mutable type (e.g.~`int')
 and a mutable value (e.g.~`3') but cannot have children at all. Figure \ref{fig_example_parsetree}
 shows an example of a parse tree.
 
-\begin{figure}
-\begin{minipage}[b]{0.17\textwidth}
-\begin{lsteco}
-// Parser
-Var: Id "eq" Val;
-Id: "id";
-Val: "int";
-
-// Lexer
-eq:"="
-id:"[a-z]+"
-int:"[0-9]+"
-\end{lsteco}
-\end{minipage}
-\begin{minipage}[b]{0.30\textwidth}
-\includegraphics[width=1.0\textwidth]{images/sampleparsetree}
-\end{minipage}
-\caption{An example of a parse tree constructed from the grammar on the left.
-The minimal parse tree consists of three
-special nodes: a \emph{Root} nonterminal; and \emph{BOS} (Beginning of
-Stream) and \emph{EOS} (End of Stream) terminals (both children of
-\emph{Root}). For brevity reasons, these nodes are elided for the remainder of
-this thesis. All nodes created from user input are (directly or indirectly)
-children of \emph{Root} and are contained between \emph{BOS} and \emph{EOS}.}
-\label{fig_example_parsetree}
-\end{figure}
-
 After input from the user is received, the incremental lexer is run first.
 Using lookahead information, it works out the affected area of the change,
 updates or creates tokens as necessary, and marks the path from each updated or
