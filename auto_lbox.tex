@@ -159,14 +159,15 @@ Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or by selecting the desired parse tree from the parse forest.  In
 this paper we show that \emph{language boxes} -- a delimiter-based
-mechanism atop incremental parsing -- can be extended in a way that places it
-between these two extremes. In essence, we retain the use of delimiters, but
+mechanism atop incremental parsing -- can be extended in a way that creates
+a new point in the design space between these two extremes. In essence, we
+retain the use of delimiters, but
 introduce a heuristic which can automatically insert, remove, or resize
 language boxes -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
 cannot always match a user's intention: rather, we present a simple
 heuristic that does the right thing in most cases, while rarely surprising the
-user when it cannot. Our case studies show that \laurie{XXX}.
+user when it cannot.
 \end{abstract}
 
 \keywords{Parsing, language composition, programming languages}
