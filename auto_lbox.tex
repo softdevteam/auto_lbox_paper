@@ -316,6 +316,7 @@ used to resolve ambiguities.
 
 
 \subsection{Scannerless parsing}
+\label{sec:scannerless}
 
 Generalised parsing can parse any Context-Free Grammar (CFG), even those that
 are ambiguous. Scannerless parsing~\cite{visser97scannerless} extends this such
@@ -437,6 +438,46 @@ automatically insert, remove, and resize language boxes. We start by
 setting out some basic criteria for a solution, before describing how
 automatic language boxes work in detail. We later validate the usefulness of
 automatic language boxes in Section~\ref{sec:evaluation}.
+
+
+\subsection{Criteria for a solution}
+
+In an ideal world, we would be able to insert language boxes exactly where and
+when needed --- and never where they are not wanted. This is impossible in the
+general case, because language composition is really grammar composition in
+disguise, and is thus subject to the same ambiguity problems as generalised
+parsing (see Section~\ref{sec:scannerless}). Most importantly, this means that
+there will be cases where there are multiple valid ways of splitting the same
+input across different language boxes. On top of this hard constraint, we
+assert that a realistic automatic language box solution must satisfy several
+softer considerations.
+
+First, a solution which requires language composition authors (i.e.~the people
+who actually compose grammars, create code generators etc.) is unlikely to be
+used widely and/or correctly. For example, it can be difficult to know whether
+a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting}: grammar
+composition often magnifies such concerns. Language composition authors are
+often experts in parts of the underlying meta-system, but it is not realistic
+to expect them to be expert in every single part. Ideally, any automatic
+language box solution would require no extra work on the language composition
+author's behalf.
+
+Second, a solution which seriously degrades performance would be unacceptable.
+For example, one simple way of achieving the overall aim would be to reparse
+the complete file on every keypress, which would be noticeably slow for large
+files. Ideally, the theoretical performance guarantees
+of~\citet{wagner98practicalalgorithms} would be maintained as well as good
+practical performance. \laurie{does wagner talk about the problem of relexing
+the whole file when you e.g.~open a string?}
+
+Third, a solution whose effects are unpredictable would probably be turned off
+by users. Clearly (given the hard constraint above) users cannot expect perfect
+outcomes all the time. But a sensible minimum is that it should be entirely
+predictable when automatic language boxes are potentially inserted, removed, or
+resized; and, ideally, largely predictable as to what the effects of such
+actions are. Furthermore, false negatives (i.e.~if the system inserts, removes,
+or resizes language boxes incorrectly) are likely to be particularly harshly
+received by users and must be reduced to the minimum possible.
 
 
 \subsection{Using errors to detect language boxes}
