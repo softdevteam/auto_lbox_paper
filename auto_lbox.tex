@@ -416,19 +416,30 @@ the power of syntax-directed editing without the accompanying difficulty of
 editing ASTs. At all points, all languages can be manipulated as normal text
 using the incremental parsers.
 
-However, the chief weakness of language boxes is that they must currently be
-inserted manually by the user -- this involves pressing a special key
-combination, selecting the desired inner language from a list, typing the
-content, and (in general) pressing a special key combination to complete the
-language box. If users want to write programs which frequently move between the
-various languages in a composition, this can quickly become tedious. The Eco
-editor, which is an implementation of an editor with language
-boxes~\cite{diekmann14eco}, slightly eases this problem by using information
-from the incremental parser to narrow down the list of languages presented to
-those valid at the cursor, though this is a mild palliative at best.
+
+\section{Automatic language boxes}
+
+The chief weakness of language boxes is that they must currently be inserted
+manually by the user --- this involves pressing a special key combination,
+selecting the desired inner language from a list, typing the content, and (in
+general) pressing a special key combination to complete the language box. For
+examples which use language boxes sparingly, this is merely slightly
+irritating, but when users write programs which frequently move between the
+various languages in a compositions, it becomes a significant usability
+concern. Eco, an editor which supports language boxes~\cite{diekmann14eco},
+slightly eases this problem by using information from the incremental parser to
+narrow down the list of languages presented to those valid at the cursor,
+though this is a mild palliative at best.
+
+In this section, we present a novel solution to this problem -- automatic
+language boxes -- which shows that it is possible, in many cases, to
+automatically insert, remove, and resize language boxes. We start by
+setting out some basic criteria for a solution, before describing how
+automatic language boxes work in detail. We later validate the usefulness of
+automatic language boxes in Section~\ref{sec:evaluation}.
 
 
-\section{Using errors to detect language boxes}
+\subsection{Using errors to detect language boxes}
 \label{sec_finding_lbox_candidates}
 % only on error
 % glr style: check on every shift if a box is valid: subsection "Improving
@@ -1278,7 +1289,9 @@ composition needs to determine all of those cases and modify grammar and lexer i
 these ambiguities, making it impossible to create a one-size-fits-all solution for
 arbitrary compositions.
 
+
 \section{Evaluation}
+\label{sec:evaluation}
 
 To evaluate the accuracy of automatic language boxes, we ran an experiment,
 testing each heuristic on multiple benchmarks. Each benchmark uses a
