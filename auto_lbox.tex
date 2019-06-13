@@ -286,6 +286,7 @@ In this section, we briefly survey existing approaches to editing composed
 programs, before giving a brief overview of incremental parsing, sufficient for
 this paper's purposes.
 
+
 \subsection{Delimiter-based approaches}
 
 The traditional approach to language composition is to use delimiters
@@ -362,8 +363,7 @@ are either \emph{nonterminals} (representing rules in the grammar) or
 \emph{tokens} (representing terminal symbols). Nonterminal nodes have an
 immutable type (e.g.~`expr') but the quantity and types of their children can change.
 Tokens have a mutable type (e.g.~`int')
-and a mutable value (e.g.~`3') but cannot have children at all. Figure \ref{fig_example_parsetree}
-shows an example of a parse tree.
+and a mutable value (e.g.~`3') but cannot have children at all.
 
 After input from the user is received, the incremental lexer is run first.
 Using lookahead information, it works out the affected area of the change,
