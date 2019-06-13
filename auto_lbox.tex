@@ -377,35 +377,30 @@ temporarily, to the nearest parent, until a correct parse can be created.
 
 \subsection{Language boxes}
 
-Language boxes allow users to embed one language inside another.  Language
-boxes have a type (e.g.~HTML), an associated editor (e.g.~an extended
-incremental parser), and a value (e.g.~a parse tree).  By design, language
-boxes only consider their own contents ignoring parent and sibling language
-boxes. It is therefore necessary to define the notion of the CST (Concrete
-Syntax Tree), which is a language box agnostic way of viewing the user's input.
-Different language box editors may have different internal tree formats, but
-each exposes a consistent interface to the CST.  Put another way, the CST is a
-global tree which integrates together the internal trees of individual language
-boxes.
+Language boxes allow users users to embed one language inside another in the
+context of an incremental parser. From the perspective of an outer language, a
+language box is simply a terminal i.e.~a node with a type but no content. Since
+parsers only care about the type of a terminal, this is a natural fit. In
+reality, language boxes do have content, though it is not visible to the outer
+language: they contain a separate parse tree for the inner language within
+them.
 
-Language boxes fit naturally with the incremental parser due to a property of
-CFGs which is rarely of consequence to batch-orientated parsers: parsers only
-need to know the type of a token and not its value. In this incremental parser
-approach, nested language boxes are therefore treated as tokens. When the user
-inserts an SQL language box into Python code, a new node of type \texttt{SQL}
-is inserted into the parse tree and treated as any other token. From the
-perspective of the incremental parser for the Python code, the language box's
-value is irrelevant as is the fact that the language box's value is mutable.
-Language boxes can appear in any part of the text, though, in this example, an
-SQL language box is only syntactically valid in places where the Python grammar
-makes a reference to the SQL grammar. Nested language boxes which use the
-incremental parser have their own complete parse trees, as can be seen in
-Figure~\ref{fig:lboxtree}.
+This simple definition belies its power. Consider a composition of Java and
+SQL, where SQL expressions can be used wherever a Java expression is
+syntactically valid. Java's grammar must have a reference from Java's
+expression rule to a special symbol type `language box' (conventionally
+represented between angle brackets to visually separate it from rules and
+tokens). At run-time, if the Java parse tree has an SQL language box at the
+correct point, then Java considers the tree to be syntactically correct. The
+SQL language box will have its own SQL parse tree inside which may or may not
+be syntactically correct. An elided example of such a tree-of-trees can be seen
+in Figure~\ref{fig:lboxtree}.
 
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=0.35\textwidth]{images/lboxtree}
-\caption{An elided example of an SQL language box nested within an outer Python
+\caption{\laurie{we need to inkscape this example and at the same point
+  make it show java + sql}An elided example of an SQL language box nested within an outer Python
 language box. From the perspective of the incremental parser, the tree stops
 at the SQL token. However, we can
 clearly see in the above figure that the SQL language box has its own parse
@@ -414,52 +409,24 @@ tree, which thus forms part of the wider \inputtree.}
 \end{center}
 \end{figure}
 
-Language boxes need to be inserted manually by the user. Though the user may
-choose to insert a language box at any place in the program, the validity of
-that insertion is restricted by the grammar of the composition. For example,
-Figure \ref{fig:langmenu} shows the composition of HTML, Python, and SQL.  The
-HTML grammar has been modified to allow Python language boxes to be inserted
-anywhere between HTML tags, while the Python grammar has been altered to allow
-SQL language boxes wherever Python expressions are valid.  In the example, the
-user has already inserted a Python language box into HTML and is about to
-insert an SQL language box after the `\texttt{print}' (while arbitrary language
-boxes can be inserted, the editor highlights those that are valid in the
-current context). If a language box is put into a place where it isn't valid it
-will be highlighted as a syntax error. Note that this does not affect the
-user's ability to edit the text inside or outside the box, and the editing
-experience retains the feel of a normal text editor.
+Philosophically, language boxes thus form delimiters of sorts, albeit invisible
+ones, between languages: from a syntactic perspective, outer languages are
+ignorant of the contents of inner languages and vice versa. Thus we get much of
+the power of syntax-directed editing without the accompanying difficulty of
+editing ASTs. At all points, all languages can be manipulated as normal text
+using the incremental parsers.
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=0.48\textwidth]{images/dropdown.png}
-\caption{Inserting a language box opens up a menu of the languages that \eco
-knows about. Languages which \eco knows are valid in the current context are
-highlighted in bold to help guide the user.}
-\label{fig:langmenu}
-\end{center}
-\end{figure}
+However, the chief weakness of language boxes is that they must currently be
+inserted manually by the user -- this involves pressing a special key
+combination, selecting the desired inner language from a list, typing the
+content, and (in general) pressing a special key combination to complete the
+language box. If users want to write programs which frequently move between the
+various languages in a composition, this can quickly become tedious. The Eco
+editor, which is an implementation of an editor with language
+boxes~\cite{diekmann14eco}, slightly eases this problem by using information
+from the incremental parser to narrow down the list of languages presented to
+those valid at the cursor, though this is a mild palliative at best.
 
-Typing inside the Python+SQL language box makes it visibly grow on screen to
-encompass its contents. Language boxes can be thought of
-as being similar to the quoting mechanism in traditional text-based approaches
-which use brackets such as $\llbracket~\rrbracket$; unlike text-based brackets,
-language boxes can never conflict with the text contained within them. Users can
-leave a language box by clicking outside it or using the cursor keys.
-Within the parse tree, the
-language box is represented by a token whose type describes its language and whose
-value is irrelevant to the incremental parser. As this may suggest, conceptually the top-level
-language of the file is a language box itself. Each language
-box has its own editor, which in this example means each has an incremental
-parser.
-
-At the end of the editing process, assuming that the user has a file with no syntax
-errors, they will be left with a parse tree with multiple nested language boxes inside
-it. In other words, the user will have entered a
-composed program with no restrictions on where language boxes can be placed; with no
-requirement to pick a bracketing mechanism which may conflict with nested
-languages; with no potential for ambiguity; and without sacrificing the ability
-to edit arbitrary portions of text (even those which happen to span multiple
-branches of a parse tree, or even those which span different language boxes).
 
 \section{Using errors to detect language boxes}
 \label{sec_finding_lbox_candidates}
