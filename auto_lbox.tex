@@ -432,7 +432,7 @@ using the incremental parsers.
 
 \section{Thinking beyond language boxes}
 
-\lukas{This is quite a big section. Maybe we can break it up somewhow...}
+\label{the problem}
 The chief weakness of language boxes is that they must be inserted
 manually by the user --- this involves pressing a special key combination,
 selecting the desired inner language from a list, typing the content, and (in
@@ -495,12 +495,49 @@ constraint above.
 
 \section{Automatic language boxes}
 
-In this section, we present a novel solution to this problem which shows that
-it is possible, in many cases, to automatically insert, remove, and resize
-language boxes --- automatic language boxes. We start by
-setting out some basic criteria for a solution, before describing how
-automatic language boxes work in detail. We later validate the usefulness of
-automatic language boxes in Section~\ref{sec:evaluation}.
+In this section, we present our solution to the problem outlined in
+Section~\ref{the problem} --- automatic language boxes. To ease the
+description, we start by considering solely the problem of language box
+insertion, before later building up the additional functionality of removal and
+insertion. We later validate the usefulness of automatic language boxes in
+Section~\ref{sec:evaluation}.
+
+
+\subsection{The consideration heuristic}
+
+The first challenge with automatic language boxes is to decide upon a sensible
+heuristic for considering if/when to insert a language box -- what we call the
+\emph{consideration heuristic}. If the consideration heuristic triggers too
+frequently, it will lead to language boxes too often being inserted when none
+are expected, requiring the user to manually remove the unwanted language
+boxes. Conversely, if it triggers infrequently, it will not be a useful aid to the user.
+
+We used two related observations as the guides to our consideration heuristic.
+First, by definition, language composition always consists of an outer language
+and one or more inner languages\footnote{Note that these terms are relative:
+when we create a language box and move into it, the previously-inner language
+now becomes the outer language.}. It is thus a reasonable expectation that most
+text typed in the outer language is intended to be in the outer language.
+Second, the clearest indication that recently typed text is not valid in the
+outer language is that it leads to a syntax error.
+
+Our consideration heuristic therefore triggers whenever text typed at the
+current position leads to a syntax error. This is an entirely predictable
+heuristic from a user perspective, though it clearly works for better for
+languages whose syntaxes don't overlap a great deal.
+
+\laurie{what happens if we type some
+text at line 1 and it triggers a syntax error at line 100? do we look for a
+language box at line 100 or ...? in other words, what i'm wondering is whether
+we have some notion of the `new' syntax error being `local' in some sense?
+is there a limit as to how far back/forwards we look?}.
+
+
+\subsection{Finding candidate language boxes}
+
+Once the consideration heuristic has triggered, we then have to search for
+appropriate language boxes to insert.
+
 
 
 \subsection{Using errors to detect language boxes}
