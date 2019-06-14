@@ -477,8 +477,11 @@ For example, one simple way of finding which language boxes to insert would
 be to reparse the complete file on every keypress, which would be noticeably slow for large
 files. Ideally, the theoretical performance guarantees
 of~\citet{wagner98practicalalgorithms} would be maintained as well as good
-practical performance. \laurie{does wagner talk about the problem of relexing
-the whole file when you e.g.~open a string?}
+practical performance\footnote{Interestingly, the original implementation of
+this incremental parsing algorithm had to be triggered by the user (e.g.~when
+a file was a saved). Modern machines are fast enough that even a naive
+implementation can run comfortably on every keypress in nearly all reasonable
+cases.}.
 
 Third, a solution which inserts language boxes unpredictably would be unlikely
 to find favour with users. Clearly, given the hard constraint described at the
