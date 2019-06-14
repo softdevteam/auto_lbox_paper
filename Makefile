@@ -12,7 +12,7 @@ LATEX_FILES = auto_lbox.tex
 DIAGRAMS = images/limitation_php.pdf \
 		   images/autoremoval.pdf \
 		   images/sampleparsetree.pdf \
-		   images/lboxtree.pdf
+		   images/lbox_parsetree.pdf
 
 EXTRA_DISTRIB_FILES = auto_lbox.pdf Makefile
 
