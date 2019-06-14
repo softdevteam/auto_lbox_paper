@@ -482,7 +482,7 @@ files. Ideally, the theoretical performance guarantees
 of~\citet{wagner98practicalalgorithms} would be maintained as well as good
 practical performance\footnote{Interestingly, the original implementation of
 this incremental parsing algorithm had to be triggered by the user (e.g.~when
-a file was a saved). Modern machines are fast enough that even a naive
+a file was saved). Modern machines are fast enough that even a naive
 implementation can run comfortably on every keypress in nearly all reasonable
 cases.}.
 
@@ -525,11 +525,11 @@ when we create a language box and move into it, the previously-inner language
 now becomes the outer language.}. It is thus a reasonable expectation that most
 text typed in the outer language is intended to be in the outer language.
 Second, the clearest indication that recently typed text is not valid in the
-outer language is that it leads to a syntax error.
+outer language is that it leads to a syntax error\lukas{isn't that the only indicator?}.
 
 Our consideration heuristic therefore triggers whenever text typed at the
 current position leads to a syntax error. This is an entirely predictable
-heuristic from a user perspective, though it clearly works for better for
+heuristic from a user perspective, though it clearly works better for
 languages whose syntaxes don't overlap a great deal.
 
 \laurie{what happens if we type some
@@ -537,6 +537,11 @@ text at line 1 and it triggers a syntax error at line 100? do we look for a
 language box at line 100 or ...? in other words, what i'm wondering is whether
 we have some notion of the `new' syntax error being `local' in some sense?
 is there a limit as to how far back/forwards we look?}.
+\lukas{Currently the heuristic always searches at the location of the error. It
+doesn't matter where we were previously typing. However, since errors are
+isolated after they are found, they are not re-inspected on every parse, but
+only if the surrounding area (i.e. the isolated subtree) is edited. This means "old"
+errors won't always be checked by the heuristics on every parse.}
 
 
 \subsection{Finding candidate language boxes}
