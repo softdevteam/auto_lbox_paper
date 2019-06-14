@@ -603,6 +603,8 @@ box candidates whose insertion remove the error by making the input
 syntactically valid. The main challenge is therefore in finding suitable
 candidates.
 
+\subsection{Finding candidates}
+
 We propose three different heuristics for finding suitable candidates. Each heuristic
 starts by searching backwards from the error to find locations where a
 language box would be valid. At each location, for each language in the composition,
@@ -684,7 +686,7 @@ beginning of the line.
 For each of
 those locations the heuristic then tries to consume the following input, using $l$'s lexer and
 parser, and produces a candidate whenever the consumed text is a valid program in
-$l$; \texttt{consume\_text} stops when it can't consume any more input, because either the remaining
+$l$; \texttt{consume\_text} (shown in Figure \ref{lst_consume_text}) stops when it can't consume any more input, because either the remaining
 input is invalid in $l$, or there is no more text to consume. Afterwards, the heuristic needs to
 confirm that the produced candidate fixes the previous error and
 doesn't introduce any new ones.
@@ -704,7 +706,9 @@ user manually moves the cursor outside of the box it becomes \emph{locked} and s
 way. Explicitly inserted language boxes are \emph{locked} by default, however, any
 box may be manually locked or unlocked by using the editor's submenu.
 
-\subsection{Finding candidates}
+\subsection{An example}
+\lukas{This can probably go, since we've already explained and somewhat shown
+this in the previous two sections.}
 
 As an example, let's consider a composition of Java and Python, where Python
 functions are allowed wherever Java functions are valid. For this we embed into
