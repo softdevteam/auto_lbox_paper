@@ -425,21 +425,20 @@ using the incremental parsers.
 
 \section{Automatic language boxes}
 
-The chief weakness of language boxes is that they must currently be inserted
+The chief weakness of language boxes is that they must be inserted
 manually by the user --- this involves pressing a special key combination,
 selecting the desired inner language from a list, typing the content, and (in
-general) pressing a special key combination to complete the language box. For
-examples which use language boxes sparingly, this is merely slightly
-irritating, but when users write programs which frequently move between the
-various languages in a compositions, it becomes a significant usability
-concern. Eco, an editor which supports language boxes~\cite{diekmann14eco},
+general) pressing a second special key combination to complete the language box.
+When language boxes are used infrequently, this is merely irritating,
+but when language boxes are used frequently, it is a significant usability
+issue, impeding the user's flow. Eco, an editor which supports language boxes~\cite{diekmann14eco},
 slightly eases this problem by using information from the incremental parser to
-narrow down the list of languages presented to those valid at the cursor,
+show only those languages valid at the point of the cursor,
 though this is a mild palliative at best.
 
-In this section, we present a novel solution to this problem -- automatic
-language boxes -- which shows that it is possible, in many cases, to
-automatically insert, remove, and resize language boxes. We start by
+In this section, we present a novel solution to this problem which shows that
+it is possible, in many cases, to automatically insert, remove, and resize
+language boxes --- automatic language boxes. We start by
 setting out some basic criteria for a solution, before describing how
 automatic language boxes work in detail. We later validate the usefulness of
 automatic language boxes in Section~\ref{sec:evaluation}.
@@ -447,42 +446,48 @@ automatic language boxes in Section~\ref{sec:evaluation}.
 
 \subsection{Criteria for a solution}
 
-In an ideal world, we would be able to insert language boxes exactly where and
-when needed --- and never where they are not wanted. This is impossible in the
-general case, because language composition is really grammar composition in
-disguise, and is thus subject to the same ambiguity problems as generalised
-parsing (see Section~\ref{sec:scannerless}). Most importantly, this means that
-there will be cases where there are multiple valid ways of splitting the same
-input across different language boxes. On top of this hard constraint, we
-assert that a realistic automatic language box solution must satisfy several
-softer considerations.
+In an ideal world, we would be able to insert language boxes exactly, and only,
+when they are wanted by the user. However, this is impossible in the
+general case because language composition is really grammar composition
+in disguise, and thus subject to the same ambiguity problems as generalised
+parsing (see Section~\ref{sec:scannerless}). Even if we were to require the
+language composition author to provide a static disambiguation specification,
+we cannot guarantee that it will cover all the ambiguous
+possibilities. Annoying as this may be, it is a hard constraint that we cannot
+change. On top of this, we also assert that a realistic solution to the overall
+problem should satisfy several softer considerations.
 
 First, a solution which requires language composition authors (i.e.~the people
-who actually compose grammars, create code generators etc.) is unlikely to be
-used widely and/or correctly. For example, it can be difficult to know whether
-a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting}: grammar
-composition often magnifies such concerns. Language composition authors are
+who actually compose grammars, create code generators etc.) to provide additional
+hints or commands to aid automatic language box insertion is less likely
+to be used widely and/or correctly. Language composition authors are
 often experts in parts of the underlying meta-system, but it is not realistic
-to expect them to be expert in every single part. Ideally, any automatic
+to expect them to be expert in every single part. For example, it can be difficult to know whether
+a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting} and whether
+one has disambiguated it in the expected way: grammar
+composition often magnifies such concerns. Ideally, any automatic
 language box solution would require no extra work on the language composition
 author's behalf.
 
 Second, a solution which seriously degrades performance would be unacceptable.
-For example, one simple way of achieving the overall aim would be to reparse
-the complete file on every keypress, which would be noticeably slow for large
+For example, one simple way of finding which language boxes to insert would
+be to reparse the complete file on every keypress, which would be noticeably slow for large
 files. Ideally, the theoretical performance guarantees
 of~\citet{wagner98practicalalgorithms} would be maintained as well as good
 practical performance. \laurie{does wagner talk about the problem of relexing
 the whole file when you e.g.~open a string?}
 
-Third, a solution whose effects are unpredictable would probably be turned off
-by users. Clearly (given the hard constraint above) users cannot expect perfect
-outcomes all the time. But a sensible minimum is that it should be entirely
-predictable when automatic language boxes are potentially inserted, removed, or
+Third, a solution which inserts language boxes unpredictably would be unlikely
+to find favour with users. Clearly, given the hard constraint described at the
+start of this subsection, users cannot expect perfect language box insertion
+all of the time. However, a reasonable minimum expectation is that it should be
+entirely predictable as to when automatic language boxes are potentially
+inserted, removed, or
 resized; and, ideally, largely predictable as to what the effects of such
-actions are. Furthermore, false negatives (i.e.~if the system inserts, removes,
+actions are. Furthermore, false negatives (i.e.~when the system inserts, removes,
 or resizes language boxes incorrectly) are likely to be particularly harshly
-received by users and must be reduced to the minimum possible.
+received by users and must be reduced to the minimum possible, given the hard
+constraint above.
 
 
 \subsection{Using errors to detect language boxes}
