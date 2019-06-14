@@ -453,7 +453,7 @@ language composition author to provide a static disambiguation specification,
 we cannot guarantee that it will cover all the ambiguous
 possibilities. Annoying as this may be, it is a hard constraint that we cannot
 change. On top of this, we also assert that a realistic solution to automatic
-language boxes problem should satisfy several softer considerations.
+language boxes should satisfy several softer considerations.
 
 First, a solution which requires language composition authors (i.e.~the people
 who actually compose grammars, create code generators etc.) to provide additional
@@ -465,7 +465,11 @@ a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting} and whether
 one has disambiguated it in the expected way: grammar
 composition often magnifies such concerns. Ideally, any automatic
 language box solution would require no extra work on the language composition
-author's behalf.
+author's behalf.\lukas{I agree with the paragraph, though in Section
+\ref{subsec:limitingautoinserts} we talk about how we can impose certain
+limitations on when a language box can be inserted.  We do this to solve
+problems with compositions like HTML which has a catch-all token and thus can
+almost always be used to wrap errors.}
 
 Second, a solution which seriously degrades performance would be unacceptable.
 For example, one simple way of finding which language boxes to insert would
