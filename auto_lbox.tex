@@ -309,7 +309,7 @@ most obvious way of achieving this is to use explicit brackets to make clear a
 switch from an outer to an inner language (e.g.~\texttt{for (String e: <<SELECT name
 FROM table>>) \{ ... \}}), though this is visually intrusive, and prevents the
 brackets being used within the sub-language (e.g.~in this case, the sub language
-cannot use `>>' as a bit-wise operator).
+cannot use `\texttt{>>}' as a bit-wise operator).
 
 Naive approaches inherit a severe restriction from traditional parsing, which
 separates lexing (i.e.~the splitting of the user's input into tokens) from
