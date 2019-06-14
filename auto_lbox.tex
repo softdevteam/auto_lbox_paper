@@ -260,8 +260,8 @@ why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
 essence, we present a heuristic which can automatically insert, remove, or resize language
-boxes in many useful cases. Automatically inserting language boxes is
-generally non-controversial, but we quickly found that a heuristic which
+boxes in many useful cases. Automatically inserting language boxes generally
+works well, but we quickly found that a heuristic which
 removes or resizes existing language boxes in the users program is too often
 irritating and surprising. To avoid this problem, automatically inserted
 language boxes start as \emph{uncommitted} (meaning they can still be
@@ -270,7 +270,9 @@ not remove or resize them). Language boxes
 move from uncommitted to committed when the user, directly or indirectly, shows
 that they are finished editing at the current point (e.g.~when they move the
 cursor outside of the language box); users can manually change a committed box to uncommitted if they later
-want it to be subject to the heuristic again. One of the main challenges with
+want it to be subject to the heuristic again. As this may suggest, automatic
+language boxes retain the traditional benefits of language boxes, which can still
+be manually inserted, removed, or resized as needed. One of the main challenges with
 automatic language boxes is to determine what text to reparse: we present
 several sub-heuristics (including the ability to take the user's previous input
 into consideration) which, when combined, lead to an effective heuristic for
