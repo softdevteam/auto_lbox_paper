@@ -573,23 +573,26 @@ errors serve as a a good initial heuristic. Figure \ref{fig_heuristic_example}
 shows two examples where the embedding of a language into another results in
 parse errors which could be used to automatically insert language boxes.
 
-\begin{figure}
+\begin{figure*}
     \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=1\textwidth]{images/heuristic1.png}
-    \caption{Python and SQL}
-  \end{subfigure}
-  \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=1\textwidth]{images/heuristic2.png}
+    \includegraphics[width=1\textwidth]{images/composition_error2.png}
     \caption{Java and Python}
+  \end{subfigure}
+    \hspace{2em}
+  \begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=1\textwidth]{images/composition_error1.png}
+    \caption{Java and SQL}
   \end{subfigure}
 \caption{Two examples showing the attempted composition of languages without the
 use of a language box. Both compositions result in an error, which can be used
-to search the surrounding area for potential language box locations. \textbf{a)}
-Here we have to search backwards to `\texttt{SELECT}' at which location the
-insertion of an SQL box is possible. \textbf{b)} Here a box can be inserted
-immediately at the location of the error.}
+to search the surrounding area for potential language box locations.
+\textbf{a)} In this example a Python language box can be inserted immediately
+at the location of the error, boxing everything from \qtt{[} to \qtt{]}.
+\textbf{b)} This example requires a backwards search to find a valid location
+for an SQL language box at `\texttt{SELECT}' consuming all text up to and including
+\qtt{students}.}
 \label{fig_heuristic_example}
-\end{figure}
+\end{figure*}
 
 When a parse error occurs during parsing, it is analysed immediately before
 parsing continues. This has
