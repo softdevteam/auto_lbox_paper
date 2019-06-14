@@ -432,6 +432,7 @@ using the incremental parsers.
 
 \section{Thinking beyond language boxes}
 
+\lukas{This is quite a big section. Maybe we can break it up somewhow...}
 The chief weakness of language boxes is that they must be inserted
 manually by the user --- this involves pressing a special key combination,
 selecting the desired inner language from a list, typing the content, and (in
@@ -547,7 +548,8 @@ immediately at the location of the error.}
 \label{fig_heuristic_example}
 \end{figure}
 
-When a parse error occurs during parsing, it is analysed immediately. This has
+When a parse error occurs during parsing, it is analysed immediately before
+parsing continues. This has
 the advantage that we have additional information available (e.g.~the parse
 stack) to help us decide whether the insertion of a box is a valid choice.
 The basic idea is to analyse the area surrounding the error to find language
@@ -577,64 +579,55 @@ leads to missed opportunities. However, in conjunction, the heuristics detect a 
 number of locations to make automatic language boxes viable.
 
 \begin{figure*}[t]
-    \begin{minipage}[t]{0.33\textwidth}
-    \begin{lstdefault}[numbers=none]
-def find_candidates_stack(error):
+\begin{minipage}[t]{0.49\textwidth}
+\begin{lstdefault}[]
+def heuristic_stack(error):
   valid_boxes = []
   for lang in <!\textit{composition}!>:
     cut = len(stack)
     while cut >= 0:
       if <!\textit{lbox of lang can be shifted at cut}!>:
-        for e in consume_text(stack[cut], lang):
-          c = (lang, cut, r)
-          if confirm_candidate(c) and \
-              fixes_error(c, error):
-            valid_boxes.append(c)
+        find_end(stack[cut], lang, valid_boxes)
       cut -= 1
   return valid_boxes
-\end{lstdefault}
-\end{minipage}
-\begin{minipage}[t]{0.33\textwidth}
-\begin{lstdefault}[numbers=none]
-def find_candidates_history(error):
-  valid_boxes = []
-  parent = error.parent
-  for lang in <!\textit{composition}!>:
-    while parent is not None and parent.left:
-      if <!\textit{lbox of lang can be shifted after parent.left}!>:
-        for e in consume_text(parent.left, lang):
-          c = (lang, parent.left, r)
-          if confirm_candidate(c) and \
-              fixes_error(c, error):
-            valid_boxes.append(c)
-      parent = parent.parent
-  return valid_boxes
-\end{lstdefault}
-\end{minipage}
-\begin{minipage}[t]{0.33\textwidth}
-\begin{lstdefault}[numbers=none]
-def find_candidates_line(error):
+
+def heuristic_line(error):
   valid_boxes = []
   term = error
   for lang in <!\textit{composition}!>:
     while True:
       if <!\textit{lbox of lang can be shifted after term}!>:
-        for e in consume_text(start, lang):
-          c = (lang, parent.left, r)
-          if confirm_candidate(c) and \
-              fixes_error(c, error):
-            valid_boxes.append(c)
+        find_end(start, lang, valid_boxes)
       if <!\textit{term is newline or BOS}!>:
         break
       term = term.previous_terminal()
   return valid_boxes
 \end{lstdefault}
 \end{minipage}
+\begin{minipage}[t]{0.49\textwidth}
+\begin{lstdefault}[firstnumber=23]
+def heuristic_history(error):
+  valid_boxes = []
+  parent = error.parent
+  for lang in <!\textit{composition}!>:
+    while parent is not None and parent.left:
+      if <!\textit{lbox of lang can be shifted after parent.left}!>:
+        find_end(parent.left, lang, valid_boxes)
+      parent = parent.parent
+  return valid_boxes
+
+def find_end(node, lang, valid_boxes):
+  for e in consume_text(node, lang):
+    c = (lang, node, e)
+    if confirm_candidate(c) and fixes_error(c, error):
+      valid_boxes.append(c)
+\end{lstdefault}
+\end{minipage}
 \caption{
-\lukas{This needs some more work, e.g.~the body of the heuristics is the same and
-could be moved to its own function. There is also the question if we need to show
-an algorithm at all or if we can abstract this more.}
-Each heuristic starts by iterating over all languages $l$ that are part
+\lukas{This needs some more work: do we need to show
+an algorithm at all or can we abstract this?}
+Algorithms for the three heuristics to find candidates for automatic language
+boxes. Each heuristic starts by iterating over all languages $l$ that are part
 of the current composition. For each language $l$, it scans the text
 before the error to find valid locations where a language box of $l$ can be
 inserted. The approach used to scan the preceding text depends on the heuristic.
@@ -644,11 +637,11 @@ parse tree; the line-based heursitic scans the terminals preceding the error up 
 beginning of the line.
 For each of
 those locations the heuristic then tries to consume the following input, using $l$'s lexer and
-parser, producing a candidate whenever the consumed text is a valid program in
+parser, and produces a candidate whenever the consumed text is a valid program in
 $l$; \texttt{consume\_text} stops when it can't consume any more input, because either the remaining
 input is invalid in $l$, or there is no more text to consume. Afterwards, the heuristic needs to
-confirm that the produced candidates fix the previous error and
-don't introduce any new ones.
+confirm that the produced candidate fixes the previous error and
+doesn't introduce any new ones.
 Candidates are returned in the order they are found: the closer to the error and
 the shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
