@@ -176,6 +176,39 @@ user when it cannot.
 
 \section{Introduction}
 
+\begin{figure*}
+    \vspace{1em}
+    \includegraphics[width=1.00\textwidth]{images/mainexample_java_sql}
+    \begin{picture}(0,0)
+        \put(-255,103){\textcolor{black}{\textbf{(a)}}}
+        \put(-108,103){\textcolor{black}{\textbf{(b)}}}
+        \put(  35,103){\textcolor{black}{\textbf{(c)}}}
+        \put(-255,51){\textcolor{black}{\textbf{(d)}}}
+        \put(  35,51){\textcolor{black}{\textbf{(e)}}}
+    \end{picture}
+    \vspace{-1em}
+    \caption{Automatic language boxes in action with a composition of Java and
+    SQL, where SQL statements can be used wherever Java expressions are valid.
+    As the user types, a language box (with a pink background) is inserted and
+    expanded depending on the context of the surrounding area. \textbf{a)} The
+    user has started typing an SQL statement which causes a Java syntax error
+    on \qtt{min}. However, no language box is inserted since that would
+    introduce a new error immediately after the box at \qtt{\}}.  \textbf{b)}
+    After typing `,', the automatic language box heuristic inserts an SQL
+    language box around \qtt{SELECT min(age)} (a valid SQL statement) which
+    fixes the error at \qtt{min} without introducing a new one immediately
+    after the box, suggesting this is a valid insertion (see Section
+    \ref{sec:parse_after_lbox} for more information). \textbf{c)} The user
+    continues typing of the SQL statement which introduces new Java syntax
+    errors into the program. \textbf{d)} After typing \qtt{;}, the automatic
+    language box heuristic expands the existing language box to encompass the
+    entire SQL statement, makeing the overall program syntactically correct.
+    \textbf{e)} The user finished writing the remaining Java code wihtout any
+    new language boxes being automatically inserted.
+}
+\label{intro_example}
+\end{figure*}
+
 Language composition -- the ability to build larger languages out of multiple
 small languages -- offers an enticing solution to problems such as the
 development of domain-specific languages or the migration of legacy software.
@@ -236,39 +269,6 @@ automatic language boxes is to determine what text to reparse: we present
 several sub-heuristics (including the ability to take the user's previous input
 into consideration) which, when combined, lead to an effective heuristic for
 many cases (see Figure \ref{intro_example} for a simple example).
-
-\begin{figure*}
-    \vspace{1em}
-    \includegraphics[width=1.00\textwidth]{images/mainexample_java_sql}
-    \begin{picture}(0,0)
-        \put(-255,103){\textcolor{black}{\textbf{(a)}}}
-        \put(-108,103){\textcolor{black}{\textbf{(b)}}}
-        \put(  35,103){\textcolor{black}{\textbf{(c)}}}
-        \put(-255,51){\textcolor{black}{\textbf{(d)}}}
-        \put(  35,51){\textcolor{black}{\textbf{(e)}}}
-    \end{picture}
-    \vspace{-1em}
-    \caption{Automatic language boxes in action with a composition of Java and
-    SQL, where SQL statements can be used wherever Java expressions are valid.
-    As the user types, a language box (with a pink background) is inserted and
-    expanded depending on the context of the surrounding area. \textbf{a)} The
-    user has started typing an SQL statement which causes a Java syntax error
-    on \qtt{min}. However, no language box is inserted since that would
-    introduce a new error immediately after the box at \qtt{\}}.  \textbf{b)}
-    After typing `,', the automatic language box heuristic inserts an SQL
-    language box around \qtt{SELECT min(age)} (a valid SQL statement) which
-    fixes the error at \qtt{min} without introducing a new one immediately
-    after the box, suggesting this is a valid insertion (see Section
-    \ref{sec:parse_after_lbox} for more information). \textbf{c)} The user
-    continues typing of the SQL statement which introduces new Java syntax
-    errors into the program. \textbf{d)} After typing \qtt{;}, the automatic
-    language box heuristic expands the existing language box to encompass the
-    entire SQL statement, makeing the overall program syntactically correct.
-    \textbf{e)} The user finished writing the remaining Java code wihtout any
-    new language boxes being automatically inserted.
-}
-\label{intro_example}
-\end{figure*}
 
 \laurie{this needs revisiting}The paper is structured as follows: Section \ref{sec_background} gives an
 overview on incremental lexing and parsing as well as language composition
