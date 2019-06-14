@@ -180,31 +180,37 @@ user when it cannot.
     \vspace{1em}
     \includegraphics[width=1.00\textwidth]{images/mainexample_java_sql}
     \begin{picture}(0,0)
-        \put(-255,103){\textcolor{black}{\textbf{(a)}}}
-        \put(-108,103){\textcolor{black}{\textbf{(b)}}}
-        \put(  35,103){\textcolor{black}{\textbf{(c)}}}
-        \put(-255,51){\textcolor{black}{\textbf{(d)}}}
-        \put(  35,51){\textcolor{black}{\textbf{(e)}}}
+        \put(-249,103){\textcolor{black}{\textbf{(a)}}}
+        \put(-103,103){\textcolor{black}{\textbf{(b)}}}
+        \put(  40,103){\textcolor{black}{\textbf{(c)}}}
+        \put(-249,51){\textcolor{black}{\textbf{(d)}}}
+        \put(  40,51){\textcolor{black}{\textbf{(e)}}}
     \end{picture}
-    \vspace{-1em}
-    \caption{Automatic language boxes in action with a composition of Java and
-    SQL, where SQL statements can be used wherever Java expressions are valid.
-    As the user types, a language box (with a pink background) is inserted and
-    expanded depending on the context of the surrounding area. \textbf{a)} The
-    user has started typing an SQL statement which causes a Java syntax error
-    on \qtt{min}. However, no language box is inserted since that would
-    introduce a new error immediately after the box at \qtt{\}}.  \textbf{b)}
-    After typing `,', the automatic language box heuristic inserts an SQL
-    language box around \qtt{SELECT min(age)} (a valid SQL statement) which
-    fixes the error at \qtt{min} without introducing a new one immediately
-    after the box, suggesting this is a valid insertion (see Section
-    \ref{sec:parse_after_lbox} for more information). \textbf{c)} The user
-    continues typing of the SQL statement which introduces new Java syntax
-    errors into the program. \textbf{d)} After typing \qtt{;}, the automatic
-    language box heuristic expands the existing language box to encompass the
-    entire SQL statement, makeing the overall program syntactically correct.
-    \textbf{e)} The user finished writing the remaining Java code wihtout any
-    new language boxes being automatically inserted.
+    \vspace{-2.2em}
+    \caption{An example of automatic language boxes in action with our
+      extension to the Eco editor. In this case, the user is entering text in a
+      composition of Java and SQL, where SQL statements can be used wherever
+      Java expressions are valid. As the user types, language boxes (with a
+      pink background) are automatically inserted, removed, or resized.
+      \textbf{a)} After typing the skeleton of a Java function, the user begins
+      typing an SQL statement as the right-hand side expression of a Java
+      assignment. The most fundamental part of the automatic language box
+      heuristic is to try inserting language boxes when a syntax error in the
+      outer language occurs (as can be seen at the \texttt{min} function) but
+      not if it then leads to a syntax error immediately after the inserted
+      language box. It is thus too early to insert an automatic language box
+      around the SQL as, while that would make the SQL valid, it would cause a
+      syntax error in the first Java token after the language box (`\texttt{,}').
+      \textbf{b)} After typing `\texttt{,}' the automatic language box heuristic inserts
+      an SQL language box since at least one further token of Java
+      (`\texttt{,}') is syntactically valid. \textbf{c)} The user continues
+      typing a (now incomplete) SQL statement which causes syntax errors in the
+      outer language which cannot yet be resolved by inserting, removing, or
+      resizing any language boxes.  \textbf{d)} After typing `\texttt{;}', the
+      automatic language box heuristic resizes the existing language box to
+      encompass the entire SQL statement, making the program syntactically
+      complete. \textbf{e)} Further syntactically correct Java input does not
+      cause the language box to be altered.
 }
 \label{intro_example}
 \end{figure*}
