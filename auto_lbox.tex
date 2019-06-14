@@ -431,7 +431,7 @@ editing ASTs. At all points, all languages can be manipulated as normal text
 using the incremental parsers.
 
 
-\section{Automatic language boxes}
+\section{Thinking beyond language boxes}
 
 The chief weakness of language boxes is that they must be inserted
 manually by the user --- this involves pressing a special key combination,
@@ -442,17 +442,8 @@ but when language boxes are used frequently, it is a significant usability
 issue, impeding the user's flow. Eco, an editor which supports language boxes~\cite{diekmann14eco},
 slightly eases this problem by using information from the incremental parser to
 show only those languages valid at the point of the cursor,
-though this is a mild palliative at best.
-
-In this section, we present a novel solution to this problem which shows that
-it is possible, in many cases, to automatically insert, remove, and resize
-language boxes --- automatic language boxes. We start by
-setting out some basic criteria for a solution, before describing how
-automatic language boxes work in detail. We later validate the usefulness of
-automatic language boxes in Section~\ref{sec:evaluation}.
-
-
-\subsection{Criteria for a solution}
+though this is a mild palliative at best. Instead, we would prefer language
+boxes to be automatically inserted, removed, and resized whenever possible.
 
 In an ideal world, we would be able to insert language boxes exactly, and only,
 when they are wanted by the user. However, this is impossible in the
@@ -462,8 +453,8 @@ parsing (see Section~\ref{sec:scannerless}). Even if we were to require the
 language composition author to provide a static disambiguation specification,
 we cannot guarantee that it will cover all the ambiguous
 possibilities. Annoying as this may be, it is a hard constraint that we cannot
-change. On top of this, we also assert that a realistic solution to the overall
-problem should satisfy several softer considerations.
+change. On top of this, we also assert that a realistic solution to automatic
+language boxes problem should satisfy several softer considerations.
 
 First, a solution which requires language composition authors (i.e.~the people
 who actually compose grammars, create code generators etc.) to provide additional
@@ -496,6 +487,16 @@ actions are. Furthermore, false negatives (i.e.~when the system inserts, removes
 or resizes language boxes incorrectly) are likely to be particularly harshly
 received by users and must be reduced to the minimum possible, given the hard
 constraint above.
+
+
+\section{Automatic language boxes}
+
+In this section, we present a novel solution to this problem which shows that
+it is possible, in many cases, to automatically insert, remove, and resize
+language boxes --- automatic language boxes. We start by
+setting out some basic criteria for a solution, before describing how
+automatic language boxes work in detail. We later validate the usefulness of
+automatic language boxes in Section~\ref{sec:evaluation}.
 
 
 \subsection{Using errors to detect language boxes}
