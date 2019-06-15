@@ -713,16 +713,34 @@ then automatically be inserted into the program.}
 \label{fig:autobox_nonwhitespace}
 \end{figure}
 
-% Multiple choice example
-\subsection{Handling multiple solutions per language}
 
-When inserting input of one language into another we can sometime find
-not one, but multiple candidates; either because there are multiple embedded
-languages the inserted input can be wrapped in; or because there are multiple
-substrings of the inserted input that can be replaced by a language box.
-An example for the latter is
-shown in the following composition of PHP and Python, which allows Python code
-wherever a PHP expression is valid.
+\subsection{Applying or presenting candidates}
+
+Once the filtering heuristic has run, we will have zero or more possible
+language boxes to insert. If there are zero candidates, then there is no more
+work to be done. If there is one candidate, we directly apply it to the user's
+program. If the user is unhappy with the insertion, they can remove it by
+pressing undo (conventionally \keys{Ctrl+Z}). \laurie{i think we do some sort
+of marking to make sure that we don't insert the same language box again?}.
+
+However, if there are multiple candidates, then we have two choices: we could
+apply one of the candidates and present the others to the users as choices; or
+simply to present all the candidates to the users as choices without applying
+any of them. The former approach is surprisingly hard to do well. If were to
+non-deterministically select one candidate and apply it, the user would be
+unable to predict what was about to happen on each key press. We could instead
+rank candidates (perhaps by `relevance', or length, or starting position etc.),
+but we were unable to find a ranking system which matches the user's intentions
+often enough to be worthwhile. We therefore simply present all the candidates
+as options to the user from which they must choose one. As we shall see in
+Section~\ref{sec:evaulation}, this happens in sufficiently few cases for this
+to be a significant usability problem. It is also worth noting that this is an
+example of a fundamental difference between traditional batch parsing and
+language boxes as part of incremental parsing: it is entirely feasible for us
+to ask the user for their help in choosing language boxes as that choice is
+made only once, not on each (batch) parse.
+
+\laurie{the rest of the stuff in this section needs putting in a figure or similar}
 
 \begin{center}
 \includegraphics[width=0.25\textwidth]{images/autoboxmultioption.png}
@@ -741,17 +759,6 @@ the relevant code:
 \begin{center}
 \includegraphics[width=0.50\textwidth]{images/autoboxmultioption2.png}
 \end{center}
-
-Despite best efforts,
-we will encounter cases where an inserted language boxes is not what the user
-intended. The user thus may undo an inserted language box anytime using the,
-for editors typical, \keys{Ctrl+Z} key combination. By default, automatically inserted
-language boxes are marked as \emph{unlocked}, which means they may
-be automatically removed again or resized to encompass less or more code. The
-box remains unlocked as long as the cursor remains inside it, but as soon as the
-user manually moves the cursor outside of the box it becomes \emph{locked} and stays this
-way. Explicitly inserted language boxes are \emph{locked} by default, however, any
-box may be manually locked or unlocked by using the editor's submenu.
 
 
 \subsection{Limiting automatic insertions}
