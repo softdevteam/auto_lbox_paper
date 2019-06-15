@@ -761,42 +761,7 @@ the relevant code:
 \end{center}
 
 
-\subsection{Limiting automatic insertions}
-\label{subsec:limitingautoinserts}
-
-Some language grammars have parsing and lexing rules that allow almost any text to be valid.
-In HTML, for example, any combination of characters that does not contain
-\qtt{<} or \qtt{>} is a valid program. Unfortunately, this means that when
-embedding HTML into another language most errors can be resolved by simply wrapping input inside a
-HTML language box, often resulting in something the user didn't intend. For
-instance, the following example shows a program written in a composition of
-Python that allows SQL and HTML wherever Python expressions are valid:
-
-\begin{center}
-\includegraphics[width=0.5\textwidth]{images/auto_html.png}
-\end{center}
-
-The suggested solutions to fix the error at \qtt{table} are to either wrap
-\qtt{SELECT * FROM table} into an SQL language box, or to wrap
-\qtt{FROM table} into a HTML language box. Looking at the context, it is obvious
-that the user meant to insert an SQL language box here, however the heuristics don't
-know about that. To remedy this the creator of the language composition can add hints that
-restrict the insertion of a language box in such cases. There are two ways in which
-a language author can add such a restriction to a composition: they can define
-the symbols that an automatically inserted language box must start with;
-or they can exclude specific symbols that must not appear at the beginning of a
-language box. For example, to solve the above problem, the author could define
-that a HTML box can only be automatically inserted if the input starts with a HTML tag,
-e.g.~\qtt{<img}.
-
-Of course, another valid solution is to simply define a more
-fine-grained composition. For example, instead of creating a Python/HTML
-composition that allows any HTML to be valid wherever Python expressions are
-valid, the composition could be restricted to only allow HTML-tags
-(e.g.~\qtt{<img}, \qtt{<html}, etc) by embedding only a subset of the HTML
-language. However, this depends on the make-up of the grammar, and may not
-always be possible if grammar rules are not separated to such a fine-grained
-level.
+\section{Advanced features}
 
 \subsection{Automatically removing boxes}
 \label{subsec_autoremoval}
@@ -902,12 +867,51 @@ maximum amount of code, or should it only grow if it can remove errors in the
 outer language doing so?}
 \lukas{Add example showing shrinking/expansion}
 
+
 \section{Limitations}
 \label{sec_lbox_limitations}
 
 This section highlights the limitations of the heuristic used, by giving some
 examples of ambiguities that cannot be resolved with automatic language boxes,
 resulting either in unwanted or no language boxes being inserted.
+
+
+\subsection{Limiting automatic insertions}
+\label{subsec:limitingautoinserts}
+
+Some language grammars have parsing and lexing rules that allow almost any text to be valid.
+In HTML, for example, any combination of characters that does not contain
+\qtt{<} or \qtt{>} is a valid program. Unfortunately, this means that when
+embedding HTML into another language most errors can be resolved by simply wrapping input inside a
+HTML language box, often resulting in something the user didn't intend. For
+instance, the following example shows a program written in a composition of
+Python that allows SQL and HTML wherever Python expressions are valid:
+
+\begin{center}
+\includegraphics[width=0.5\textwidth]{images/auto_html.png}
+\end{center}
+
+The suggested solutions to fix the error at \qtt{table} are to either wrap
+\qtt{SELECT * FROM table} into an SQL language box, or to wrap
+\qtt{FROM table} into a HTML language box. Looking at the context, it is obvious
+that the user meant to insert an SQL language box here, however the heuristics don't
+know about that. To remedy this the creator of the language composition can add hints that
+restrict the insertion of a language box in such cases. There are two ways in which
+a language author can add such a restriction to a composition: they can define
+the symbols that an automatically inserted language box must start with;
+or they can exclude specific symbols that must not appear at the beginning of a
+language box. For example, to solve the above problem, the author could define
+that a HTML box can only be automatically inserted if the input starts with a HTML tag,
+e.g.~\qtt{<img}.
+
+Of course, another valid solution is to simply define a more
+fine-grained composition. For example, instead of creating a Python/HTML
+composition that allows any HTML to be valid wherever Python expressions are
+valid, the composition could be restricted to only allow HTML-tags
+(e.g.~\qtt{<img}, \qtt{<html}, etc) by embedding only a subset of the HTML
+language. However, this depends on the make-up of the grammar, and may not
+always be possible if grammar rules are not separated to such a fine-grained
+level.
 
 \subsection{No detection}
 
