@@ -552,31 +552,30 @@ language box. so errors aren't isolated and ignored immediately i guess? or
 does each new keypress make an old error back into a new error?}
 
 
-\subsection{Finding candidate language boxes}
+\subsection{The candidates heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
-appropriate language boxes to insert.
+plausible language boxes to insert -- what we call the \emph{candidates heuristic}. The
+main challenge for a candidates heuristic is to determine how much of a program
+should be searched around the point identified by the consideration heuristic:
+searching too much of the program leads to poor performance; searching too
+little leads to plausible language boxes being missed. A candidates heuristic
+can produce multiple candidate language boxes at any given point; those
+candidate language boxes may cover different spans and/or be of different
+language types. In this subsection we define, in no particular order, three
+possible candidates heuristics, each of which, as we shall see in
+Section~\ref{sec:evaluation}, has different strengths and weaknesses. We thus
+combine several of these heuristics into an overall candidates heuristic.
 
-We propose three different heuristics for finding suitable candidates. Each heuristic
-starts by searching backwards from the error to find locations where a
-language box would be valid. At each location, for each language in the composition,
-it then tries to match as much text as possible. If consumed text is valid in one
-of the languages, a candidate is produced. Each language can produce multiple
-candidates by consuming more text, even if a candidate for that language has
-already been found. Afterwards, each candidate language box is virtually
-applied to the user's input (replacing the consumed text). If it introduces
-extra errors or does not fix the initial parsing error, the candidate is
-discarded. If at the end no candidates are found, the error
-remains, as normal; if one candidate is found, we automatically insert the
-appropriate language box; and if multiple candidates are found, we ask the user
-for help.
+\laurie{lukas: can you flesh out rough descriptions of these?}
+The first candidates heuristic is the \emph{stack} approach.
+
+The second candidates heuristic is the \emph{history} approach.
+
+The third candidates heuristic is the \emph{history} approach.
+
 Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
 candidates.
-For performance reasons we cannot simply scan the entire input preceding the error,
-so each heuristic uses a different approach to reduce the amount of locations that
-need to be tested. Neither approach is optimal, since skipping the majority of locations
-leads to missed opportunities. However, in conjunction, the heuristics detect a sufficient
-number of locations to make automatic language boxes viable.
 
 \begin{figure*}[t]
 \begin{minipage}[t]{0.49\textwidth}
@@ -647,36 +646,35 @@ the shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
 \end{figure*}
 
-Despite best efforts,
-we will encounter cases where an inserted language boxes is not what the user
-intended. The user thus may undo an inserted language box anytime using the,
-for editors typical, \keys{Ctrl+Z} key combination. By default, automatically inserted
-language boxes are marked as \emph{unlocked}, which means they may
-be automatically removed again or resized to encompass less or more code. The
-box remains unlocked as long as the cursor remains inside it, but as soon as the
-user manually moves the cursor outside of the box it becomes \emph{locked} and stays this
-way. Explicitly inserted language boxes are \emph{locked} by default, however, any
-box may be manually locked or unlocked by using the editor's submenu.
 
+\subsection{The filtering heuristic}
 
-\subsection{Confirming candidates}
-\label{sec:parse_after_lbox}
+Once the candidates heuristic has run, we will have zero or more possible
+language boxes to insert. If there are zero candidates, then there is no more
+work to be done. If one or more candidates have been found, we then need to see
+which of those candidates make sense in the wider context of the program --
+what we call the \emph{filtering heuristic}. The challenge here is to determine
+if the insertion of a language box causes further syntax errors. Performance is
+not a particular concern for the filtering heuristic, because the incremental
+parser will naturally inform us if inserting a language box causes syntax
+errors elsewhere in the program. Rather, the main concern is that it is easy to
+reject candidates because of syntax errors caused by the fact that a program
+being typed is as yet incomplete (see Figure~\ref{fig:autoboxerrorafterinsert}
+for an example).
 
-In order to confirm if a candidate is a valid choice, we need to
-check that it does not introduce new errors when it is inserted into the parse
-tree, and that it fixes the initial parsing error. To determine the former, we
-can simply check if the first non-whitespace token that follows the inserted
-language box can be shifted. The reasons for this are
-twofold. Firstly, parsing too far past the language box can, apart from
-implicating performance, lead to candidates being falsely
-rejected if the entire input is not syntactically valid (see Figure \ref{fig_autoboxerrorafterinsert} for an example).
-Secondly, whitespace tokens, which most programming languages use, have the
-unfortunate property in an LR parser, that they can almost always be shifted after another token. This
-means that a whitespace token following a language box candidate would always
-confirm the candidate, even if the insertion of the box would cause an error
-immediately after that whitespace. This can lead to invalid
-candidates being accepted (see Figure \ref{fig_autobox_nonwhitespace} for an
-example).
+A first attempt at a filtering heuristic is to accept all candidate language
+boxs which do not lead to a syntax error at the next non-whitespace token
+\laurie{do we care about a syntax error before the language box?}. In other
+words, if a language box is syntactically valid at its current point, we don't
+mind if it causes subsequent errors, since we assume those are the result of an
+incomplete program. The reason that we specify that the first non-whitespace
+token must not contain an error is that grammars for incremental parsing almost
+always define whitespace as a token, and whitespace can nearly always be empty.
+This means that the incremental parse nearly always inserts a (possibly empty)
+whitespace token after every candidate language box, which is by definition
+syntactically valid. We thus need to skip such tokens in order to get to a
+token which tells us something useful about the context surrounding a candidate
+language box (see Figure~\ref{fig:autobox_nonwhitespace} for an example).
 
 \begin{figure}
 \begin{center}
@@ -690,7 +688,7 @@ into the program (left), which produced a language box candidate (right). To val
 the candidate we insert it into the program and parse it. We can succesfully
 parse \qtt{*}, confirming the candidate. However, if we continue parsing beyond that an error occurs
 at \qtt{;} which would lead to the false rejection of the candidate.}
-\label{fig_autoboxerrorafterinsert}
+\label{fig:autoboxerrorafterinsert}
 \end{figure}
 
 \begin{figure}
@@ -712,7 +710,7 @@ immediately after the whitespace (upon parsing \qtt{and}/\qtt{\}}).
 \textbf{b)} If instead we use the first non-whitespace token for candidate
 confirmation, this reduces the three candidates to a single one, which can
 then automatically be inserted into the program.}
-\label{fig_autobox_nonwhitespace}
+\label{fig:autobox_nonwhitespace}
 \end{figure}
 
 % Multiple choice example
@@ -743,6 +741,18 @@ the relevant code:
 \begin{center}
 \includegraphics[width=0.50\textwidth]{images/autoboxmultioption2.png}
 \end{center}
+
+Despite best efforts,
+we will encounter cases where an inserted language boxes is not what the user
+intended. The user thus may undo an inserted language box anytime using the,
+for editors typical, \keys{Ctrl+Z} key combination. By default, automatically inserted
+language boxes are marked as \emph{unlocked}, which means they may
+be automatically removed again or resized to encompass less or more code. The
+box remains unlocked as long as the cursor remains inside it, but as soon as the
+user manually moves the cursor outside of the box it becomes \emph{locked} and stays this
+way. Explicitly inserted language boxes are \emph{locked} by default, however, any
+box may be manually locked or unlocked by using the editor's submenu.
+
 
 \subsection{Limiting automatic insertions}
 \label{subsec:limitingautoinserts}
