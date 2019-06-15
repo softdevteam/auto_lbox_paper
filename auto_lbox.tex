@@ -518,7 +518,7 @@ frequently, it will lead to language boxes too often being inserted when none
 are expected, requiring the user to manually remove the unwanted language
 boxes. Conversely, if it triggers infrequently, it will not be a useful aid to the user.
 
-We used two related observations as the guides to our consideration heuristic.
+We use two related observations as the guides to our consideration heuristic.
 First, by definition, language composition always consists of an outer language
 and one or more inner languages\footnote{Note that these terms are relative:
 when we create a language box and move into it, the previously-inner language
@@ -528,13 +528,28 @@ Second, the clearest indication that recently typed text in the outer language
 might have been intended for an inner language is that it leads to a syntax error
 in the outer language.
 
-Our consideration heuristic therefore triggers at the point of a new syntax
-error. This is an entirely predictable heuristic from a user perspective,
-though it clearly works better for languages whose syntaxes don't overlap a
-great deal. Happily, we can rely on fact that the incremental parser isolates
-syntax errors after they occur~\cite[p.~93]{wagner98practicalalgorithms}, so
-that there is no possibility of old syntax errors being considered a second
-time.
+\begin{figure}
+    \includegraphics[width=.45\textwidth]{images/composition_error1.png}
+    \caption{An example of a syntax error in a Java and SQL composition. In
+      this example, we have turned off automatic language box insertion to
+      emphasise the fact that syntax errors often occur in the middle of the
+      language box we would like to insert.}
+\label{fig_heuristic_example}
+\end{figure}
+
+Our consideration heuristic therefore triggers at the point of a syntax error.
+This is an entirely predictable heuristic from a user perspective, though it
+does have two consequences: the point of a syntax error is not always at the
+beginning or end of the text that a user expects to be put in a language box
+(see Figure~\ref{fig:consideration}; and this heuristic clearly works better
+for languages whose syntaxes don't overlap a great deal. Happily, we can rely
+on fact that the incremental parser isolates syntax errors after they
+occur~\cite[p.~93]{wagner98practicalalgorithms}, so that there is no
+possibility of old syntax errors being considered a second time.\laurie{i
+clearly haven't quite got this explanation right, because otherwise figure 1
+wouldn't work since we go through several syntax errors until we get a new
+language box. so errors aren't isolated and ignored immediately i guess? or
+does each new keypress make an old error back into a new error?}
 
 
 \subsection{Finding candidate language boxes}
@@ -569,27 +584,6 @@ automatic language boxes on every keypress would implicate performance, parse
 errors serve as a a good initial heuristic. Figure \ref{fig_heuristic_example}
 shows two examples where the embedding of a language into another results in
 parse errors which could be used to automatically insert language boxes.
-
-\begin{figure*}
-    \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=1\textwidth]{images/composition_error2.png}
-    \caption{Java and Python}
-  \end{subfigure}
-    \hspace{2em}
-  \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=1\textwidth]{images/composition_error1.png}
-    \caption{Java and SQL}
-  \end{subfigure}
-\caption{Two examples showing the attempted composition of languages without the
-use of a language box. Both compositions result in an error, which can be used
-to search the surrounding area for potential language box locations.
-\textbf{a)} In this example a Python language box can be inserted immediately
-at the location of the error, boxing everything from \qtt{[} to \qtt{]}.
-\textbf{b)} This example requires a backwards search to find a valid location
-for an SQL language box at `\texttt{SELECT}' consuming all text up to and including
-\qtt{students}.}
-\label{fig_heuristic_example}
-\end{figure*}
 
 When a parse error occurs during parsing, it is analysed immediately before
 parsing continues. This has
