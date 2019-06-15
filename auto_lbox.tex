@@ -524,8 +524,9 @@ and one or more inner languages\footnote{Note that these terms are relative:
 when we create a language box and move into it, the previously-inner language
 now becomes the outer language.}. It is thus a reasonable expectation that most
 text typed in the outer language is intended to be in the outer language.
-Second, the clearest indication that recently typed text is not valid in the
-outer language is that it leads to a syntax error\lukas{isn't that the only indicator?}.
+Second, the clearest indication that recently typed text in the outer language
+might have been intended for an inner language is that it leads to a syntax error
+in the outer language.
 
 Our consideration heuristic therefore triggers whenever text typed at the
 current position leads to a syntax error. This is an entirely predictable
