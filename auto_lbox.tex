@@ -528,28 +528,19 @@ Second, the clearest indication that recently typed text in the outer language
 might have been intended for an inner language is that it leads to a syntax error
 in the outer language.
 
-Our consideration heuristic therefore triggers whenever text typed at the
-current position leads to a syntax error. This is an entirely predictable
-heuristic from a user perspective, though it clearly works better for
-languages whose syntaxes don't overlap a great deal.
-
-\laurie{what happens if we type some
-text at line 1 and it triggers a syntax error at line 100? do we look for a
-language box at line 100 or ...? in other words, what i'm wondering is whether
-we have some notion of the `new' syntax error being `local' in some sense?
-is there a limit as to how far back/forwards we look?}.
-\lukas{Currently the heuristic always searches at the location of the error. It
-doesn't matter where we were previously typing. However, since errors are
-isolated after they are found, they are not re-inspected on every parse, but
-only if the surrounding area (i.e. the isolated subtree) is edited. This means "old"
-errors won't always be checked by the heuristics on every parse.}
+Our consideration heuristic therefore triggers at the point of a new syntax
+error. This is an entirely predictable heuristic from a user perspective,
+though it clearly works better for languages whose syntaxes don't overlap a
+great deal. Happily, we can rely on fact that the incremental parser isolates
+syntax errors after they occur~\cite[p.~93]{wagner98practicalalgorithms}, so
+that there is no possibility of old syntax errors being considered a second
+time.
 
 
 \subsection{Finding candidate language boxes}
 
 Once the consideration heuristic has triggered, we then have to search for
 appropriate language boxes to insert.
-
 
 
 \subsection{Using errors to detect language boxes}
