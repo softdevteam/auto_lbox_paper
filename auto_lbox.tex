@@ -535,19 +535,24 @@ does have two consequences: the point of a syntax error is not always at the
 beginning or end of the text that a user expects to be put in a language box
 (see Figure~\ref{fig:consideration}); and this heuristic clearly works better
 for languages whose syntaxes don't overlap a great deal. Happily, we can rely
-on fact that the incremental parser isolates syntax errors after they
+on the fact that the incremental parser isolates syntax errors after they
 occur~\cite[p.~93]{wagner98practicalalgorithms}, so that there is no
-possibility of old syntax errors being considered a second time.\laurie{i
+possibility of old syntax errors being considered a second time, unless
+the error itself or the area surrounding it are edited. \laurie{i
 clearly haven't quite got this explanation right, because otherwise figure 1
 wouldn't work since we go through several syntax errors until we get a new
 language box. so errors aren't isolated and ignored immediately i guess? or
-does each new keypress make an old error back into a new error?}
+does each new keypress make an old error back into a new error?} \lukas{in the
+example in figure 1 the text following `name' is inserted into the isolated
+subtree. Whenever an isolated subtree is changed, it needs to be reinspected
+during a parse, which means the error is also reparsed, but since it still
+causes a parsing error, the heuristic is also triggered again.}
 
 
 \subsection{The candidates heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
-plausible language boxes to insert -- what we call the \emph{candidates heuristic}. The
+plausible language boxes to insert -- we call this the \emph{candidates heuristic}. The
 main challenge for a candidates heuristic is to determine how much of a program
 should be searched around the point identified by the consideration heuristic:
 searching too much of the program leads to poor performance; searching too
@@ -564,12 +569,40 @@ possible candidates heuristics, each of which, as we shall see in
 Section~\ref{sec:evaluation}, has different strengths and weaknesses. We thus
 combine several of these heuristics into an overall candidates heuristic.
 
-\laurie{lukas: can you flesh out rough descriptions of these?}
-The first candidates heuristic is the \emph{stack} approach.
+The first candidates heuristic is the \emph{stack} approach. This heuristic
+uses the parsing stack at the time of a parsing error to search the input
+backwards and find a location at which a language box can be inserted. The
+advantage of this heuristic is that the availability of the parsing stack makes
+it easy to test found candidates during the filtering heuristics.  After
+inserting a candidate language box and pushing it onto the stack, we can just
+continue parsing as normal, while the other heuristics will need to recreate
+the stack at the point of insertion. To find a valid location, this heuristic
+simply starts popping elements of the parsing stack. Each time it then tries to
+parse a candidate language box in the current parsing state. The heuristic
+stops when it reaches the beginning of the stack. Since the stack is typically
+small (as many elements frequently get reduced into a single one), this
+heuristic skips the majority of locations, many of which are possibly valid,
+for the sake of performance.
 
-The second candidates heuristic is the \emph{history} approach.
+The second candidates heuristic is the \emph{history} approach. This approach
+uses the previous version of the parse tree (before reparsing was started) and
+traverses the error node's ancestors to find valid locations. It starts at the
+error node's immediate parent, sets the parser to the state just before the
+parent is to be parsed, and attempts to insert a box there. Since we store
+previous parsing states onto the nodes in the parse tree, we can just use the
+state of the parent's left neighbour to test if a language box can be inserted
+here. However, in order to confirm the candidate during the filtering
+heuristic, it is still required to recreate the parsing stack to the state just
+before the parent was parsed. Luckily, the incremental parser allows us to recreate
+the stack quickly, without having to reparse the entire program.
 
-The third candidates heuristic is the \emph{history} approach.
+The third candidates heuristic is the \emph{newline} approach, which finds
+valid locations by traversing the tokens preceding the error up to the
+beginning of the line. This heuristic ensures that locations that are very
+close to the error, which are more likely to be skipped by the other two
+heuristics, are tried, but sacrifices overall reach. Like the history approach,
+this heuristic also need to recreate the parse stack to confirm candidates
+during the filtering.
 
 Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
 candidates.
@@ -700,11 +733,14 @@ then automatically be inserted into the program.}
 
 Our filtering heuristic is thus simple: we accept all candidate language
 boxs which do not lead to a syntax error at the next non-whitespace token
-\laurie{do we care about a syntax error before the language box?}. In other
+\laurie{do we care about a syntax error before the language box?}\lukas{no, otherwise
+a syntax error at the beginning of the file would keep us from
+inserting any language boxes in the rest of the program}. In other
 words, if a language box is syntactically valid at its immediate surrounding
 context in the parse tree, we don't mind if it causes errors beyond that
 context, since we assume those are the result of an
-incomplete program. The reason that we specify that the first non-whitespace
+incomplete program. \lukas{I agree with everything in the following paragraph, except
+that I am not sure what you mean by an empty whitespace token.}The reason that we specify that the first non-whitespace
 token must not contain an error is that grammars for incremental parsing almost
 always define whitespace as a token, and whitespace can nearly always be empty.
 This means that the incremental parser nearly always inserts a (possibly empty)
@@ -721,7 +757,10 @@ language boxes to insert. If there are zero candidates, then the algorithm
 completes. If there is one candidate, we simply insert it to the user's
 program. If the user is unhappy with the insertion, they can remove it by
 pressing undo (conventionally \keys{Ctrl+Z}). \laurie{i think we do some sort
-of marking to make sure that we don't insert the same language box again?}.
+of marking to make sure that we don't insert the same language box again?}\lukas{indeed! when the user
+undos a language box, the error node is marked an no language box is automatically inserted again.
+though there is an improvement on my todo list, that allows other language boxes to be added, because
+atm we block all of them, which is a bit too strict.}.
 
 However, if there are multiple candidates, then we have two choices: we could
 insert one of the candidates and present the others to the users as choices; or
@@ -732,7 +771,7 @@ unable to predict what was about to happen on each key press. We could instead
 rank candidates (perhaps by `relevance', or length, or starting position etc.),
 but we were unable to find a ranking system which matches the user's intentions
 often enough to be worthwhile. We therefore simply present all the candidates
-as options to the user from which they must choose one. As we shall see in
+as options to the user from which they must choose one (see Figure \ref{languagebox_choices}). As we shall see in
 Section~\ref{sec:evaulation}, this happens rarely enough that it is not a
 significant problem. It is also worth noting that this is an
 example of a fundamental difference between traditional batch parsing and
@@ -741,24 +780,34 @@ to ask the user for their help in choosing language boxes as that choice can
 be made once and recorded permanently, rather than having to be made anew
 on each (batch) parse.
 
-\laurie{the rest of the stuff in this section needs putting in a figure or similar}
-
+\begin{figure*}
 \begin{center}
-\includegraphics[width=0.25\textwidth]{images/autoboxmultioption.png}
+\includegraphics[width=1\textwidth]{images/autobox_multioption_java.png}
 \end{center}
-
-In the example there are two options to fix the error at \qtt{y} in line 2:
-we include everything from \qtt{def} up to,
-and including \qtt{return 12}; or we stop after \qtt{x = 11}. Since both
-options are valid and fix the error, we can't automatically pick one.
-Instead, we display an indicator that there are multiple solutions available
-(in the examples this is shown via a light bulb icon next to the line numbers). From
-there the user can choose one of the solutions from a drop-down list. Clicking
-on one of the options then automatically inserts a language box and replaces
-the relevant code:
+\begin{picture}(0,0)
+    \put(-253,85){\textcolor{black}{\textbf{(a)}}}
+    \put(-90,85){\textcolor{black}{\textbf{(b)}}}
+    \put(80,85){\textcolor{black}{\textbf{(c)}}}
+\end{picture}
+\vspace{-1.5em}
+\caption{
+Example showing multiple language box options for the same error.
+\textbf{a)} After inserting inserting a Python method into Java, the heuristic
+found two options to resolve the error at \qtt{x} in line 2:
+include everything from \qtt{def} up to,
+and including, \qtt{return a}; or stop after \qtt{a = 11}.
+The editor indicates that there are multiple solutions for an error by showing
+a lightbulb on the left hand side.
+\textbf{b)} Clicking on the lightbulb reveals a drop-down list of the
+candidates the heuristic has found.
+\textbf{c)} Clicking on one of the options inserts the language box. This is
+treated as a manual insertion, marking the language box as committed, which
+means it will not be automatically removed or resized, unless the user
+manually marks it as uncommitted.}
+\label{languagebox_choices}
+\end{figure*}
 
 \begin{center}
-\includegraphics[width=0.50\textwidth]{images/autoboxmultioption2.png}
 \end{center}
 
 
