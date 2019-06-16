@@ -529,7 +529,7 @@ in the outer language.
 \label{fig:consideration}
 \end{figure}
 
-Our consideration heuristic therefore triggers at the point of a syntax error.
+Our consideration heuristic therefore triggers at the point of each new syntax error.
 This is an entirely predictable heuristic from a user perspective, though it
 does have two consequences: the point of a syntax error is not always at the
 beginning or end of the text that a user expects to be put in a language box
@@ -537,16 +537,7 @@ beginning or end of the text that a user expects to be put in a language box
 for languages whose syntaxes don't overlap a great deal. Happily, we can rely
 on the fact that the incremental parser isolates syntax errors after they
 occur~\cite[p.~93]{wagner98practicalalgorithms}, so that there is no
-possibility of old syntax errors being considered a second time, unless
-the error itself or the area surrounding it are edited. \laurie{i
-clearly haven't quite got this explanation right, because otherwise figure 1
-wouldn't work since we go through several syntax errors until we get a new
-language box. so errors aren't isolated and ignored immediately i guess? or
-does each new keypress make an old error back into a new error?} \lukas{in the
-example in figure 1 the text following `name' is inserted into the isolated
-subtree. Whenever an isolated subtree is changed, it needs to be reinspected
-during a parse, which means the error is also reparsed, but since it still
-causes a parsing error, the heuristic is also triggered again.}
+possibility of old syntax errors being considered a second time.
 
 
 \subsection{The candidates heuristic}
@@ -735,17 +726,19 @@ Our filtering heuristic is thus simple: we accept all candidate language
 boxs which do not lead to a syntax error at the next non-whitespace token
 \laurie{do we care about a syntax error before the language box?}\lukas{no, otherwise
 a syntax error at the beginning of the file would keep us from
-inserting any language boxes in the rest of the program}. In other
+inserting any language boxes in the rest of the program}\laurie{well, yes, but
+we could check the first non-whitespace token before a language box for errors?
+i don't know if this is a good idea or not, but it's an obvious question that
+someone will ask!}. In other
 words, if a language box is syntactically valid at its immediate surrounding
 context in the parse tree, we don't mind if it causes errors beyond that
 context, since we assume those are the result of an
-incomplete program. \lukas{I agree with everything in the following paragraph, except
-that I am not sure what you mean by an empty whitespace token.}The reason that we specify that the first non-whitespace
+incomplete program. The reason that we specify that the first non-whitespace
 token must not contain an error is that grammars for incremental parsing almost
-always define whitespace as a token, and whitespace can nearly always be empty.
-This means that the incremental parser nearly always inserts a (possibly empty)
-whitespace token after every candidate language box, which is by definition
-syntactically valid. We thus need to skip such tokens in order to get to a
+always define whitespace as a token. This means that the incremental parser
+often inserts a whitespace token after a candidate language box, and that
+whitespace token is by definition syntactically valid, though not particularly
+insightful. We thus need to skip such tokens in order to get to a
 token which tells us something useful about the context surrounding a candidate
 language box (see Figure~\ref{fig:autobox_nonwhitespace} for an example).
 
@@ -756,11 +749,13 @@ Once the filtering heuristic has run, we will have zero or more possible
 language boxes to insert. If there are zero candidates, then the algorithm
 completes. If there is one candidate, we simply insert it to the user's
 program. If the user is unhappy with the insertion, they can remove it by
-pressing undo (conventionally \keys{Ctrl+Z}). \laurie{i think we do some sort
-of marking to make sure that we don't insert the same language box again?}\lukas{indeed! when the user
-undos a language box, the error node is marked an no language box is automatically inserted again.
-though there is an improvement on my todo list, that allows other language boxes to be added, because
-atm we block all of them, which is a bit too strict.}.
+pressing undo (conventionally \keys{Ctrl+Z}). Implemented naively, this isn't
+enough, as on each subsequent key press the algorithm may try to insert the
+same unwanted language box. Therefore removing a language box in this way marks
+a flag \texttt{noinsert} on the node with a syntax error identified by the
+consideration heuristic. When set to \texttt{true}, the candidates heuristic
+will notice and deliberately ignore such nodes so that language boxes are not
+repeatedly inserted.
 
 However, if there are multiple candidates, then we have two choices: we could
 insert one of the candidates and present the others to the users as choices; or
