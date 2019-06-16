@@ -709,9 +709,13 @@ at \qtt{;} which would lead to the false rejection of the candidate.}
     \vspace{-3.1cm}\caption{}%
   \end{subfigure}
 \includegraphics[scale=0.4]{images/whitespace2.png}
-\caption{An example showing how using only non-whitespace tokens to confirm language
-box candidates gives better results. The example uses a composition of Java
-and Python, which allows Python expressions in place of Java expressions. The
+\caption{An example showing how using the first token, or first non-whitespace
+  token, after a candidate language box changes our idea of what a sensible
+  insertion might be. Both examples use the same language composition (Java and
+  Python, where Python expressions are valid wherever Java expressions are) and
+  the same input text. \laurie{is it necessary for them to have pasted it in?
+  could they have typed it? i must admit, the more i look at the example, the
+less i understand how we end up with 3 candidates...}The
 user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
 between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
 candidates, we find three. Each candidate was confirmed by a following whitespace token,
