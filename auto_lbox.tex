@@ -430,7 +430,7 @@ editing ASTs. At all points, all languages can be manipulated as normal text
 using the incremental parsers.
 
 
-\section{Thinking beyond language boxes}
+\section{Beyond manual language boxes}
 
 \label{the problem}
 The chief weakness of language boxes is that they must be inserted
@@ -442,8 +442,8 @@ but when language boxes are used frequently, it is a significant usability
 issue, impeding the user's flow. Eco, an editor which supports language boxes~\cite{diekmann14eco},
 slightly eases this problem by using information from the incremental parser to
 show only those languages valid at the point of the cursor,
-though this is a mild palliative at best. Instead, we would prefer language
-boxes to be automatically inserted, removed, and resized whenever possible.
+though this is a mild palliative at best. A superior solution would be
+to automatically insert, remove, and resize language boxes whenever possible.
 
 In an ideal world, we would be able to insert language boxes exactly, and only,
 when they are wanted by the user. However, this is impossible in the
@@ -459,21 +459,13 @@ language boxes should satisfy several softer considerations.
 First, a solution which requires language composition authors (i.e.~the people
 who actually compose grammars, create code generators etc.) to provide additional
 hints or commands to aid automatic language box insertion is less likely
-to be used widely and/or correctly. Language composition authors are
-often experts in parts of the underlying meta-system, but it is not realistic
-to expect them to be expert in every single part. For example, it can be difficult to know whether
+to be used widely and/or correctly. The meta-system underlying a language
+composition system is often complex, and expecting language composition authors
+to be expert in every part of it (as well as the domain they are composing
+languages for!) is unrealistic. For example, it can be difficult to know whether
 a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting} and whether
 one has disambiguated it in the expected way: grammar
-composition often magnifies such concerns. Ideally, any automatic
-language box solution would require no extra work on the language composition
-author's behalf.\lukas{I agree with the paragraph, though in Section
-\ref{subsec:limitingautoinserts} we talk about how we can impose certain
-limitations on when a language box can be inserted.  We do this to solve
-problems with compositions like HTML which has a catch-all token and thus can
-almost always be used to wrap errors.}\laurie{i agree: the point here isn't
-just to set up the ideal situation as ``this is what we do'', but to point
-out later that we can't always quite match the ideals, but we can get
-quite close.}
+composition often magnifies such concerns.
 
 Second, a solution which seriously degrades performance would be unacceptable.
 For example, one simple way of finding which language boxes to insert would
