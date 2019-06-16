@@ -701,13 +701,14 @@ at \qtt{;} which would lead to the false rejection of the candidate.}
 \end{figure}
 
 \begin{figure}[tb]
-\includegraphics[width=0.5\textwidth]{images/autobox_nonwhitespace.png}
-\vspace{0.3em}
-\begin{picture}(0,0)
-  \small
-  \put(-110,0){\textbf{(a)} Using first token}
-  \put(-20,0){\textbf{(b)} Using first non-whitespace token}
-\end{picture}
+  \begin{subfigure}{20pt}
+    \vspace{-4.65cm}\caption{}%
+  \end{subfigure}
+  \includegraphics[scale=0.4]{images/whitespace1.png}\\
+  \begin{subfigure}{20pt}
+    \vspace{-3.1cm}\caption{}%
+  \end{subfigure}
+\includegraphics[scale=0.4]{images/whitespace2.png}
 \caption{An example showing how using only non-whitespace tokens to confirm language
 box candidates gives better results. The example uses a composition of Java
 and Python, which allows Python expressions in place of Java expressions. The
