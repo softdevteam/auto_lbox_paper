@@ -599,7 +599,12 @@ def cnds_recogniser(node, lang):
   (lines 7--8). If we successfully parse a substring, we add a candidate to the
   list (lines 10--11). If a substring causes a parse error on anything but the
   EOS (End Of String) token, we assume that further input cannot fix the parse
-  and terminate the search (lines 12--13).}
+    and terminate the search (lines 12--13).\lukas{this algorithm currently suggests that we reparse
+    every substring from the beginning, which isn't necessary, since we can just continue from the previous
+    parsing state after receiving the next token from the lexer. the \texttt{add\_before\_eos} also seems
+    to suggest that we have some kind of tree that the recogniser parses. however, the recogniser is just a bog-standard
+    batch-parser that just takes the next token and processes it using the parsing table. to do the eos check, we just virtually parse
+    an eos token to see if the parser reaches an accept state. if it doesn't we continue from the state of the previously parsed token.}}
 \label{fig:recogniser}
 \end{figure}
 
