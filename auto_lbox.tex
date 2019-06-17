@@ -559,7 +559,7 @@ A candidates heuristic first attempts to find valid locations in the program
 where a language box can be inserted. For each of these locations it determines
 which languages that are part of the composition are valid at this point. If it
 found one or more valid languages, it then consumes text starting at that
-location using that language's lexer and parser. It stops consuming text when
+location using that language's lexer and parser \laurie{this is a recogniser, right? so can we talk a bit about how it works? because it's not actually doing stuff with the parse tree or ... ?}. It stops consuming text when
 the language's parser reaches an error state, which means that no more input
 can be consumed.
 
@@ -734,7 +734,7 @@ the candidate SQL language box, that candidate is not filtered out.}
   is a candidate for the same reason. `1 or 2 and 3;` is a candidate, because it following is a newline
     which can also be shifted after the language box, confirming it.}\laurie{ok, this example is going to confuse readers because the pasting thing feels weird. can we find a simpler example that triggers just with normal typing?}
     \lukas{I already thought about this. I don't think we can. Because if there are multiple possible
-    insertions, the first one will always be immediately inserted after it has been typed, so we will never get multiple options this way.}
+    insertions, the first one will always be immediately inserted after it has been typed, so we will never get multiple options this way.}\laurie{if that's the case, i think we should just delete this figure. it's going to confuse more than it enlightens.}
 The
 user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
 between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
