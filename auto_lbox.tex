@@ -160,14 +160,14 @@ Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or by selecting the desired parse tree from the parse forest.  In
 this paper we show that \emph{language boxes} -- a delimiter-based
-mechanism atop incremental parsing -- can be extended in a way that creates
+algorithm atop incremental parsing -- can be extended in a way that creates
 a new point in the design space between these two extremes. In essence, we
 retain the use of delimiters, but
-introduce a heuristic which can automatically insert, remove, or resize
+introduce an algorithm which can automatically insert, remove, or resize
 language boxes -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
 cannot always match a user's intention: rather, we present a simple
-heuristic that does the right thing in most cases, while rarely surprising the
+algorithm that does the right thing in most cases, while rarely surprising the
 user when it cannot.
 \end{abstract}
 
@@ -196,18 +196,18 @@ user when it cannot.
       \textbf{a)} After typing the skeleton of a Java function, the user begins
       typing an SQL statement as the right-hand side expression of a Java
       assignment. The most fundamental part of the automatic language box
-      heuristic is to try inserting language boxes when a syntax error in the
+      algorithm is to try inserting language boxes when a syntax error in the
       outer language occurs (as can be seen at the \texttt{min} function) but
       not if it then leads to a syntax error immediately after the inserted
       language box. It is thus too early to insert an automatic language box
       around the SQL as it would cause a syntax error in the first Java token
-      afterwards (`\texttt{,}').  \textbf{b)} After typing `\texttt{,}' an SQL
+      afterwards (`\texttt{,}'). \textbf{b)} After typing `\texttt{,}' an SQL
       language box is automatically inserted since at least one further token
       of Java (`\texttt{,}') is now syntactically valid. \textbf{c)} The user continues
       typing a (now incomplete) SQL statement. This causes syntax errors in the
       outer language which cannot yet be resolved by inserting, removing, or
       resizing any language boxes.  \textbf{d)} After typing `\texttt{;}', the
-      automatic language box heuristic resizes the existing language box to
+      automatic language box algorithm resizes the existing language box to
       encompass the entire SQL statement, making the program syntactically
       complete. \textbf{e)} Further syntactically correct Java input does not
       cause the language box to be altered.
@@ -234,9 +234,12 @@ ambiguous parses have been covered by disambiguation operators.
 
 An alternative to traditional delimiter-based approaches are \emph{language boxes} which aim to
 combine the advantages of explicit bracketing and syntax-based
-editing without the disadvantages~\cite{diekmann14eco}. Building atop the
-incremental parsing algorithm
-of \citet{wagner98practicalalgorithms}, language boxes are nodes in the parse
+editing without the disadvantages~\cite{diekmann14eco}. In essence, an editor
+which supports language boxes needs to support an incremental parsing algorithm
+(we assume that of \citet{wagner98practicalalgorithms}), which provides an
+online editing experience: user's are not editing text directly, but instead
+indirectly edit a parse tree, which is continuously updated as they type.
+Language boxes are then simply nodes in such a parse
 tree that represent a different language: the language box is surrounded by
 explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
 there are no visually intrusive delimiters; unlike traditional
@@ -259,18 +262,17 @@ not be unduly impacted; and users should be able to broadly predict if, and
 why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
-essence, we present a heuristic which can automatically insert, remove, or resize language
+essence, we present an algorithm which can automatically insert, remove, or resize language
 boxes in many useful cases. Automatically inserting language boxes generally
-works well, but we quickly found that a heuristic which
-removes or resizes existing language boxes in the users program is too often
+works well, but we quickly found that removing or resizing existing language boxes
 irritating and surprising. To avoid this problem, automatically inserted
 language boxes start as \emph{uncommitted} (meaning they can still be
-removed or resized) and \emph{committed} (which means that the heuristic will
+removed or resized) and \emph{committed} (which means that the algorithm will
 not remove or resize them). Language boxes
 move from uncommitted to committed when the user, directly or indirectly, shows
 that they are finished editing at the current point (e.g.~when they move the
 cursor outside of the language box); users can manually change a committed box to uncommitted if they later
-want it to be subject to the heuristic again. As this may suggest, automatic
+want it to be subject to the algorithm again. As this may suggest, automatic
 language boxes retain the traditional benefits of language boxes, which can still
 be manually inserted, removed, or resized as needed. One of the main challenges with
 automatic language boxes is to determine what text to reparse: we present
@@ -494,9 +496,8 @@ constraint above.
 
 \section{Automatic language boxes}
 
-In this section, we present our solution to the problem outlined in
-Section~\ref{the problem} --- automatic language boxes. To ease the
-description of this algorithm, we start by considering the problem of language box
+In this section, we present the automatic language boxes algorithm. To ease its
+description, we start by considering the problem of language box
 insertion, before then adding additional functionality (e.g.~removal and
 resizing). We later validate the usefulness of automatic language boxes in
 Section~\ref{sec:evaluation}.
