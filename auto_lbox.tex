@@ -394,6 +394,24 @@ temporarily, to the nearest parent, until a correct parse can be created.
 
 \subsection{Language boxes}
 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=0.35\textwidth]{images/lbox_parsetree}
+\caption{An elided example of a parse tree in an incremental parser with
+  language boxes: nonterminals have a type and zero or more children; terminals
+  have a type (top) and a value (bottom). The composition in question is,
+  again, (outer) Java and (inner) SQL. Here, the outer Java code is an
+  assignment (`\texttt{type name = ...;}'). The right-hand side of the
+  assignment is an SQL language box (the node with type \texttt{<sql>}): from the
+  perspective of the outer Java code, the SQL node is a terminal (and hence its
+  value is irrelevant). In reality, the SQL node has a complete SQL parse tree
+  underneath it: the special Root, BOS (Beginning Of String), and EOS (End Of
+  String) nodes that every incremental parse tree contains, as well as the actual
+  SQL contents (elided to `...' in this example). }
+\label{fig:lboxtree}
+\end{center}
+\end{figure}
+
 Language boxes allow users users to embed one language inside another in the
 context of an incremental parser. From the perspective of an outer language, a
 language box is simply a terminal i.e.~a node with a type but no content. Since
@@ -412,24 +430,6 @@ correct point, then Java considers the tree to be syntactically correct. The
 SQL language box will have its own SQL parse tree inside which may or may not
 be syntactically correct. An elided example of such a tree-of-trees can be seen
 in Figure~\ref{fig:lboxtree}.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=0.35\textwidth]{images/lbox_parsetree}
-\caption{An elided example of a parse tree in an incremental parser with
-  language boxes: nonterminals have a type and zero or more children; terminals
-  have a type (top) and a value (bottom). The composition in question is,
-  again, (outer) Java and (inner) SQL. Here, the outer Java code is an
-  assignment (`\texttt{type name = ...;}'). The right-hand side of the
-  assignment is an SQL language box (the node with type \texttt{<sql>}): from the
-  perspective of the outer Java code, the SQL node is a terminal (and hence its
-  value is irrelevant). In reality, the SQL node has a complete SQL parse tree
-  underneath it: the special Root, BOS (Beginning Of String), and EOS (End Of
-  String) nodes that every incremental parse tree contains, as well as the actual
-  SQL contents (elided to `...' in this example). }
-\label{fig:lboxtree}
-\end{center}
-\end{figure}
 
 Philosophically, language boxes thus form delimiters of sorts, albeit invisible
 ones, between languages: from a syntactic perspective, outer languages are
