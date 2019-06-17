@@ -685,20 +685,26 @@ reject candidates because of syntax errors caused by the fact that a program
 being typed is as yet incomplete (see Figure~\ref{fig:autoboxerrorafterinsert}
 for an example).
 
-\begin{figure}[tb]
+\begin{figure*}[tb]
 \begin{center}
-\includegraphics[width=0.50\textwidth]{images/autoboxerrorafterinsert.png}
+\includegraphics[width=0.90\textwidth]{images/autoboxerrorafterinsert_javasql.png}
 \end{center}
+\begin{picture}(0,0)
+    \put(-242,40){\textcolor{black}{\textbf{(a)}}}
+    \put(-5,40){\textcolor{black}{\textbf{(b)}}}
+\end{picture}
+\vspace{-1.2em}
 \caption{An example showing why parsing further than necessary to confirm
 a language box candidate, can lead to the candidate being falsely rejected.
 The example shows a composition of Java and Python, that allows Python
-expressions wherever Java expressions are valid. The user inserted a Python list
-into the program (left), which produced a language box candidate (right). To validate
-the candidate we insert it into the program and parse it. We can succesfully
-parse \qtt{*}, confirming the candidate. However, if we continue parsing beyond that an error occurs
-at \qtt{;} which would lead to the false rejection of the candidate.}
+expressions wherever Java expressions are valid. \textbf{a)} The user inserted an SQL statement
+into the program, but hasn't finished typing yet. However, since the \qtt{+} is invalid
+in the SQL statement, we can already insert an SQL language box at that point. \textbf{b)} When
+inserting the SQL language box, an error appears at \qtt{\}}, since the user hasn't finished
+typing the Java expression. Parsing further than \qtt{+} to confirm the candidate would
+thus lead to its false rejection.}
 \label{fig:autoboxerrorafterinsert}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[tb]
   \begin{subfigure}{20pt}
