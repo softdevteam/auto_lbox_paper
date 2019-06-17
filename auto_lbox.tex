@@ -580,7 +580,7 @@ def cnds_recogniser(node, lang):
     token = lexer.next_token()
     if token is None:
       return cnds
-    parser.add_token(token)
+    parser.parse_token(token)
     if parser.accepted():
       cnds.append(token.end_pos)
     elif parser.error_node.type_ != "EOS":
@@ -594,7 +594,7 @@ def cnds_recogniser(node, lang):
   state, so the run-time is linear. If we reach the end of the parse tree we are complete
   (lines 7--8). If we successfully parse a substring, we add a candidate to the
   list (lines 10--11). If a substring causes a parse error on anything but the
-  implicit EOS (End Of String) token, we assume that further input cannot fix the parse
+  implicit EOS (End Of String) token, we know that further input cannot fix the parse
     and terminate the search (lines 12--13).}
 \label{fig:recogniser}
 \end{figure}
@@ -658,7 +658,31 @@ of the parse tree before reparsing began. we don't need to rewind anything, we
 just read it. It then just goes upwards from the error node and basically tries
 to replace entire subtrees, containing the error node, with a language box (technically
 that's not entirely true, since the candidate can exceed the subtree, tho the starting point
-is the beginning of the subtree)}\laurie{ok, you need to expand this, particulary the "technically" point, as i think this is probably interesting stuff that the reader needs to know about!}. This approach
+is the beginning of the subtree)}\laurie{ok, you need to expand this,
+particulary the "technically" point, as i think this is probably interesting
+stuff that the reader needs to know about!}.\lukas{I'll try. The goal of any
+heuristic is to traverse the parse tree and trying to insert boxes at locations
+where this naturally makes sense. In other words, we don't need to try to
+insert a box say inbetween the type and name of a variable, e.g.~\texttt{int
+x}, or before the parathethis of a for loop, e.g.~\texttt{for (}, because these
+are unlikely places for a language box to be valid or be typed by the user.
+Instead we want to find locations that happen inbetween syntactic groups,
+e.g.~before the expression of an assignment, or inbetween two function
+declarations.  Since these groups are typically reduced into a single subtree,
+it makes sense to try locations inbetween those subtrees. The stack heuristic
+does exactly that by only trying locations on the stack, which means reductions
+have already put syntactic groups into subtrees. However, the stack heuristic
+is a bit too coarse and often skips subtrees that have already been combined
+into a bigger subtree, and sometimes we get unlucky with how the newly inserted
+input is parsed making it impossible to find its beginning since it is hidden
+within another subtree on the stack. The line heuristic on the other hand is
+too fine as it only looks at immediate tokens before the error.  The history
+approach is somewhat a middle ground. By following the error node's (previous)
+ancestors up to the root we still find sensible locations inbetween subtrees
+while ignoring the current parse of the new input which make certain locations
+inaccessible. And we still traverse quickly through the parse tree (just going
+up should be something logarithmically) which helps with the performance.}
+This approach
 uses the previous version of the parse tree (before reparsing was started) and
 traverses the error node's ancestors to find valid locations. It starts at the
 error node's immediate parent, sets the parser to the state just before the
