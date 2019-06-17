@@ -555,10 +555,13 @@ boxes which consume existing content: the subsequent phase in the algorithm
 then determines if actually inserting such language boxes makes sense in the
 wider context of the program (see Section~\ref{sec:filtering}).
 
-\laurie{i think we need to talk a bit about recognisers here. for example, when
-we find a place we'd like to think about inserting language boxes, do we try
-all possible languages in the composition? just the ones valid at that point?
-how far forward do we search?}
+A candidates heuristic first attempts to find valid locations in the program
+where a language box can be inserted. For each of these locations it determines
+which languages that are part of the composition are valid at this point. If it
+found one or more valid languages, it then consumes text starting at that
+location using that language's lexer and parser. It stops consuming text when
+the language's parser reaches an error state, which means that no more input
+can be consumed.
 
 In this subsection we define, in no particular order, three
 distinct candidates heuristics, each of which, as we shall see in
@@ -566,7 +569,7 @@ Section~\ref{sec:evaluation}, has different strengths and weaknesses. We then
 combine several of these heuristics into an overall candidates heuristic.
 
 The first candidates heuristic is the \emph{stack} approach, which uses each
-point in parsing stack at the point of an error as a proxy for sensible
+point in the parsing stack at the point of an error as a proxy for sensible
 starting positions of candidate language boxes. In essence, this heuristic
 walks backwards over the parsing stack, at each point seeing if a language box
 can be successfully inserted at that point. This heuristic has two significant
@@ -727,7 +730,10 @@ thus lead to its false rejection.}
   get 3 candidates if we use whitespace tokens to confirm candidates. `1 or 2' is a candidate,
   because we can insert it and shift the whitespace following it, which confirms it. `1 or 2 and 3`
   is a candidate for the same reason. `1 or 2 and 3;` is a candidate, because it following is a newline
-which can also be shifted after the language box, confirming it.}\laurie{ok, this example is going to confuse readers because the pasting thing feels weird. can we find a simpler example that triggers just with normal typing?}The
+    which can also be shifted after the language box, confirming it.}\laurie{ok, this example is going to confuse readers because the pasting thing feels weird. can we find a simpler example that triggers just with normal typing?}
+    \lukas{I already thought about this. I don't think we can. Because if there are multiple possible
+    insertions, the first one will always be immediately inserted after it has been typed, so we will never get multiple options this way.}
+The
 user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
 between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
 candidates, we find three. Each candidate was confirmed by a following whitespace token,
