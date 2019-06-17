@@ -278,21 +278,28 @@ be manually inserted, removed, or resized as needed. One of the main challenges 
 automatic language boxes is to determine what text to reparse: we present
 several sub-heuristics (including the ability to take the user's previous input
 into consideration) which, when combined, lead to an effective heuristic for
-many cases (see Figure \ref{intro_example} for a simple example). Our
-approach is implemented as an extension to the Eco editor~\cite{diekmann14eco}.
+many cases (see Figure \ref{intro_example} for a simple example).
 
-\laurie{this needs revisiting}The paper is structured as follows: Section \ref{sec_background} gives an
-overview on incremental lexing and parsing as well as language composition
-using language boxes. Section \ref{sec_finding_lbox_candidates}
-describes how we can use parsing errors to find automatic language boxes, how
-we can present multiple solutions to the user, and how automatically inserted
-language boxes can also automatically be removed again. Section
-\ref{sec_lbox_limitations} describes some of the limitations of automatic
-language boxes, e.g.~where either unwanted language boxes are inserted or
-detection fails and no language box is inserted at all. Section
-\ref{sec:impl_defaultrec} describes the implementation of recognisers, which
-are used during the detection of automatic language boxes.
-
+We implemented automatic language boxes as an extension to the Eco
+editor~\cite{diekmann14eco}. In order to validate automatic language boxes, we
+created several language compositions of large, real-world languages and
+creating composed programs by extracting fragments from real-world programs and
+combining them. In other words, our experiment is equivalent to opening a file
+in one language, moving the cursor to a given position, deleting a fixed amount
+of text, and then inserting text one character at a time from another language.
+Our experiments show that in \laurie{XXX\%} automatic language boxes achieve an
+acceptable result by which we mean they either: inserted a single valid
+language box (\laurie{XXX\%}); did not insert a language box because the
+inserted fragment was valid in both languages (\laurie{XXX\%}); or an ambiguity
+was found and there were multiple different ways of inserting language boxes
+(\laurie{XXX\%}). As this suggests, the number of cases where automatic
+language boxes perform poorly is small and is split into two categories: a
+language box was inserted, but syntax errors remain because not all of the
+input was put into the language box (\laurie{XXX\%}); or a language box wasn't
+inserted when we would have expected it to be (\laurie{XXX\%}). Our fully
+repeatable experiment can be found at \emph{redacted for double blind review}
+and our extensions to the Eco editor can be found at \emph{redacted for double
+blind review}.
 
 
 \section{Background}
