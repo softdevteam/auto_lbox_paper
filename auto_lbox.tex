@@ -567,9 +567,15 @@ A candidates heuristic first attempts to find valid locations in the program
 where a language box can be inserted. For each of these locations it determines
 which languages that are part of the composition are valid at this point. If it
 found one or more valid languages, it then consumes text starting at that
-location using that language's lexer and parser \laurie{this is a recogniser, right? so can we talk a bit about how it works? because it's not actually doing stuff with the parse tree or ... ?}. It stops consuming text when
-the language's parser reaches an error state, which means that no more input
-can be consumed.
+location in each of the languages. Since we are in the middle of a parsing
+operation, we do not want to alter the current parse tree while consuming text.
+For this reason we use a recogniser which is initialised with each language's
+parser and lexer. The recogniser then simply lexes and parses input from the
+current parse tree. After each parsed token it simulates the special
+\texttt{EOS} token to check if the input parsed so far is a valid program in
+the language. If it is, a candidate is produce from that input. Afterwards, the
+recogniser continues parsing. It stops when it reaches an error state, which
+means that no more input can be consumed.
 
 In this subsection we define, in no particular order, three
 distinct candidates heuristics, each of which, as we shall see in
@@ -751,6 +757,20 @@ Note that we do not need to check the tokens preceding a candidate language box
 for correctness since, by definition, the parser will be in a correct state
 at that point.
 
+Similar to the candidates heuristic, the filtering heuristic also uses a
+recogniser to confirm candidates, since language boxes need to be virtually
+inserted and parsing continued without actually altering the parse tree. Before
+we can virtually insert and parse the language box, however, we need to put the
+recogniser into the appropriate state. When using the stack heuristic, this
+means simply copying the current parsing stack up to the candidate's location.
+The other two heuristics require some more preparation, since the chosen
+location likely doesn't exist on the current parsing stack. Luckily, there is
+no need to reparse the entire program up to the location we want to insert the
+language box at. Instead, we can use incremental parsing to skip all subtrees
+that are not a direct ancestor of the node after which we want to insert the
+language box. This way we can recreate the parsing stack as if we had inserted
+the language box at that point and reparsed the changed parse tree (see Figure
+\ref{fig_preparse}).
 
 \subsection{Applying or presenting candidates}
 
