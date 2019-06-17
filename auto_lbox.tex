@@ -765,19 +765,6 @@ the candidate SQL language box, that candidate is not filtered out.}
 \label{fig:autoboxerrorafterinsert}
 \end{figure*}
 
-\begin{figure}[tb]
-\includegraphics[scale=1.5]{images/whitespace.png}
-\caption{An example showing how using the first token after a candidate
-language box for candidate confirmation, changes our idea of what a
-sensible insertion might be.  The user has just typed in an SQL statement
-into a Java program and an SQL language box was automatically inserted.
-However, the example clearly shows that the user hasn't finished typing the
-\texttt{where}-clause yet, resulting in a parsing error in the outer Java.
-Using the first non-whitespace token to confirm candidates instead, solves
-this issue.}
-\label{fig:autobox_nonwhitespace}
-\end{figure}
-
 Our filtering heuristic is thus simple: we accept all candidate language
 boxes which do not lead to a syntax error at the next non-whitespace token. In other
 words, if a language box is syntactically valid at its immediate surrounding
