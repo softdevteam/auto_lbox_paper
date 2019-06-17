@@ -644,7 +644,7 @@ weaknesses. We now present these in no particular order.
 The first candidates heuristic is the \emph{stack} approach, which is based on
 the idea that each point in the parsing stack naturally defines a plausible
 breaking point between one language and another. It walks backwards over the
-parsing stack, at each point seeing at the associated node. This heuristic has
+parsing stack, at each point looking at the associated node. This heuristic has
 two significant advantages
 advantages: the parsing stack is nearly always fairly small, so only a small number
 of places in the program need to be checked; and if a language box can be
@@ -652,7 +652,16 @@ inserted, parsing can continue as normal from that position in the parsing
 stack.
 
 The second candidates heuristic is the \emph{history} approach, which makes
-use of incremental parsing's ability \laurie{actually, i'm not sure what it's doing! are we resetting everything in the parse tree to a previous version? just one version back?} . This approach
+use of incremental parsing's ability \laurie{actually, i'm not sure what it's
+doing! are we resetting everything in the parse tree to a previous version?
+just one version back?}\lukas{It is using history of the parse tree. The
+current parse tree, in the process of being parsed, is missing a lot of stuff,
+including a path to the root (it's likely detached). So we just use the version
+of the parse tree before reparsing began. we don't need to rewind anything, we
+just read it. It then just goes upwards from the error node and basically tries
+to replace entire subtrees, containing the error node, with a language box (technically
+that's not entirely true, since the candidate can exceed the subtree, tho the starting point
+is the beginning of the subtree)} . This approach
 uses the previous version of the parse tree (before reparsing was started) and
 traverses the error node's ancestors to find valid locations. It starts at the
 error node's immediate parent, sets the parser to the state just before the
@@ -669,7 +678,7 @@ backwards, one node at a time, from the error node to the beginning of the line
 that contains that token for candidates. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown. Like the history
-approach, this heuristic also need to recreate the parse stack to confirm
+approach, this heuristic also needs to recreate the parse stack to confirm
 candidates during the filtering.
 
 Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
@@ -686,13 +695,17 @@ def stack(parser, node):
         # we shouldn't use node, we should use
         # whatever node is valid at this point in
         # the parse stack
+        # lukas: this should be the first terminal following the node on top of
+        # the stack: e.g. stackn.find_next_terminal() or similar. This will be a
+        # bit tricky to explain
         cnds.extend(cnds_recogniser(node, lang))
   return cnds
 
 def history(parser, node):
   cnds = []
   node = node.parent # XXX laurie asks: what does "parent" have to do with history?
-  # also, shouldn't we check node before checking its parent or ... ?
+  # this should be something like node.parent(oldversion)
+  # also, shouldn't we check node before checking its parent or ... ? lukas: you are quite right, we should.
   while node is not None and node.left:
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
