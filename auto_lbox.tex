@@ -720,38 +720,15 @@ the candidate SQL language box, that candidate is not filtered out.}
 \end{figure*}
 
 \begin{figure}[tb]
-  \begin{subfigure}{20pt}
-    \vspace{-4.65cm}\caption{}%
-  \end{subfigure}
-  \includegraphics[scale=0.4]{images/whitespace1.png}\\
-  \begin{subfigure}{20pt}
-    \vspace{-3.1cm}\caption{}%
-  \end{subfigure}
-\includegraphics[scale=0.4]{images/whitespace2.png}
-\caption{An example showing how using the first token, or first non-whitespace
-  token, after a candidate language box changes our idea of what a sensible
-  insertion might be. Both examples use the same language composition (Java and
-  Python, where Python expressions are valid wherever Java expressions are) and
-  the same input text. \laurie{is it necessary for them to have pasted it in?
-  could they have typed it? i must admit, the more i look at the example, the
-  less i understand how we end up with 3 candidates...}\lukas{Yes, it needs to
-    be pasted as otherwise a box would be immediately inserted after \texttt{1 or 2} and the rest
-    then gets typed into the box correctly. When pasting, we only
-  get 3 candidates if we use whitespace tokens to confirm candidates. `1 or 2' is a candidate,
-  because we can insert it and shift the whitespace following it, which confirms it. `1 or 2 and 3`
-  is a candidate for the same reason. `1 or 2 and 3;` is a candidate, because it following is a newline
-    which can also be shifted after the language box, confirming it.}\laurie{ok, this example is going to confuse readers because the pasting thing feels weird. can we find a simpler example that triggers just with normal typing?}
-    \lukas{I already thought about this. I don't think we can. Because if there are multiple possible
-    insertions, the first one will always be immediately inserted after it has been typed, so we will never get multiple options this way.}\laurie{if that's the case, i think we should just delete this figure. it's going to confuse more than it enlightens.}
-The
-user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
-between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
-candidates, we find three. Each candidate was confirmed by a following whitespace token,
-however, when inserting the first or second candidate, they produce an error
-immediately after the whitespace (upon parsing \qtt{and}/\qtt{\}}).
-\textbf{b)} If instead we use the first non-whitespace token for candidate
-confirmation, this reduces the three candidates to a single one, which can
-then automatically be inserted into the program.}
+\includegraphics[scale=1.5]{images/whitespace.png}
+\caption{An example showing how using the first token after a candidate
+language box for candidate confirmation, changes our idea of what a
+sensible insertion might be.  The user has just typed in an SQL statement
+into a Java program and an SQL language box was automatically inserted.
+However, the example clearly shows that the user hasn't finished typing the
+\texttt{where}-clause yet, resulting in a parsing error in the outer Java.
+Using the first non-whitespace token to confirm candidates instead, solves
+this issue.}
 \label{fig:autobox_nonwhitespace}
 \end{figure}
 
