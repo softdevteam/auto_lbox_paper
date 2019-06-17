@@ -584,12 +584,12 @@ def cnds_recogniser(node, lang):
   while True:
     token = lexer.next_token()
     if token is None:
-      return results
+      return cnds
     parser.add_before_eos(token)
     if parser.parse():
-      results.append(token.end_pos)
+      cnds.append(token.end_pos)
     elif parser.error_node.type_ != "EOS":
-        return results
+        return cnds
 \end{lstdefault}
 \caption{A generic candidates recogniser which produces the ending offsets of
   each substring starting at \texttt{node} that is valid in language
@@ -604,7 +604,7 @@ def cnds_recogniser(node, lang):
 \end{figure}
 
 When a candidates heuristic has identified a node $n$ in the parse tree as the
-plausible start of a language boxe, we then have to decide if one or more
+plausible start of a language box, we then have to decide if one or more
 language boxes could start at that point. Although it would be possible to use
 the normal incremental parser to answer this question, it would require
 significant setting up and tearing down which would be tedious to program and
@@ -620,7 +620,7 @@ we use is to try recognising gradually growing substrings as valid in an inner
 language. If a substring is not valid, we then check where the parse failed:
 if it failed on the EOS (End Of String) token, then we know that more input
 would be needed to find a valid parse, so we continue the search; but if it
-failed earlier than the EOS token, then we assume that no further input will
+failed earlier than the EOS token, then we assume\lukas{we actually know, not just assume} that no further input will
 fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
 more formal version of this algorithm.
 
