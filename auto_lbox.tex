@@ -193,7 +193,7 @@ user when it cannot.
       composition of Java and SQL, where SQL statements can be used wherever
       Java expressions are valid. As the user types, language boxes (with a
       pink background) are automatically inserted, removed, or resized.
-      \textbf{a)} After typing the skeleton of a Java function, the user begins
+      \textbf{(a)} After typing the skeleton of a Java function, the user begins
       typing an SQL statement as the right-hand side expression of a Java
       assignment. The most fundamental part of the automatic language box
       algorithm is to try inserting language boxes when a syntax error in the
@@ -201,15 +201,15 @@ user when it cannot.
       not if it then leads to a syntax error immediately after the inserted
       language box. It is thus too early to insert an automatic language box
       around the SQL as it would cause a syntax error in the first Java token
-      afterwards (`\texttt{,}'). \textbf{b)} After typing `\texttt{,}' an SQL
+      afterwards (`\texttt{,}'). \textbf{(b)} After typing `\texttt{,}' an SQL
       language box is automatically inserted since at least one further token
-      of Java (`\texttt{,}') is now syntactically valid. \textbf{c)} The user continues
+      of Java (`\texttt{,}') is now syntactically valid. \textbf{(c)} The user continues
       typing a (now incomplete) SQL statement. This causes syntax errors in the
       outer language which cannot yet be resolved by inserting, removing, or
-      resizing any language boxes.  \textbf{d)} After typing `\texttt{;}', the
+      resizing any language boxes.  \textbf{(d)} After typing `\texttt{;}', the
       automatic language box algorithm resizes the existing language box to
       encompass the entire SQL statement, making the program syntactically
-      complete. \textbf{e)} Further syntactically correct Java input does not
+      complete. \textbf{(e)} Further syntactically correct Java input does not
       cause the language box to be altered.
 }
 \label{intro_example}
