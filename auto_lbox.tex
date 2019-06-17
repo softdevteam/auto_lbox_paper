@@ -635,20 +635,24 @@ and continue. `\texttt{SELECT 1 + }' errors at the EOS token, so we continue.
 terminates, even if there is input after the fragment.
 
 
-\subsubsection{The stack, history, and line-based heuristics}
+\subsubsection{The stack, history, and line heuristics}
 
 We eventually created three distinct candidates heuristics, each of which, as
 we shall see in Section~\ref{sec:evaluation}, has different strengths and
 weaknesses. We now present these in no particular order.
 
-The first candidates heuristic is the \emph{stack} approach, which is based on the idea that each point in the parsing stack naturally defines a plausible breaking point between one language and another. It walks backwards over the parsing stack, at each point seeing if a language box
-can be successfully inserted at that point. This heuristic has two significant advantages
+The first candidates heuristic is the \emph{stack} approach, which is based on
+the idea that each point in the parsing stack naturally defines a plausible
+breaking point between one language and another. It walks backwards over the
+parsing stack, at each point seeing at the associated node. This heuristic has
+two significant advantages
 advantages: the parsing stack is nearly always fairly small, so only a small number
 of places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
 stack.
 
-The second candidates heuristic is the \emph{history} approach. This approach
+The second candidates heuristic is the \emph{history} approach, which makes
+use of incremental parsing's ability \laurie{actually, i'm not sure what it's doing! are we resetting everything in the parse tree to a previous version? just one version back?} . This approach
 uses the previous version of the parse tree (before reparsing was started) and
 traverses the error node's ancestors to find valid locations. It starts at the
 error node's immediate parent, sets the parser to the state just before the
@@ -660,83 +664,63 @@ heuristic, it is still required to recreate the parsing stack to the state just
 before the parent was parsed. Luckily, the incremental parser allows us to recreate
 the stack quickly, without having to reparse the entire program.
 
-The third candidates heuristic is the \emph{newline} approach, which finds
-valid locations by traversing the tokens preceding the error up to the
-beginning of the line. This heuristic ensures that locations that are very
-close to the error, which are more likely to be skipped by the other two
-heuristics, are tried, but sacrifices overall reach. Like the history approach,
-this heuristic also need to recreate the parse stack to confirm candidates
-during the filtering.
+The third candidates heuristic is the \emph{line} approach, which searches
+backwards, one node at a time, from the error node to the beginning of the line
+that contains that token for candidates. This heuristic ensures that all
+candidate locations close to the error node are searched, but bounds the search
+in a way that is unlikely to cause a noticeable slowdown. Like the history
+approach, this heuristic also need to recreate the parse stack to confirm
+candidates during the filtering.
 
 Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
 candidates.
 
 \begin{figure*}[t]
-\begin{minipage}[t]{0.49\textwidth}
+\begin{minipage}[t]{0.55\textwidth}
 \begin{lstdefault}[]
-def heuristic_stack(error):
-  valid_boxes = []
-  for lang in <!\textit{composition}!>:
-    cut = len(stack)
-    while cut >= 0:
-      if <!\textit{lbox of lang can be shifted at cut}!>:
-        find_end(stack[cut], lang, valid_boxes)
-      cut -= 1
-  return valid_boxes
+def stack(parser, node):
+  cnds = []
+  for stackn in reversed(parser.stack):
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted at \texttt{stackn}}}!>:
+        # we shouldn't use node, we should use
+        # whatever node is valid at this point in
+        # the parse stack
+        cnds.extend(cnds_recogniser(node, lang))
+  return cnds
 
-def heuristic_line(error):
-  valid_boxes = []
-  term = error
-  for lang in <!\textit{composition}!>:
-    while True:
-      if <!\textit{lbox of lang can be shifted after term}!>:
-        find_end(start, lang, valid_boxes)
-      if <!\textit{term is newline or BOS}!>:
-        break
-      term = term.previous_terminal()
-  return valid_boxes
+def history(parser, node):
+  cnds = []
+  node = node.parent # XXX laurie asks: what does "parent" have to do with history?
+  # also, shouldn't we check node before checking its parent or ... ?
+  while node is not None and node.left:
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
+        cnds.extend(cnds_recogniser(node, lang))
+    node = node.parent
+  return cnds
+
+def line(parser, node):
+  cnds = []
+  while node is not None and node.typ not in ["BOS", "Newline"]:
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
+        cnds.extend(cnds_recogniser(node, lang))
+    node = node.prev_terminal()
+  return cnds
 \end{lstdefault}
 \end{minipage}
-\begin{minipage}[t]{0.49\textwidth}
-\begin{lstdefault}[firstnumber=23]
-def heuristic_history(error):
-  valid_boxes = []
-  parent = error.parent
-  for lang in <!\textit{composition}!>:
-    while parent is not None and parent.left:
-      if <!\textit{lbox of lang can be shifted after parent.left}!>:
-        find_end(parent.left, lang, valid_boxes)
-      parent = parent.parent
-  return valid_boxes
-
-def find_end(node, lang, valid_boxes):
-  for e in consume_text(node, lang):
-    c = (lang, node, e)
-    if confirm_candidate(c) and fixes_error(c, error):
-      valid_boxes.append(c)
-\end{lstdefault}
+\begin{minipage}[t]{0.44\textwidth}
+  \caption{Simplified versions of our three candidates heuristics. Each is
+  passed a \texttt{node}, which is the point at which an error is detected, and
+finds sensible points before that node in the parse tree to be the possible
+starting point of language boxes (using the candidates recogniser from
+Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
+stack and, at each point, finds all candidate language boxes. The history
+heuristic \laurie{I don't know what this one does}. The \texttt{line} heuristic
+searches each token from the error node until the beginning of the line which
+contains that node.}
 \end{minipage}
-\caption{
-\lukas{This needs some more work: do we need to show
-an algorithm at all or can we abstract this?}
-Algorithms for the three heuristics to find candidates for automatic language
-boxes. Each heuristic starts by iterating over all languages $l$ that are part
-of the current composition. For each language $l$, it scans the text
-before the error to find valid locations where a language box of $l$ can be
-inserted. The approach used to scan the preceding text depends on the heuristic.
-The stack-based heuristic uses the positions on the current parse stack; the
-history-based heuristic traverses the ancestors of the error node in the previous
-parse tree; the line-based heursitic scans the terminals preceding the error up to the
-beginning of the line.
-For each of
-those locations the heuristic then tries to consume the following input, using $l$'s lexer and
-parser, and produces a candidate whenever the consumed text is a valid program in
-$l$; \texttt{consume\_text} (shown in Figure \ref{lst_consume_text}) stops when it can't consume any more input, because either the remaining
-input is invalid in $l$, or there is no more text to consume. Afterwards, the heuristic needs to
-confirm that the produced candidate fixes the previous error and
-doesn't introduce any new ones.
-Candidates are returned in the order they are found: the closer to the error and
-the shorter they are, the higher they are in the list.}
 \label{lst_find_candidates}
 \end{figure*}
 
