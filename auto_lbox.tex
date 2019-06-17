@@ -862,7 +862,20 @@ manually marks it as uncommitted.}
 \end{center}
 
 
-\section{Advanced features}
+\subsection{Removing and resizing}
+
+Automatically inserted language boxes start life in the \emph{uncommitted}
+state, which means that they can then be considered possible candidates for
+automatic removing and resizing. Language boxes move to the \emph{committed}
+state when the user, directly or indirectly, shows that they are finished
+editing at the current point (e.g.~when they move the cursor outside of the
+language box); users can manually change a committed box to uncommitted if they
+later want it to be subject to the algorithm again.
+
+\laurie{how do we remove and resize? do we rerun the complete algorithm, and
+simply ignore the uncommitted language boxes? if so, do we actually remove
+language box nodes and replace them (which would, admittedly, be imperceptible)
+or ...?}
 
 \subsection{Automatically removing boxes}
 \label{subsec_autoremoval}
