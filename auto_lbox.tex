@@ -697,15 +697,17 @@ for an example).
     \put(-5,40){\textcolor{black}{\textbf{(b)}}}
 \end{picture}
 \vspace{-1.2em}
-\caption{An example showing why parsing further than necessary to confirm
-a language box candidate, can lead to the candidate being falsely rejected.
-The example shows a composition of Java and Python, that allows Python
-expressions wherever Java expressions are valid. \textbf{a)} The user inserted an SQL statement
-into the program, but hasn't finished typing yet. However, since the \qtt{+} is invalid
-in the SQL statement, we can already insert an SQL language box at that point. \textbf{b)} When
-inserting the SQL language box, an error appears at \qtt{\}}, since the user hasn't finished
-typing the Java expression. Parsing further than \qtt{+} to confirm the candidate would
-thus lead to its false rejection.}
+\caption{An example showing why parsing too far beyond a candidate language box increases
+  the chances of rejecting it. In \textbf{(a)}, we have altered Eco to only insert
+candidate language boxes that do not cause subsequent parse errors. However,
+the `\texttt{+}` operator is invalid in an SQL \texttt{FROM} clause meaning
+that it will be left to the outer language (Java) where it also causes a syntax
+error. Thus the candidate language box around the SQL is rejected. In
+\textbf{(b)}, we use the heuristic described in Section~\ref{sec:filtering},
+where we only filter out candidate language boxes that cause syntax errors in
+the first non-whitespace token. Thus although there is still a syntax error in
+the program (at the `\texttt{\}}' character), since `\texttt{+}' is valid after
+the candidate SQL language box, that candidate is not filtered out.}
 \label{fig:autoboxerrorafterinsert}
 \end{figure*}
 
