@@ -715,7 +715,13 @@ at \qtt{;} which would lead to the false rejection of the candidate.}
   Python, where Python expressions are valid wherever Java expressions are) and
   the same input text. \laurie{is it necessary for them to have pasted it in?
   could they have typed it? i must admit, the more i look at the example, the
-less i understand how we end up with 3 candidates...}The
+  less i understand how we end up with 3 candidates...}\lukas{Yes, it needs to
+    be pasted as otherwise a box would be immediately inserted after \texttt{1 or 2} and the rest
+    then gets typed into the box correctly. When pasting, we only
+  get 3 candidates if we use whitespace tokens to confirm candidates. `1 or 2' is a candidate,
+  because we can insert it and shift the whitespace following it, which confirms it. `1 or 2 and 3`
+  is a candidate for the same reason. `1 or 2 and 3;` is a candidate, because it following is a newline
+  which can also be shifted after the language box, confirming it.}The
 user just pasted the Python code \qtt{1 or 2 and 3} into the assignment, in
 between \qtt{=} and \qtt{;}. \textbf{a)} If we allow any token to confirm
 candidates, we find three. Each candidate was confirmed by a following whitespace token,
@@ -728,17 +734,28 @@ then automatically be inserted into the program.}
 \end{figure}
 
 Our filtering heuristic is thus simple: we accept all candidate language
-boxs which do not lead to a syntax error at the next non-whitespace token
+boxes which do not lead to a syntax error at the next non-whitespace token
 \laurie{do we care about a syntax error before the language box?}\lukas{no, otherwise
 a syntax error at the beginning of the file would keep us from
 inserting any language boxes in the rest of the program}\laurie{well, yes, but
 we could check the first non-whitespace token before a language box for errors?
 i don't know if this is a good idea or not, but it's an obvious question that
-someone will ask!}. In other
+someone will ask!}\lukas{We don't need to do this, since the heuristic needs to check
+if the language box can be pushed at the chosen location, which it only can if
+the parser can parse to this point (while using error recovery to isolate errors on the way).
+this means that the immediate area preceding the language box can not have any errors. for example,
+the stack heuristic doesn this implicitly since we only use locations that can be found on the
+stack, guarenteeing that any location we pick has no errors. the other heuristics recreate the stack,
+so picking a location with an error would fail the recreating process and the location is discarded}. In other
 words, if a language box is syntactically valid at its immediate surrounding
 context in the parse tree, we don't mind if it causes errors beyond that
 context, since we assume those are the result of an
-incomplete program. The reason that we specify that the first non-whitespace
+incomplete program. We do not need to check the area preceding the language box, since
+any location picked by the heuristics is prooven to be valid at that point (though, isolated errors may exists
+before that). For example the stack
+heuristic only chooses locations from the current parsing stack, while the other two heuristics recreate
+the parse stack at the location in order to confirm the candidate.
+The reason that we specify that the first non-whitespace
 token must not contain an error is that grammars for incremental parsing almost
 always define whitespace as a token. This means that the incremental parser
 often inserts a whitespace token after a candidate language box, and that
