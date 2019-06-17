@@ -555,25 +555,25 @@ boxes which consume existing content: the subsequent phase in the algorithm
 then determines if actually inserting such language boxes makes sense in the
 wider context of the program (see Section~\ref{sec:filtering}).
 
+\laurie{i think we need to talk a bit about recognisers here. for example, when
+we find a place we'd like to think about inserting language boxes, do we try
+all possible languages in the composition? just the ones valid at that point?
+how far forward do we search?}
+
 In this subsection we define, in no particular order, three
-possible candidates heuristics, each of which, as we shall see in
-Section~\ref{sec:evaluation}, has different strengths and weaknesses. We thus
+distinct candidates heuristics, each of which, as we shall see in
+Section~\ref{sec:evaluation}, has different strengths and weaknesses. We then
 combine several of these heuristics into an overall candidates heuristic.
 
-The first candidates heuristic is the \emph{stack} approach. This heuristic
-uses the parsing stack at the time of a parsing error to search the input
-backwards and find a location at which a language box can be inserted. The
-advantage of this heuristic is that the availability of the parsing stack makes
-it easy to test found candidates during the filtering heuristics.  After
-inserting a candidate language box and pushing it onto the stack, we can just
-continue parsing as normal, while the other heuristics will need to recreate
-the stack at the point of insertion. To find a valid location, this heuristic
-simply starts popping elements of the parsing stack. Each time it then tries to
-parse a candidate language box in the current parsing state. The heuristic
-stops when it reaches the beginning of the stack. Since the stack is typically
-small (as many elements frequently get reduced into a single one), this
-heuristic skips the majority of locations, many of which are possibly valid,
-for the sake of performance.
+The first candidates heuristic is the \emph{stack} approach, which uses each
+point in parsing stack at the point of an error as a proxy for sensible
+starting positions of candidate language boxes. In essence, this heuristic
+walks backwards over the parsing stack, at each point seeing if a language box
+can be successfully inserted at that point. This heuristic has two significant
+advantages: the parsing stack is generally fairly small, so only a small number
+of places in the program need to be checked; and if a language box can be
+inserted, parsing can continue as normal from that position in the parsing
+stack.
 
 The second candidates heuristic is the \emph{history} approach. This approach
 uses the previous version of the parse tree (before reparsing was started) and
