@@ -289,16 +289,16 @@ creating composed programs by extracting fragments from real-world programs and
 combining them. In other words, our experiment is equivalent to opening a file
 in one language, moving the cursor to a given position, deleting a fixed amount
 of text, and then inserting text one character at a time from another language.
-Our experiments show that in \laurie{XXX\%} automatic language boxes achieve an
+Our experiments show that in \validalloverall automatic language boxes achieve an
 acceptable result by which we mean they either: inserted a single valid
-language box (\laurie{XXX\%}); did not insert a language box because the
-inserted fragment was valid in both languages (\laurie{XXX\%}); or an ambiguity
+language box (\breakdownallvalid); did not insert a language box because the
+inserted fragment was valid in both languages (\breakdownallnovalid); or an ambiguity
 was found and there were multiple different ways of inserting language boxes
-(\laurie{XXX\%}). As this suggests, the number of cases where automatic
+(\breakdownallnomulti). As this suggests, the number of cases where automatic
 language boxes perform poorly is small and is split into two categories: a
 language box was inserted, but syntax errors remain because not all of the
-input was put into the language box (\laurie{XXX\%}); or a language box wasn't
-inserted when we would have expected it to be (\laurie{XXX\%}). Our fully
+input was put into the language box (\breakdownallinvalid); or a language box wasn't
+inserted when we would have expected it to be (\breakdownallnoerror). Our fully
 repeatable experiment can be found at \emph{redacted for double blind review}
 and our extensions to the Eco editor can be found at \emph{redacted for double
 blind review}.
