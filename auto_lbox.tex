@@ -560,43 +560,90 @@ possibility of old syntax errors being considered a second time.
 \subsection{The candidates heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
-plausible language boxes to insert -- we call this the \emph{candidates heuristic}. The
-main challenge for a candidates heuristic is to determine how much of a program
-should be searched around the point identified by the consideration heuristic:
-searching too much of the program leads to poor performance; searching too
-little leads to plausible language boxes being missed. A candidates heuristic
-can produce multiple candidate language boxes at any given point; those
+plausible language boxes to insert -- we call this the \emph{candidates heuristic}. A candidates heuristic
+can produce zero or more candidate language boxes at any given point; those
 candidate language boxes may cover different spans and/or be of different
 language types. Note that candidates heuristics merely need to suggest language
 boxes which consume existing content: the subsequent phase in the algorithm
 then determines if actually inserting such language boxes makes sense in the
 wider context of the program (see Section~\ref{sec:filtering}).
 
-A candidates heuristic first attempts to find valid locations in the program
-where a language box can be inserted. For each of these locations it determines
-which languages that are part of the composition are valid at this point. If it
-found one or more valid languages, it then consumes text starting at that
-location in each of the languages. Since we are in the middle of a parsing
-operation, we do not want to alter the current parse tree while consuming text.
-For this reason we use a recogniser which is initialised with each language's
-parser and lexer. The recogniser then simply lexes and parses input from the
-current parse tree. After each parsed token it simulates the special
-\texttt{EOS} token to check if the input parsed so far is a valid program in
-the language. If it is, a candidate is produce from that input. Afterwards, the
-recogniser continues parsing. It stops when it reaches an error state, which
-means that no more input can be consumed.
+Before we can define candidates heuristics, we first need to introduce the
+concepts of recognisers, which are an important optimisation used by all
+candidates heuristics, before introducing several candidates heuristics.
 
-In this subsection we define, in no particular order, three
-distinct candidates heuristics, each of which, as we shall see in
-Section~\ref{sec:evaluation}, has different strengths and weaknesses. We then
-combine several of these heuristics into an overall candidates heuristic.
 
-The first candidates heuristic is the \emph{stack} approach, which uses each
-point in the parsing stack at the point of an error as a proxy for sensible
-starting positions of candidate language boxes. In essence, this heuristic
-walks backwards over the parsing stack, at each point seeing if a language box
-can be successfully inserted at that point. This heuristic has two significant
-advantages: the parsing stack is generally fairly small, so only a small number
+\subsubsection{Recognisers}
+
+\begin{figure}
+\begin{lstdefault}[]
+def cnds_recogniser(node, lang):
+  lexer = <!\textrm{\textit{lexer for lang starting at node}}!>
+  parser = <!\textrm{\textit{parser for lang}}!>
+  cnds = []
+  while True:
+    token = lexer.next_token()
+    if token is None:
+      return results
+    parser.add_before_eos(token)
+    if parser.parse():
+      results.append(token.end_pos)
+    elif parser.error_node.type_ != "EOS":
+        return results
+\end{lstdefault}
+\caption{A generic candidates recogniser which produces the ending offsets of
+  each substring starting at \texttt{node} that is valid in language
+  \texttt{lang}. In essence, we create a lexer and parser for \texttt{lang}
+  (lines 2--3) and then try recognising substrings that grow one token at a
+  time (lines 6 and 9). If we reach the end of the parse tree we are complete
+  (lines 7--8). If we successfully parse a substring, we add a candidate to the
+  list (lines 10--11). If a substring causes a parse error on anything but the
+  EOS (End Of String) token, we assume that further input cannot fix the parse
+  and terminate the search (lines 12--13).}
+\label{fig:recogniser}
+\end{figure}
+
+When a candidates heuristic has identified a node $n$ in the parse tree as the
+plausible start of a language boxe, we then have to decide if one or more
+language boxes could start at that point. Although it would be possible to use
+the normal incremental parser to answer this question, it would require
+significant setting up and tearing down which would be tedious to program and
+slow to run. Instead we provide \emph{candidates recognisers}\footnote{Some languages
+  (e.g.~whitespace sensitive languages such as Python) need slightly customised
+candidates recognisers.} which are able to quickly return the list of substrings valid in
+a language $L$ starting at node $n$.
+
+The main challenge for candidates recognisers is to know when to stop trying to recognise
+further input. If we stop too early, we will fail to recognise valid language
+boxes, but if we go too far, we will suffer from bad performance. The technique
+we use is to try recognising gradually growing substrings as valid in an inner
+language. If a substring is not valid, we then check where the parse failed:
+if it failed on the EOS (End Of String) token, then we know that more input
+would be needed to find a valid parse, so we continue the search; but if it
+failed earlier than the EOS token, then we assume that no further input will
+fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
+more formal version of this algorithm.
+
+For example, consider the fragment \texttt{int x = SELECT 1 + 2;} in our
+running Java and SQL composition. If we start a candidates recogniser at the
+\texttt{SELECT} token, we first try recognising `\texttt{SELECT}' which leads
+to a syntax error at the EOS token, so we continue. We then try recognising
+`\texttt{SELECT 1}', which is valid SQL, so we add it to our candidates list
+and continue. `\texttt{SELECT 1 + }' errors at the EOS token, so we continue.
+`\texttt{SELECT 1 + 2}' succeeds, so we add it to our candidates list.
+`\texttt{SELECT 1 + 2;}' errors at the `\texttt{;}' token, so the search then
+terminates, even if there is input after the fragment.
+
+
+\subsubsection{The stack, history, and line-based heuristics}
+
+We eventually created three distinct candidates heuristics, each of which, as
+we shall see in Section~\ref{sec:evaluation}, has different strengths and
+weaknesses. We now present these in no particular order.
+
+The first candidates heuristic is the \emph{stack} approach, which is based on the idea that each point in the parsing stack naturally defines a plausible breaking point between one language and another. It walks backwards over the parsing stack, at each point seeing if a language box
+can be successfully inserted at that point. This heuristic has two significant advantages
+advantages: the parsing stack is nearly always fairly small, so only a small number
 of places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
 stack.
@@ -1156,113 +1203,8 @@ the input (unless this result in the insertion of a new language box), this
 does not affect the parse tree of the outer language. And since lexing is
 generally quite fast, the performance impact will also be insignificant.
 
-\section{Recognisers}
-\label{sec:impl_defaultrec}
 
-This section describes in more detail how language box candidates are
-constructed and how we can improve performance by not using a full incremental
-parser to find language box candidates, but instead using a simple batch
-recogniser. A recogniser is a parser that doesn't execute any actions or
-generates a parse tree, but rather only validates the input. This section also
-shows how a recogniser can be used to decide whether or not a language box can
-be removed again.
-
-Section \ref{sec_finding_lbox_candidates} described, how in order to find
-language box candidates, we try to consume as much text surrounding the error
-node as possible, generating a candidate every time the surrounding text is
-valid in the language of the box. Since we are only interested in the text that
-can be parsed and don't need to generate a parse tree from it, a simple batch
-recogniser is a good alternative to a full parser, as it improves performance
-and reduces memory usage.  An important restriction is that the recogniser must
-lex and parse input from the parse tree without actually altering the parse
-tree or any nodes within it.  A recogniser in the \ald takes as input a node
-from which it starts parsing, and returns all valid substrings from that input,
-until either a parsing error occurs, or there is no more input left to parse.
-Substrings are returned in form of their end node in the original parse tree.
-The substring can then be derived by reading all tokens between the start and
-end node.  The algorithm is shown in Listing \ref{lst_consume_text}.
-
-\begin{figure}
-\begin{lstdefault}[]
-def consume_text(node, lang):
-  lexer = <!\textit{lexer for lang starting at node}!>
-  parser = <!\textit{parser for lang}!>
-  results = []
-  token = lexer.next_token()
-  while token is not None:
-    if parser.parse(token):
-      if <!\textit{parser can accept current input}!>:
-        results.append(lexer.last_node)
-    else: # parse error
-      break
-    token = lexer.next_token()
-  return results
-\end{lstdefault}
-\caption{An algorithm for consuming text and returning valid
-substrings for the creation of language candidates. We first create a lexer that
-produces tokens in language \texttt{lang}, starting at \texttt{node} (line 2).
-We also create a parser for \texttt{lang} (line 3) which is used to parse input (line 7) and test if the
-input parsed so far can be accepted (line 8); the latter can be achieved by simply pretending
-that the next token is the end-of-file token, and test if the
-parser reaches an accept state. We then consume as much text as we can,
-producing tokens and parsing them (line 6--12), until no more text can be
-consumed, either due to an error (line 10), or because we've reached the end of
-the input. Each time a token was successfully parsed, we test if the input parsed so far is
-valid (line 8), and if so, store the last node from the original parse tree that the lexer
-processed (line 9). This node is later used to derive the substring from which the
-language box is created.}
-\label{lst_consume_text}
-\end{figure}
-
-\subsection{Recognising Python}
-\label{sec:impl_wsrec}
-
-In order to produce language box candidates for whitespace-sensitive languages
-like Python, we need to be able to create indentation tokens during the
-consumption of input. To do
-this, we implement a separate recogniser for Python which uses a wrapper around the lexer that inspects
-the tokens that the lexer produces and, when appropriate, returns indentation
-tokens instead. While the Python recogniser inherits most of the behaviour of
-the default recogniser, it also needs to keep track of the indentation levels. Listing
-\ref{lst_next_token_indent} shows how the recogniser wraps around the lexer and
-produces indentation tokens whenever they are needed.
-
-\begin{figure}
-\begin{lstdefault}[basicstyle=\linespread{1.0}\footnotesize\ttfamily]
-def next_token(todo, indent):
-  if todo:
-    return todo.pop(0) # return first element
-  token = lex.next_token()
-  if token is <!\textit{newline}!>:
-    prevl = <!\textit{previous line}!>
-    currl = <!\textit{current line}!>
-    if prevl is not empty:
-      todo.append(<!\textit{NEWLINE}!>)
-    if currl is not empty:
-      if prevl.ws < currl.ws:
-        indent.append(currl.ws)
-        todo.append(<!\textit{INDENT}!>)
-      elif prevl.ws > currl.ws:
-        ws = indent.pop()
-        while ws > currl.ws:
-          todo.append(<!\textit{DEDENT}!>)
-          ws = indent.pop()
-        if ws != currl.ws:
-          todo.append(<!\textit{UNBALANCED}!>)
-  todo.append(token)
-  return todo.pop(0)
-\end{lstdefault}
-\caption{To support language box detection for Python, we
-create a method that wraps around the lexer and produces indentation tokens as
-needed by keeping track of the indentation levels. Producing and returning
-indentation tokens delays the parsing of tokens which have already been lexed.
-In order to not forget to parse those tokens, we use a to-do list (line 3). We
-always return the first item of that list. If it is empty, we continue lexing
-from the input (line 4). The remaining code is similar to the batch indentation
-approach described in Section \ref{subsec_indentation_batch}.
-}
-\label{lst_next_token_indent}
-\end{figure}
+\section{Orphan}
 
 \subsection{Incremental Recogniser for auto removal}
 \label{sec:impl_removerec}
