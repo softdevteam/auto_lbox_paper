@@ -580,8 +580,8 @@ def cnds_recogniser(node, lang):
     token = lexer.next_token()
     if token is None:
       return cnds
-    parser.add_before_eos(token)
-    if parser.parse():
+    parser.add_token(token)
+    if parser.accepted():
       cnds.append(token.end_pos)
     elif parser.error_node.type_ != "EOS":
         return cnds
@@ -590,16 +590,12 @@ def cnds_recogniser(node, lang):
   each substring starting at \texttt{node} that is valid in language
   \texttt{lang}. In essence, we create a lexer and parser for \texttt{lang}
   (lines 2--3) and then try recognising substrings that grow one token at a
-  time (lines 6 and 9). If we reach the end of the parse tree we are complete
+  time (lines 6 and 9), though note that the recogniser parser reuses the previous
+  state, so the run-time is linear. If we reach the end of the parse tree we are complete
   (lines 7--8). If we successfully parse a substring, we add a candidate to the
   list (lines 10--11). If a substring causes a parse error on anything but the
-  EOS (End Of String) token, we assume that further input cannot fix the parse
-    and terminate the search (lines 12--13).\lukas{this algorithm currently suggests that we reparse
-    every substring from the beginning, which isn't necessary, since we can just continue from the previous
-    parsing state after receiving the next token from the lexer. the \texttt{add\_before\_eos} also seems
-    to suggest that we have some kind of tree that the recogniser parses. however, the recogniser is just a bog-standard
-    batch-parser that just takes the next token and processes it using the parsing table. to do the eos check, we just virtually parse
-    an eos token to see if the parser reaches an accept state. if it doesn't we continue from the state of the previously parsed token.}}
+  implicit EOS (End Of String) token, we assume that further input cannot fix the parse
+    and terminate the search (lines 12--13).}
 \label{fig:recogniser}
 \end{figure}
 
@@ -617,10 +613,12 @@ The main challenge for candidates recognisers is to know when to stop trying to 
 further input. If we stop too early, we will fail to recognise valid language
 boxes, but if we go too far, we will suffer from bad performance. The technique
 we use is to try recognising gradually growing substrings as valid in an inner
-language. If a substring is not valid, we then check where the parse failed:
+language (making use of the fact that the recogniser parser implicitly
+reuses state from the previous token, so that the running time is linear).
+If a substring is not valid, we then check where the parse failed:
 if it failed on the EOS (End Of String) token, then we know that more input
 would be needed to find a valid parse, so we continue the search; but if it
-failed earlier than the EOS token, then we assume\lukas{we actually know, not just assume} that no further input will
+failed earlier than the EOS token, then we know that no further input will
 fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
 more formal version of this algorithm.
 
@@ -651,17 +649,16 @@ of places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
 stack.
 
-The second candidates heuristic is the \emph{history} approach, which makes
-use of incremental parsing's ability \laurie{actually, i'm not sure what it's
-doing! are we resetting everything in the parse tree to a previous version?
-just one version back?}\lukas{It is using history of the parse tree. The
+The second candidates heuristic is the \emph{history} approach which makes
+use of the undo-style data that each node in a \cite{wagner98incremental} parse tree contains.
+\lukas{It is using history of the parse tree. The
 current parse tree, in the process of being parsed, is missing a lot of stuff,
 including a path to the root (it's likely detached). So we just use the version
 of the parse tree before reparsing began. we don't need to rewind anything, we
 just read it. It then just goes upwards from the error node and basically tries
 to replace entire subtrees, containing the error node, with a language box (technically
 that's not entirely true, since the candidate can exceed the subtree, tho the starting point
-is the beginning of the subtree)} . This approach
+is the beginning of the subtree)}\laurie{ok, you need to expand this, particulary the "technically" point, as i think this is probably interesting stuff that the reader needs to know about!}. This approach
 uses the previous version of the parse tree (before reparsing was started) and
 traverses the error node's ancestors to find valid locations. It starts at the
 error node's immediate parent, sets the parser to the state just before the
@@ -689,15 +686,10 @@ candidates.
 \begin{lstdefault}[]
 def stack(parser, node):
   cnds = []
-  for stackn in reversed(parser.stack):
+  for state in reversed(parser.stack):
     for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted at \texttt{stackn}}}!>:
-        # we shouldn't use node, we should use
-        # whatever node is valid at this point in
-        # the parse stack
-        # lukas: this should be the first terminal following the node on top of
-        # the stack: e.g. stackn.find_next_terminal() or similar. This will be a
-        # bit tricky to explain
+      if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
+        stackn = parser.next_terminal(state)
         cnds.extend(cnds_recogniser(node, lang))
   return cnds
 
@@ -706,6 +698,7 @@ def history(parser, node):
   node = node.parent # XXX laurie asks: what does "parent" have to do with history?
   # this should be something like node.parent(oldversion)
   # also, shouldn't we check node before checking its parent or ... ? lukas: you are quite right, we should.
+  # laurie: what does "node.left" mean?
   while node is not None and node.left:
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
@@ -729,7 +722,7 @@ def line(parser, node):
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
 Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
-stack and, at each point, finds all candidate language boxes. The history
+stack, finding the node matching each point in the stack (line 6) and then searching for candidate language boxes (line 7). The history
 heuristic \laurie{I don't know what this one does}. The \texttt{line} heuristic
 searches each token from the error node until the beginning of the line which
 contains that node.}
