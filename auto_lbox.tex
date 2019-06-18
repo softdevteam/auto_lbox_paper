@@ -880,70 +880,41 @@ automatic removing and resizing. Language boxes move to the \emph{committed}
 state when the user, directly or indirectly, shows that they are finished
 editing at the current point (e.g.~when they move the cursor outside of the
 language box); users can manually change a committed box to uncommitted if they
-later want it to be subject to the algorithm again.
-A language box in an uncommitted state is subject to automatic changes. If the
-language box or its surrounding area changes, they may automatically removed
-or resized by the algorithm.
+later want it to be subject to the algorithm again.  If the content of an
+uncommitted language box, or its surrounding area, changes then it may be
+automatically removed or resized by the algorithm.
 
-\subsection{Automatically removing boxes}
-\label{subsec_autoremoval}
 
-As mentioned before, by definition we cannot perfectly detect language boxes
-and ther ewill be cases where an automatically inserted language box is not
-what the user wanted.
-And while the user can always undo a wrong insertion,
-this can quickly become an irritating task.
-The following composition of Python and
-SQL, though admittedly a rather unlikely scenario, exemplifies the problem:
+\subsubsection{Removing language boxes}
 
-\begin{lstdefault}[language=Python]
-  def x():
-    select = 1
-    from = 2
-    t = 3
-    x = select * from t
-\end{lstdefault}
-\vspace{1em}
+The simplest example of when might want an automatic language box removed is if
+the user deletes a character immediately after an automatic language box has
+been inserted. For example, if an SQL language box is inserted as soon as the
+user types `\texttt{int x = SELECT * FROM t}` and the user then presses
+backspace, the automatic language box should disappear because `\texttt{SELECT
+* FROM}' is valid Java and we want to prioritise the outer language in a
+composition. As Figure~\ref{fig_autoremoval}) shows, there are other scenarios
+when uncommitted language boxes should be removed, including situations where
+it is sensible for them to be inserted and removed more than once as the user
+types. The complete set of situations we handle are as follows:
 
-After typing this program, an SQL language box surrounding the input
-\qtt{select * from t} will have been automatically inserted. From a syntactical
-perspective, this was a valid decision. However, we can see from the variable
-declarations that the user intented to multiply the three poorly named
-variables and simply forgot a \qtt{*} between \qtt{from} and \qtt{t}.
-Instead of requiring the user to manually undo the insertion, language boxes
-can be automatically removed again once more information has
-become available.  In this example, once the user inserts the missing \qtt{*}
-between \qtt{from} and \qtt{t}, the SQL language box becomes invalid. This
-suggests that the language box was inserted accidentally and needs
-to be removed, however, with the restriction, that its entire content must be valid in
-the outer language.
-In some cases an automatically inserted language box can become valid in
-both the inner as well as the outer language, after the user made additional
-changes.  In those cases we prioritise the outer language and remove the
-box, but only if the boxes contents \emph{and} its surrounding context can be
-parsed in the outer language. The following constraints summarise the above
-(an example using these constraints is given in Figure \ref{fig_autoremoval}):
 \begin{enumerate}
-  \item Only automatically inserted, unlocked boxes can be automatically removed again.
-  \item If the language box content is invalid, it will be removed only if
-        its content can be parsed in the outer language.
-  \item If the language box content is valid in both the inner and outer
-    language, it will be removed only if its removal doesn't introduce new errors (i.e.~if its contents \emph{and} the first non-whitespace token following it
-    can be parsed).
-  \item If the language box itself is invalid in the outer language, it will be removed
-      if its content can be parsed in the outer language.
+  \item If an uncommitted language box's content cause a syntax error within
+    the language box, then the language box should be removed if its contents
+    can be successfully parsed in the outer language.
+  \item If an uncommitted language box causes a syntax error in the outer
+    language then it should be removed if its contents are valid in the
+    outer language. \laurie{do we check the first non-whitespace token in this context?}
+  \item If an uncommitted language box's content is valid in both the inner and
+    outer languages, then the language box should be removed if that would not
+    then cause subsequent parse errors. Following the precedent from
+    Section~\ref{sec:filtering}, we use the first non-whitespace token after
+    the language box as a proxy for this.
 \end{enumerate}
 
-While constraints 1, 2, and 4 only need to be checked when either the content of
+The first two of these only need to be checked when either the content of
 the language box, or the language box itself become invalid, constraint 3 requires
-a check anytime content is changed, i.e.~on every reparse.
-
-Applying these constraints to the example above, the inserted box would be
-removed as soon as the user inserts a \qtt{*} between \qtt{from} and
-\qtt{t}; however, it stays if more SQL code is added even it that makes the
-SQL code temporarily invalid. Note, that language boxes that were inserted by the
-user by choosing one of the suggested candidates, count as manual insertions
-and won't be automatically removed, even if they become invalid.
+a check anytime content is changed \laurie{this is really vague}, i.e.~on every reparse.
 
 \begin{figure}
 \begin{center}
@@ -969,13 +940,8 @@ language, and remove it again.}
 \label{fig_autoremoval}
 \end{figure}
 
-%After a language box has been inserted it stays in a "to be determined"
-%mode. When the user moves the cursor outside the box, the box is finalised. Until then,
-%any changes inside the box have to be validated and can lead to the box being destroyed again.
-%E.g. changing \qtt{x = SELECT * FROM table;} to \qtt{x = SELECT * FROM} will remove the box again
-%as the content is valid Python now and not valid SQL anymore.
 
-\subsection{Resizing language boxes}
+\subsubsection{Resizing language boxes}
 
 Language boxes may automatically be resized if this allows both the language box as
 well as the outer program to parse correctly. A language box may shrink, if it
