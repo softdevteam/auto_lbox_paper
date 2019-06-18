@@ -1160,14 +1160,50 @@ up to the box (lines 10--18).}
 \section{Evaluation}
 \label{sec:evaluation}
 
-To evaluate the accuracy of automatic language boxes, we ran an experiment,
-testing each heuristic on multiple benchmarks. Each benchmark uses a
-compositions of two languages, where expressions or functions from one language
-can be embedded into the other. The benchmark then first chooses a random file
-that parses in the main language. It then picks a random expressions or
-function written in the embedded language, and inserts it at a valid location
-in the chosen file. All files and expressions/functions were extracted from
-real-world programs.
+To evaluate the efficacy of automatic language boxes, a large-scale evaluation
+is necessary. However, since composed programs of the type we are aiming to
+support with automatic language boxes are currently rare, there is no
+off-the-shelf benchmark suite we can use. In this section we first detail
+the benchmark suite we created before analysing the results of automatic
+language boxes on that suite.
+
+
+\subsection{The benchmark suite}
+
+To create a benchmark suite, we took the grammars of 4 real-world languages
+(Java \laurie{7 or 8?}, Lua \laurie{5.3?}, PHP \laurie{what version?}, and
+SQLite \laurie{what version?}) and created 12 language compositions from them.
+For each language composition of $L_1$ (outer) and $L_2$ (inner), we allow
+expressions and function definitions in $L_2$ to be used wherever expressions
+and function definitions in $L_1$ are normally valid. For example, in the
+composition \emph{JavaLua}, Java is the outer language and Lua the inner
+language: Lua function definitions and expressions can be used wherever Java
+function definitions and expressions (respectively) are valid \laurie{this
+makes sense for java/lua/php, but what is a function definition in SQL?}.  The
+particular language compositions we created can be seen as the $x$-axis labels
+in Figure~\ref{tbl_valid}.
+
+We then collected a corpus of inputs in each language. \laurie{we
+need facts and figures here. at a minimum: where did we get the source code?
+how many files were there? roughly how many lines?} We then ran each program
+through a parser to identify the positions and spans of function definitions
+and expressions. \laurie{how many of each did we find? did we use every
+possible position? did we use subexpressions (e.g.~in 
+\texttt{int x = 2 + 3 * 4} did we cut out `2 + 3 * 4' as a single expression or
+did we also cut out `2 + 3'?}
+
+For each language composition, we then created a test framework which took in
+random pairs (\emph{base file}, \emph{function definition or expression
+fragment}) \laurie{did we record which pairs so that other people can replay
+exactly the same things we used?} and: loaded \emph{base file} into our
+extension of Eco; moved the cursor to a function definition or expression (as
+appropriate) and emulated the key presses to delete it; then emulated the key
+presses to insert \emph{function definition or expression fragment} in its
+place. \laurie{did we only insert linearly? i thought we were also going to try
+non-linear insertions?} For each pair we recorded \laurie{what did we record?}.
+
+
+\subsection{Results}
 
 Figure \ref{tbl_valid} shows the total percentage of
 acceptable outcomes for each heuristic used broken down by each composition.
@@ -1220,6 +1256,9 @@ to insert a language box at.
     were found.}
     \label{tbl_breakdown}
 \end{figure*}
+
+
+\section{Threats to validity}
 
 
 \section{Related Work}
