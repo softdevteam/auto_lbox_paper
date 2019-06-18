@@ -918,11 +918,7 @@ types. The complete set of situations we handle are as follows:
     can be successfully parsed in the outer language.
   \item If an uncommitted language box causes a syntax error in the outer
     language then it should be removed if its contents are valid in the
-    outer language. \laurie{do we check the first non-whitespace token in this
-        context?}\lukas{no, because if a language box is not valid at its
-        current location that is quite a severe error, so checking if the content
-        can parse outside is enough to warrant the removal (e.g. the user may not be
-        finished typing the outer input yet, so the code may not be valid yet).}
+    outer language.
   \item If an uncommitted language box's content is valid in both the inner and
     outer languages, then the language box should be removed if that would not
     then cause subsequent parse errors. Following the precedent from
