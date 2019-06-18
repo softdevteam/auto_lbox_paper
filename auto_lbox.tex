@@ -934,17 +934,12 @@ types. The complete set of situations we handle are as follows:
 \end{enumerate}
 
 Not, that while the first two situations are triggered by an error occuring either inside
-the box or on the box itself, the third situation doesn't have such a trigger.
-For this reason the conditions in the third situation need to be checked each time the
-outer program is being reparsed.\lukas{this is similar to my comment in the expanding section.
-we currently need to check these every time the program is reparsed which is not very efficient.
-an alternative approach could be to only check these boxes if the surrounding area has changed, though
-that itself is hard to determine, e.g.~how large should be make this surrounding area? the easiest
-would be to only recheck these boxes if they are encountered by the parser (i.e.~not skipped) but
-that may not be enough.}\laurie{yes, but it's deeply unclear to me what ``every time the program is reparsed'' means: do we have to inspect the whole tree or ...?}
-\lukas{ah, sorry. the program is incrementally reparsed every time the user makes an edit (e.g. after a keypress). though we don't have to inspect the whole tree
-to find these language boxes (they are all stored in a list and easily accessible). But since its hard to tell which language box the latest edit by the user
-may affect, we just check all of them each time.}
+the box or on the box itself, the third situation has no clear trigger. On each
+run of the incremental parser we thus check the third situation for each uncommitted
+language box in the program. Fortunately, unless the user has manually marked some
+language boxes as uncommitted, the only uncommitted language boxes can be at
+the local location, so their number is typically small and the performance
+implications trivial.
 
 \begin{figure}
 \begin{center}
