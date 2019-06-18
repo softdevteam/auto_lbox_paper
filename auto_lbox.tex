@@ -843,26 +843,28 @@ on each (batch) parse.
 
 \begin{figure*}
 \begin{center}
-\includegraphics[width=1\textwidth]{images/autobox_multioption_java.png}
+\includegraphics[width=1\textwidth]{images/autobox_multioption_java_sql.png}
 \end{center}
 \begin{picture}(0,0)
-    \put(-253,85){\textcolor{black}{\textbf{(a)}}}
-    \put(-90,85){\textcolor{black}{\textbf{(b)}}}
-    \put(80,85){\textcolor{black}{\textbf{(c)}}}
+    \put(-255,95){\textcolor{black}{\textbf{(a)}}}
+    \put(0,95){\textcolor{black}{\textbf{(b)}}}
+    \put(-255,53){\textcolor{black}{\textbf{(c)}}}
+    \put(0,53){\textcolor{black}{\textbf{(d)}}}
 \end{picture}
 \vspace{-1.5em}
 \caption{
 Example showing multiple language box options for the same error.
-\textbf{a)} After inserting inserting a Python method into Java, the heuristic
-found two options to resolve the error at \qtt{x} in line 2:
-include everything from \qtt{def} up to,
-and including, \qtt{return a}; or stop after \qtt{a = 11}.
+\textbf{a)} The user is currently in the process of editing an existing Java program and has
+just deleted the expression after \qtt{remote}.
+\textbf{b)} After inserting an SQL statement an error appears in line 3. However,
+since the heuristic
+found multiple options to resolve the error, no language box is automatically inserted.
 The editor indicates that there are multiple solutions for an error by showing
 a lightbulb on the left hand side.
-\textbf{b)} Clicking on the lightbulb reveals a drop-down list of the
+\textbf{c)} Clicking on the lightbulb reveals a drop-down list of the
 candidates the heuristic has found.
-\textbf{c)} Clicking on one of the options inserts the language box. This is
-treated as a manual insertion, marking the language box as committed, which
+\textbf{d)} Clicking on one of the options inserts the language box. This is
+treated as a manua insertion, marking the language box as committed, which
 means it will not be automatically removed or resized, unless the user
 manually marks it as uncommitted.}
 \label{languagebox_choices}
