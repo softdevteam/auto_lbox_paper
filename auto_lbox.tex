@@ -980,19 +980,31 @@ example of the former). A language boxes is expanded to encompass more content
 if: its parse tree does not contain a syntax error; if encompassing the
 additional content does not cause a syntax error within the language box; and
 if removing the content from the outer language does not cause syntax errors in
-the outer language. Language boxes are shrunk to encompass less content if they
-contain a syntax error and moving the content to the outer language does not
-introduce additional syntax errors.
+the outer language\lukas{is it worth reminind the user that we only check
+the first non-whitespace token?}. Language boxes are shrunk to encompass less content if they
+contain a syntax error and moving the content to the outer language both
+fixes the error inside the language box and does not
+introduce additional syntax errors in the outer language.
 
 Fortunately both growing and shrinking can be handled with a small variation to
 our existing candidates recogniser (see Section~\ref{sec:recognisers}) to
-ensure that it pretends the language box of its starting node does not exist.
-When there is a change \laurie{near/after?} or inside an uncommitted language
+\lukas{I don't understand the rest of this sentence}ensure that it pretends the language box of its starting node does not exist.
+When there is a change \laurie{near/after?}\lukas{this is tricky to define,
+since its unclear how far/close an edit needs to happen to affect the box.
+currently we only check for shrinking if the box contains errors, while
+expansion is checked everytime an edit happens anywhere in the program} or inside
+an uncommitted language
 box, we run our altered candidates recogniser at the start of the language box.
 This returns all the possible right hand extents of the language box. Starting
-from that which matches the most content and working backwards, we then check
+from the candidate which matches the most content and working backwards, we then check
 whether the conditions above are satisfied and, as soon as we match one, we
-resize the language box appropriately.
+resize the language box appropriately.\lukas{this is also not entirely true. we only
+expand a box if there is a single candidate. otherwise we let the user pick similar to
+insertion. for shrinking we currently only try to parse everything up to the error node.
+it hasn't actually occured to me to run the recogniser on the whole language box to
+see if there may be other shrinking candidates (probably because I incrementally
+parsed straight to the error node, which is faster then reparsing the entire language box
+again)}
 
 
 \section{Limitations}
