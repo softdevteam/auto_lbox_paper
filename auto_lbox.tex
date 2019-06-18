@@ -635,9 +635,8 @@ terminates, even if there is input after the fragment.
 
 \subsubsection{The stack, history, and line heuristics}
 
-We eventually created three distinct candidates heuristics, each of which, as
-we shall see in Section~\ref{sec:evaluation}, has different strengths and
-weaknesses. We now present these in no particular order.
+We eventually created three distinct candidates heuristics, each of which has
+different strengths and weaknesses.
 
 The first candidates heuristic is the \emph{stack} approach, which is based on
 the idea that each point in the parsing stack naturally defines a plausible
@@ -647,47 +646,28 @@ two significant advantages
 advantages: the parsing stack is nearly always fairly small, so only a small number
 of places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
-stack.
+stack. However, the weakness of this heuristic is that it tries relatively few
+locations, and often misses out possibilities which seem plausible to humans.
 
-The second candidates heuristic is the \emph{history} approach which makes
-use of the undo-style data that each node in a \cite{wagner98incremental} parse tree contains.
-\lukas{It is using history of the parse tree. The
-current parse tree, in the process of being parsed, is missing a lot of stuff,
-including a path to the root (it's likely detached). So we just use the version
-of the parse tree before reparsing began. we don't need to rewind anything, we
-just read it. It then just goes upwards from the error node and basically tries
-to replace entire subtrees, containing the error node, with a language box (technically
-that's not entirely true, since the candidate can exceed the subtree, tho the starting point
-is the beginning of the subtree)}\laurie{ok, you need to expand this,
-particulary the "technically" point, as i think this is probably interesting
-stuff that the reader needs to know about!}.\lukas{I'll try. The goal of any
-heuristic is to traverse the parse tree and trying to insert boxes at locations
-where this naturally makes sense. In other words, we don't need to try to
-insert a box say inbetween the type and name of a variable, e.g.~\texttt{int
-x}, or before the parathethis of a for loop, e.g.~\texttt{for (}, because these
-are unlikely places for a language box to be valid or be typed by the user.
-Instead we want to find locations that happen inbetween syntactic groups,
-e.g.~before the expression of an assignment, or inbetween two function
-declarations.  Since these groups are typically reduced into a single subtree,
-it makes sense to try locations inbetween those subtrees. The stack heuristic
-does exactly that by only trying locations on the stack, which means reductions
-have already put syntactic groups into subtrees. However, the stack heuristic
-is a bit too coarse and often skips subtrees that have already been combined
-into a bigger subtree, and sometimes we get unlucky with how the newly inserted
-input is parsed making it impossible to find its beginning since it is hidden
-within another subtree on the stack. The line heuristic on the other hand is
-too fine as it only looks at immediate tokens before the error.  The history
-approach is somewhat a middle ground. By following the error node's (previous)
-ancestors up to the root we still find sensible locations inbetween subtrees
-while ignoring the current parse of the new input which make certain locations
-inaccessible. And we still traverse quickly through the parse tree (just going
-up should be something logarithmically) which helps with the performance.}
-This approach
-uses the previous version of the parse tree (before reparsing was started) and
-traverses the error node's ancestors to find valid locations. It starts at the
-error node's immediate parent, sets the parser to the state just before the
-parent is to be parsed, and attempts to insert a box there. Since we store
-previous parsing states onto the nodes in the parse tree, we can just use the
+The second candidates heuristic is the \emph{history} approach which aims to
+find plausible candidates based on the structure of the parse tree. The
+intuition underlying this is that a likely point to insert a language box is
+around text that forms a subtree \laurie{what happens if some of the putative
+language box ends up being put in a subtree away from the rest of the content?}
+and that we can find such places by recursively walking the parent nodes of the
+node in which a syntax error was found. However, by definition, at the point
+that the candidates heuristic is called the tree is, by definition, broken
+(since a syntax error is used to trigger the automatic language box algorithm).
+Although the tree is generally broken in only minor ways, it can be broken in
+ways that would surprise users if they were aware of it. We thus use the
+history feature of the incremental parsing algorithm from
+\cite{wagner98incremental} which records all the states the tree has gone
+through. The history candidates heuristic uses this feature to walk over a
+previous version \laurie{do we just unwind one version? or do we unwind to the
+last non-broken tree? or ...?} \laurie{and why does going back a version allow
+us to walk over the tree in a different way?} of the tree.
+Since we store
+previous parsing states onto the nodes in the parse tree \laurie{eh, this seems a comically inefficient use of memory! surely we wouldn't do this in production?}, we can just use the
 state of the parent's left neighbour to test if a language box can be inserted
 here. However, in order to confirm the candidate during the filtering
 heuristic, it is still required to recreate the parsing stack to the state just
