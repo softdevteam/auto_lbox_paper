@@ -660,7 +660,17 @@ that the candidates heuristic is called the tree is, by definition, broken
 (since a syntax error is used to trigger the automatic language box algorithm).
 Although the tree is generally broken in only minor ways, it can be broken in
 ways that would surprise users if they were aware of it; in particular, in
-certain situations nodes can end up disconnected from the root \laurie{we need to cite a page or pages from wagner's thesis that backs this up, because otherwise we're going to have to explain it ourselves, which is a scary thought}. We thus use the
+certain situations nodes can end up disconnected from the root \laurie{we need to cite a page or pages from wagner's thesis that backs this up, because otherwise we're going to have to explain it ourselves, which is a scary thought}.
+\lukas{This is going to be difficult. I don't think he mentions anything along
+those lines. The closest I could find is this when he talks about ambiguous node reuse: ``Consider what happens if two
+children of a node both exist in the new version of the tree but with different
+parents -- which, if either, should be the reuse site?  The policy we adopt in
+our implementation is first-come/first-served.''. From here we can argue,
+that the second of the two node is the error node, which hasn't been parsed yet,
+and thus is still attached to its old parent. But the old parent has already been
+reused and attached to a new nonterminal (which is detached). Thus there is no path
+from the error node to the root.}
+We thus use the
 versioning feature of the incremental parsing algorithm
 from~\cite{wagner98incremental} which, simplifying slightly, uses a
 monotonically increasing global version number. Each node in the parse tree can
@@ -668,10 +678,21 @@ be viewed both in its current, and in an arbitrary previous, version. The
 history candidates heuristic uses this feature to walk over the version of the
 parse tree immediately preceding the parse that led to a syntax error (i.e.~we
 treat the parse tree as if the global version number was one less than its
-current value). \laurie{why does putting things back one version guarantee that we don't have disconnected nodes?}
+current value). \laurie{why does putting things back one version guarantee that we don't have disconnected nodes?}\lukas{because
+after every parse we have an intact parse tree. It may contain isolated errors, but there can't be any detached nonterminals
+since parsing has completed and all reductions have been applied. if we go one version back we get a (at some point) reparsed
+parse tree which only had tokens added in. we only get detached parse trees in the middle of the parse. we only store
+parse trees once parsing has finished, so there are never any detached parse trees in the history.}
 Since each node stores the parser state it was valid in, we need only check
 a candidate language box's immediate left neighbour to see if it would be valid
-at that point or not. However, unlike the stack heuristic, candidate language boxes created by the history heuristic will not have a valid parsing stack associated with them. We must therefore use the incremental parser to create a valid stack \laurie{how does it do it?}.
+at that point or not. However, unlike the stack heuristic, candidate language boxes created by the history heuristic will not have a valid parsing stack associated with them. We must therefore use the incremental parser to create a valid stack \laurie{how does it do it?}
+\lukas{How to recreate the parsing stack is explained at the end of \ref{sec:filtering}. However,
+for the candidate heuristic we don't actually need to recreate the parsing stack. It is sufficient
+to check if the parse table has an action for the language box at the given state. This doesn't
+guarentee that the language box is fully valid at that point (e.g. the lbox could first cause a reduction
+but in the following state results in an error). But since the filtering heuristic does this check properly by
+recreating the stack and then parsing the language box (plus whatever comes after), it will
+filter out those cases afterwards.}.
 
 The third candidates heuristic is the \emph{line} approach, which searches
 backwards, one node at a time, from the error node to the beginning of the line
@@ -911,11 +932,11 @@ types. The complete set of situations we handle are as follows:
     the language box as a proxy for this.
 \end{enumerate}
 
-Not, that while the first two situations are triggered by an error occuring either inside
+Note, that while the first two situations are triggered by an error occuring either inside
 the box or on the box itself, the third situation has no clear trigger. On each
 run of the incremental parser we thus check the third situation for each uncommitted
 language box in the program. Fortunately, unless the user has manually marked some
-language boxes as uncommitted, the only uncommitted language boxes can be at
+language boxes as uncommitted, the only uncommitted language boxes\lukas{is it box or boxes?} can be at
 the local location, so their number is typically small and the performance
 implications trivial.
 
