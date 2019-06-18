@@ -710,31 +710,27 @@ candidates.
 \begin{lstdefault}[]
 def stack(parser, node):
   cnds = []
-  for state in reversed(parser.stack):
+  for state, node in reversed(parser.stack):
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
-        stackn = parser.next_terminal(state)
-        cnds.extend(cnds_recogniser(node, lang))
+        la = node.next_lookahead()
+        cnds.extend(cnds_recogniser(la, lang))
   return cnds
 
 def history(parser, node):
   cnds = []
-  node = node.parent # XXX laurie asks: what does "parent" have to do with history?
-  # this should be something like node.parent(oldversion)
-  # also, shouldn't we check node before checking its parent or ... ? lukas: you are quite right, we should.
-  # laurie: what does "node.left" mean?
-  while node is not None and node.left:
+  while node is not None:
     for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
+      if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
-    node = node.parent
+    node = node.parent(previous_version)
   return cnds
 
 def line(parser, node):
   cnds = []
   while node is not None and node.typ not in ["BOS", "Newline"]:
     for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted at \texttt{node}}}!>:
+      if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
     node = node.prev_terminal()
   return cnds
@@ -746,8 +742,11 @@ def line(parser, node):
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
 Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
-stack, finding the node matching each point in the stack (line 6) and then searching for candidate language boxes (line 7). The history
-heuristic \laurie{I don't know what this one does}. The \texttt{line} heuristic
+stack, finding the node matching each point in the stack (line 6) and then
+searching for candidate language boxes (line 7). The history heuristic
+walks the error node's ancestors up to the root and searching for candidate
+language boxes at the beginning of each ancestor subtree. The \texttt{line}
+heuristic
 searches each token from the error node until the beginning of the line which
 contains that node.}
 \end{minipage}
