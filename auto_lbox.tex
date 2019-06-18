@@ -670,6 +670,47 @@ that the second of the two node is the error node, which hasn't been parsed yet,
 and thus is still attached to its old parent. But the old parent has already been
 reused and attached to a new nonterminal (which is detached). Thus there is no path
 from the error node to the root.}\laurie{we need to do something here: on the basis that, after you, i probably understand wagner's algorithm as well as nearly anyone, i don't have a clue what the problem is, or why our solution works. we've either got to explain it fully, or reference something that explains it. i'll be honest and say that i'm baffled that nodes can become detached: it runs counter to my intuitions about how wagner's algorithm works. is this connected to the fact that parsing increments the versions by two?}
+\lukas{I may have not been very clear about the detaching thing. Nodes can
+become detached, but only briefly during parsing. As soon as parsing finishes
+everything is back in order.  Just think about an empty parse tree into which
+we insert a single token. Let's take the familiar calculator grammar as an
+example. We insert 1 which then gets reparsed. The parser shifts `1` onto the
+stack. Then `1` gets reduced to `P` for which we create a new nonterminal
+(since there are no nonterminals to reuse yet) and push that onto the stack.
+This nonterminal `P` has no parent yet. This means that `1` which is a child of
+`P` is now detached from the root of the parse tree (note, that we can still
+traverse down to `1` from the root using the previous parse tree -- whenever
+the incremental parser reparses a parse tree, it always needs to traverse the
+previous version since we are actively changing stuff around during parsing,
+kindof like iterating over a list that we add/remove elements from).  Now we
+continue parsing, which applys the reductions `T->P` and `E->T`, which attaches
+P to T, and T to E, however, E is still detached. Then the parser reaches an
+accept state, which means there should only be a single node left on the tree
+which is pretty much our entire new parse tree (intertwined from new and old
+nonterminals). We then just take this node from the top of the stack and whack
+inbetween BOS and EOS and we're done.  This is how subtrees in general can
+become detached. However, this doesn't explain how the error node can become
+attached, since it hasn't even been parsed yet, which means it couldn't have
+been reduced and attached to a new nonterminal. This is were node reuse comes
+into play. Whenever a reduction happens, we see if we can reuse an old node
+which already exists in the tree.  There are two variants of node reuse.
+Unambiguous node reuse can only reuse an old nonterminal, if the new children
+and the old children are all the same, which is a bit too strict. Which is why
+there is another variant: ambiguous node reuse. There only one of the children
+needs to be the same. Let's now assume we have two nodes, `1` and `e`, which
+are both attached to a nonterminal `A`. The node `e` was just inserted and
+needs to be reparsed. Let's then assume `1` gets reduced using a rule `A->1`,
+so we can reuse the previous `A`. However, due to the `e` being there things
+are being parsed differently, and we use a rule `X->A`, but no nonterminal `X`
+exists yet. So we create a new nonterminal `X` and attach `A` to it. `X` is not
+detached. However, `e` which now causes an error still has a parent pointer to
+`A` (since we haven't parsed `e` yet), and thus be definition `e` is now also
+detached from the root. Of course then error recovery kicks and and isolates
+trees and reverts them and so on, so at the end of the parse no detached
+subtrees exist. However, since the candidate heuristic gets triggered at the
+point of the error, the parse tree is still broken, and thus when traversing
+the tree upwards from the error node, we need to use the previous version of
+the parse tree.  }
 We thus use the
 versioning feature of the incremental parsing algorithm
 from~\cite{wagner98incremental} which, simplifying slightly, uses a
@@ -698,11 +739,16 @@ needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
 valid parse stack for candidates from the history and line heuristics.
 Fortunately, we can do so by using incremental parsing \laurie{i think we mean
-to say ``we can do so by using the state of the incremental parser''?}
-\laurie{the rest of this sentence is so terse that i can't understand it} to
-skip all subtrees
-that are not a direct ancestor of the node after which we want to insert the
-language box. This way we can recreate the parsing stack as if we had inserted
+to say ``we can do so by using the state of the incremental
+parser''?}\lukas{no, we are basically reparsing the entire parse tree again all
+the way up to the candidate location where we want to insert the language box.
+however, because anything subtree that isn't a direct ancestor of that location
+can just be skipped (i.e.~optimistically shifted).  This is equivalent to
+changing the node at the candidate location as changed, and then reparsing the
+parse tree all the way to that node.}
+to generate the parse stack without revisiting the entire tree, by skipping
+subtrees are not on a direct path to the candidate location.
+This way we can recreate the parsing stack as if we had inserted
 the language box at that point and reparsed the changed parse tree (see Figure
 \ref{fig_preparse} \laurie{this figure doesn't seem obviously related
 to the main algorithm?}).
@@ -746,7 +792,8 @@ def line(parser, node):
   passed a \texttt{node}, which is the point at which an error is detected, and
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
-Figure~\ref{fig:recogniser}) \laurie{what is the intuition behind \texttt{next\_lookahead}?}. The \texttt{stack} heuristic walks the parse
+    Figure~\ref{fig:recogniser}) \laurie{what is the intuition behind \texttt{next\_lookahead}?\lukas{this used to be called poplookahead by Wagner, but in my thesis
+    I changed this to nextlookahead. It simply returns the next node in the parse tree (similar to a depth-first traversal)}}. The \texttt{stack} heuristic walks the parse
 stack, finding the node matching each point in the stack (line 6) and then
 searching for candidate language boxes (line 7). The history heuristic
 walks up (line 17) a previous version of the parse tree (line 12) for
@@ -999,12 +1046,12 @@ an HTML language box, which is unlikely to match the user's intentions.
 
 To solve many such cases, we thus have to relax the `no hints' constraint from
 Section~\ref{the problem} by allowing language composition authors to specify
-either of both of: those \laurie{token types or strings?} which can start a
+either or both of\lukas{I think the two are mutually exclusive}: those token types which can start a
 language box; and those which can't start a language box. For example, in the
 case of the Java and HTML composition, a good choice for the language
 composition is to specify HTML tags as being the only valid starting input for
 a candidate language box. \laurie{i assume we enforce this in the candidates
-recogniser so that later stages don't have to do needless work?}
+recogniser so that later stages don't have to do needless work?}\lukas{correct!}
 
 
 \section{Limitations}
@@ -1042,7 +1089,9 @@ Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
 `\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
 file (whether it is inside or outside a language box) to be relexed. \laurie{I
-have no idea what this sentence means} However, since the lexing only happens
+have no idea what this sentence means}\lukas{It basically means,
+since we are only pretend-lexing things for the recogniser, this has no
+impact other than the performance hit.} However, since the lexing only happens
 virtually and is not applied to the input (unless this result in the insertion
 of a new language box), this does not affect the parse tree of the outer
 language. And since lexing is generally quite fast, the performance impact will
@@ -1052,6 +1101,15 @@ also be insignificant.
 \subsection{Wrong detection}
 
 \laurie{does this ever trigger for anything except the java/python example?}
+\lukas{It should also trigger for JavaSQL and probably does for many other compositions, e.g.}
+
+\begin{lstdefault}
+int y;
+int x = SELECT * FROM t WHERE
+y = 2; // Old Java code
+\end{lstdefault}
+
+\lukas{If we keep this subsection, I will update the example accordingly.}
 
 Sometimes, while the user is typing, language boxes are inserted prematurely,
 and wrap contents of the outer language into the language box, that weren't
@@ -1094,6 +1152,9 @@ then the body will be older than the header.
 \label{sec:impl_removerec}
 
 \laurie{i'm not sure what to do with this section. do we need it?}
+\lukas{probably not. I think we've explained most of this in prose and
+the algorithm isn't all that exciting, if we can get the prose explanation right (which
+currently needs a bit more tweaking)}
 
 Section \ref{subsec_autoremoval} described how automatically inserted language
 boxes can automatically be removed again, if they become invalid. The condition
