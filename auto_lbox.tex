@@ -660,7 +660,13 @@ that the candidates heuristic is called the tree is, by definition, broken
 Although the tree is generally broken in only minor ways, it can be broken in
 ways that would surprise users if they were aware of it.\lukas{there are two reasons we use history:
 1) subtrees on the current parsing stack may be detached from the root, so traversing parents
-up to the root is not always possible}\laurie{can you explain this a bit more for me? detached in what way? i thought everything was attached, but perhaps attched to the wrong node? clearly i'm wrong in some way!} We thus use the
+up to the root is not always possible}\laurie{can you explain this a bit more for me? detached in what way? i thought everything was attached, but perhaps attched to the wrong node? clearly i'm wrong in some way!}
+\lukas{if we create a new nonterminal node (and we couldn't reuse an old one),
+this node doesn't have a parent yet. but because of (ambiguous) node reuse one
+of the error nodes ancestors can end up as a child of that new nonterminal. so
+when then try to traverse the error nodes ancestors we end up in the new nonterminal
+node and won't be able to continue traversing up to the root.}
+We thus use the
 versioning feature of the incremental parsing algorithm
 from~\cite{wagner98incremental} which, simplifying slightly, uses a
 monotonically increasing global version number. Each node in the parse tree can
@@ -680,7 +686,7 @@ checking if a language box can be inserted without having to reparse the parse
 tree to that point. so, we don't really need to do this, but without some of these algorithms
 perferm a bit worse. That being said, given we can use incremental parsing for most of them,
 it might not be a huge performance loss, but that's hard to say without trying. Though if we
-want to optimise memory use storing only the diffs of changed tokens values might be a better target.}\laurie{hang on, do we store the parsing stack or just a single parsing state? if it's the latter, fine (it's just a machine word at worse).}, we can just use the
+want to optimise memory use storing only the diffs of changed tokens values might be a better target.}\laurie{hang on, do we store the parsing stack or just a single parsing state? if it's the latter, fine (it's just a machine word at worse).}\lukas{ah, haha, I see the misunderstanding now. We only store the single state where the node was shifted onto the stack. if we'd store the entire stack that would indeed be laughably inefficient.}, we can just use the
 state of the parent's left neighbour to test if a language box can be inserted
 here. However, in order to confirm the candidate during the filtering
 heuristic, it is still required to recreate the parsing stack to the state just
@@ -935,6 +941,9 @@ an alternative approach could be to only check these boxes if the surrounding ar
 that itself is hard to determine, e.g.~how large should be make this surrounding area? the easiest
 would be to only recheck these boxes if they are encountered by the parser (i.e.~not skipped) but
 that may not be enough.}\laurie{yes, but it's deeply unclear to me what ``every time the program is reparsed'' means: do we have to inspect the whole tree or ...?}
+\lukas{ah, sorry. the program is incrementally reparsed every time the user makes an edit (e.g. after a keypress). though we don't have to inspect the whole tree
+to find these language boxes (they are all stored in a list and easily accessible). But since its hard to tell which language box the latest edit by the user
+may affect, we just check all of them each time.}
 
 \begin{figure}
 \begin{center}
