@@ -822,25 +822,6 @@ consideration heuristic. When set to \texttt{true}, the candidates heuristic
 will notice and deliberately ignore such nodes so that language boxes are not
 repeatedly inserted.
 
-\label{multiple candidates}
-However, if there are multiple candidates, then we have two choices: we could
-insert one of the candidates and present the others to the users as choices; or
-simply present all the candidates as choices without inserting
-any of them. The former approach is surprisingly hard to do well. If we were to
-non-deterministically select one candidate and insert it, the user would be
-unable to predict what was about to happen on each key press. We could instead
-rank candidates (perhaps by `relevance', or length, or starting position etc.),
-but we were unable to find a ranking system which matches the user's intentions
-often enough to be worthwhile. We therefore simply present all the candidates
-as options to the user from which they must choose one (see Figure~\ref{fig:multiplecnds}). As we shall see in
-Section~\ref{sec:evaulation}, this happens rarely enough that it is not a
-significant problem. It is also worth noting that this is an
-example of a fundamental difference between traditional batch parsing and
-incremental parsing: it is entirely feasible for us
-to ask the user for their help in choosing language boxes as that choice can
-be made once and recorded permanently, rather than having to be made anew
-on each (batch) parse.
-
 \begin{figure*}
 \begin{center}
 \includegraphics[width=1\textwidth]{images/autobox_multioption_java_sql.png}
@@ -865,6 +846,26 @@ on each (batch) parse.
   drop-down list. \textbf{(d)} The appropriate language box is inserted.}
 \label{fig:multiplecnds}
 \end{figure*}
+
+\label{multiple candidates}
+However, if there are multiple candidates, then we have two choices: we could
+insert one of the candidates and present the others to the users as choices; or
+simply present all the candidates as choices without inserting
+any of them. The former approach is surprisingly hard to do well. If we were to
+non-deterministically select one candidate and insert it, the user would be
+unable to predict what was about to happen on each key press. We could instead
+rank candidates (perhaps by `relevance', or length, or starting position etc.),
+but we were unable to find a ranking system which matches the user's intentions
+often enough to be worthwhile. We therefore simply present all the candidates
+as options to the user from which they must choose one (see Figure~\ref{fig:multiplecnds}). As we shall see in
+Section~\ref{sec:evaulation}, this happens rarely enough that it is not a
+significant problem. It is also worth noting that this is an
+example of a fundamental difference between traditional batch parsing and
+incremental parsing: it is entirely feasible for us
+to ask the user for their help in choosing language boxes as that choice can
+be made once and recorded permanently, rather than having to be made anew
+on each (batch) parse.
+
 
 \begin{center}
 \end{center}
