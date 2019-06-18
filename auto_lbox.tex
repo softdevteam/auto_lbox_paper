@@ -228,7 +228,7 @@ and determining whether a grammar is unambiguous or not is
 undecidable~\cite{cantor62ambiguity}. There are two fundamental approaches
 of coping with ambiguity: either ruling it out through the use of
 delimiters (either via explicit bracketing or syntax-directed
-editing); or using generalised parsing algorithm that can create a parse
+editing); or using a generalised parsing algorithm that can create a parse
 forest, capturing all ambiguities
 (e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
 are visually intrusive and/or awkward to work with; and one can never know if all possible
@@ -654,20 +654,41 @@ find plausible candidates based on the structure of the parse tree. The
 intuition underlying this is that a likely point to insert a language box is
 around text that forms a subtree \laurie{what happens if some of the putative
 language box ends up being put in a subtree away from the rest of the content?}
+\lukas{this can only happen if during typing parts of the language box can be parsed
+in the outer language, which then creates a separate subtree, and continuing to type
+inserts tokens into another remote subtree. in those cases we can't really do anything, which
+is why we added the line heuristic.}
 and that we can find such places by recursively walking the parent nodes of the
 node in which a syntax error was found. However, by definition, at the point
 that the candidates heuristic is called the tree is, by definition, broken
 (since a syntax error is used to trigger the automatic language box algorithm).
 Although the tree is generally broken in only minor ways, it can be broken in
-ways that would surprise users if they were aware of it. We thus use the
+ways that would surprise users if they were aware of it.\lukas{there are two reasons we use history:
+1) subtrees on the current parsing stack may be detached from the root, so traversing parents
+up to the root is not always possible 2) the current parse tree may have reparsed
+contents of the language box in weird ways so that we cannot find the beginning of the language box
+anymore (which is somewhat decsribed by the previous sentence)} We thus use the
 history feature of the incremental parsing algorithm from
 \cite{wagner98incremental} which records all the states the tree has gone
 through. The history candidates heuristic uses this feature to walk over a
 previous version \laurie{do we just unwind one version? or do we unwind to the
 last non-broken tree? or ...?} \laurie{and why does going back a version allow
-us to walk over the tree in a different way?} of the tree.
+us to walk over the tree in a different way?}\lukas{we don't really unwind
+anything. we just look at an old version of the tree. we use the version of the
+tree just before reparsing started, so that we have an intact parse tree that
+still contains all recent changes. it's 1 version back} of the tree.
 Since we store
-previous parsing states onto the nodes in the parse tree \laurie{eh, this seems a comically inefficient use of memory! surely we wouldn't do this in production?}, we can just use the
+previous parsing states onto the nodes in the parse tree \laurie{eh, this seems
+a comically inefficient use of memory! surely we wouldn't do this in
+production?}\lukas{it's not really that much more inefficient compared to the other stuff
+we store on the nodes. i think wagners original algorithm doesn't store states
+on nodes, but storing them helps us a lot with other features, e.g. showing in the
+editor which language boxes are valid at the current cursor position, or in this case
+checking if a language box can be inserted without having to reparse the parse
+tree to that point. so, we don't really need to do this, but without some of these algorithms
+perferm a bit worse. That being said, given we can use incremental parsing for most of them,
+it might not be a huge performance loss, but that's hard to say without trying. Though if we
+want to optimise memory use storing only the diffs of changed tokens values might be a better target.}, we can just use the
 state of the parent's left neighbour to test if a language box can be inserted
 here. However, in order to confirm the candidate during the filtering
 heuristic, it is still required to recreate the parsing stack to the state just
@@ -887,7 +908,7 @@ automatically removed or resized by the algorithm.
 
 \subsubsection{Removing language boxes}
 
-The simplest example of when might want an automatic language box removed is if
+The simplest example of when we might want an automatic language box removed is if
 the user deletes a character immediately after an automatic language box has
 been inserted. For example, if an SQL language box is inserted as soon as the
 user types `\texttt{int x = SELECT * FROM t}` and the user then presses
@@ -899,12 +920,16 @@ it is sensible for them to be inserted and removed more than once as the user
 types. The complete set of situations we handle are as follows:
 
 \begin{enumerate}
-  \item If an uncommitted language box's content cause a syntax error within
+  \item If an uncommitted language box's content causes a syntax error within
     the language box, then the language box should be removed if its contents
     can be successfully parsed in the outer language.
   \item If an uncommitted language box causes a syntax error in the outer
     language then it should be removed if its contents are valid in the
-    outer language. \laurie{do we check the first non-whitespace token in this context?}
+    outer language. \laurie{do we check the first non-whitespace token in this
+        context?}\lukas{no, because if a language box is not valid at its
+        current location that is quite a severe error, so checking if the content
+        can parse outside is enough to warrant the removal (e.g. the user may not be
+        finished typing the outer input yet, so the code may not be valid yet).}
   \item If an uncommitted language box's content is valid in both the inner and
     outer languages, then the language box should be removed if that would not
     then cause subsequent parse errors. Following the precedent from
@@ -912,9 +937,15 @@ types. The complete set of situations we handle are as follows:
     the language box as a proxy for this.
 \end{enumerate}
 
-The first two of these only need to be checked when either the content of
-the language box, or the language box itself become invalid, constraint 3 requires
-a check anytime content is changed \laurie{this is really vague}, i.e.~on every reparse.
+Not, that while the first two situations are triggered by an error occuring either inside
+the box or on the box itself, the third situation doesn't have such a trigger.
+For this reason the conditions in the third situation need to be checked each time the
+outer program is being reparsed.\lukas{this is similar to my comment in the expanding section.
+we currently need to check these every time the program is reparsed which is not very efficient.
+an alternative approach could be to only check these boxes if the surrounding area has changed, though
+that itself is hard to determine, e.g.~how large should be make this surrounding area? the easiest
+would be to only recheck these boxes if they are encountered by the parser (i.e.~not skipped) but
+that may not be enough.}
 
 \begin{figure}
 \begin{center}
