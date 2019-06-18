@@ -655,19 +655,12 @@ find plausible candidates based on the structure of the parse tree. The
 intuition underlying this is that a likely point to insert a language box is
 around text that forms a subtree
 and that we can find such places by recursively walking the parent nodes of the
-node in which a syntax error was found. However, by definition, at the point
+node in which a syntax error was found. However, at the point
 that the candidates heuristic is called the tree is, by definition, broken
 (since a syntax error is used to trigger the automatic language box algorithm).
 Although the tree is generally broken in only minor ways, it can be broken in
-ways that would surprise users if they were aware of it.\lukas{there are two reasons we use history:
-1) subtrees on the current parsing stack may be detached from the root, so traversing parents
-up to the root is not always possible}\laurie{can you explain this a bit more for me? detached in what way? i thought everything was attached, but perhaps attched to the wrong node? clearly i'm wrong in some way!}
-\lukas{if we create a new nonterminal node (and we couldn't reuse an old one),
-this node doesn't have a parent yet. but because of (ambiguous) node reuse one
-of the error nodes ancestors can end up as a child of that new nonterminal. so
-when then try to traverse the error nodes ancestors we end up in the new nonterminal
-node and won't be able to continue traversing up to the root.}
-We thus use the
+ways that would surprise users if they were aware of it; in particular, in
+certain situations nodes can end up disconnected from the root \laurie{we need to cite a page or pages from wagner's thesis that backs this up, because otherwise we're going to have to explain it ourselves, which is a scary thought}. We thus use the
 versioning feature of the incremental parsing algorithm
 from~\cite{wagner98incremental} which, simplifying slightly, uses a
 monotonically increasing global version number. Each node in the parse tree can
@@ -675,35 +668,20 @@ be viewed both in its current, and in an arbitrary previous, version. The
 history candidates heuristic uses this feature to walk over the version of the
 parse tree immediately preceding the parse that led to a syntax error (i.e.~we
 treat the parse tree as if the global version number was one less than its
-current value).
-Since we store
-previous parsing states onto the nodes in the parse tree \laurie{eh, this seems
-a comically inefficient use of memory! surely we wouldn't do this in
-production?}\lukas{it's not really that much more inefficient compared to the other stuff
-we store on the nodes. i think wagners original algorithm doesn't store states
-on nodes, but storing them helps us a lot with other features, e.g. showing in the
-editor which language boxes are valid at the current cursor position, or in this case
-checking if a language box can be inserted without having to reparse the parse
-tree to that point. so, we don't really need to do this, but without some of these algorithms
-perferm a bit worse. That being said, given we can use incremental parsing for most of them,
-it might not be a huge performance loss, but that's hard to say without trying. Though if we
-want to optimise memory use storing only the diffs of changed tokens values might be a better target.}\laurie{hang on, do we store the parsing stack or just a single parsing state? if it's the latter, fine (it's just a machine word at worse).}\lukas{ah, haha, I see the misunderstanding now. We only store the single state where the node was shifted onto the stack. if we'd store the entire stack that would indeed be laughably inefficient.}, we can just use the
-state of the parent's left neighbour to test if a language box can be inserted
-here. However, in order to confirm the candidate during the filtering
-heuristic, it is still required to recreate the parsing stack to the state just
-before the parent was parsed. Luckily, the incremental parser allows us to recreate
-the stack quickly, without having to reparse the entire program.
+current value). \laurie{why does putting things back one version guarantee that we don't have disconnected nodes?}
+Since each node stores the parser state it was valid in, we need only check
+a candidate language box's immediate left neighbour to see if it would be valid
+at that point or not. However, unlike the stack heuristic, candidate language boxes created by the history heuristic will not have a valid parsing stack associated with them. We must therefore use the incremental parser to create a valid stack \laurie{how does it do it?}.
 
 The third candidates heuristic is the \emph{line} approach, which searches
 backwards, one node at a time, from the error node to the beginning of the line
 that contains that token for candidates. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
-in a way that is unlikely to cause a noticeable slowdown. Like the history
-approach, this heuristic also needs to recreate the parse stack to confirm
-candidates during the filtering.
+in a way that is unlikely to cause a noticeable slowdown. Once candidates are found,
+we use the same approach as in the history heuristic to create a valid parsing
+stack for each candidate.
 
-Listing \ref{lst_find_candidates} shows the heuristics for finding suitable
-candidates.
+Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
 
 \begin{figure*}[t]
 \begin{minipage}[t]{0.55\textwidth}
@@ -749,8 +727,8 @@ language boxes at the beginning of each ancestor subtree. The \texttt{line}
 heuristic
 searches each token from the error node until the beginning of the line which
 contains that node.}
+\label{lst:find_candidates}
 \end{minipage}
-\label{lst_find_candidates}
 \end{figure*}
 
 
@@ -898,10 +876,10 @@ manually marks it as uncommitted.}
 Automatically inserted language boxes start life in the \emph{uncommitted}
 state, which means that they can then be considered possible candidates for
 automatic removing and resizing. Language boxes move to the \emph{committed}
-state when the user, directly or indirectly, shows that they are finished
-editing at the current point (e.g.~when they move the cursor outside of the
-language box); users can manually change a committed box to uncommitted if they
-later want it to be subject to the algorithm again.  If the content of an
+state when the user shows that they are finished
+editing at the current point by moving the cursor outside of the language box.
+Users can manually change a committed box to uncommitted if they
+later want it to be subject to the algorithm again. If the content of an
 uncommitted language box, or its surrounding area, changes then it may be
 automatically removed or resized by the algorithm.
 
