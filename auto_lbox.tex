@@ -652,12 +652,7 @@ locations, and often misses out possibilities which seem plausible to humans.
 The second candidates heuristic is the \emph{history} approach which aims to
 find plausible candidates based on the structure of the parse tree. The
 intuition underlying this is that a likely point to insert a language box is
-around text that forms a subtree \laurie{what happens if some of the putative
-language box ends up being put in a subtree away from the rest of the content?}
-\lukas{this can only happen if during typing parts of the language box can be parsed
-in the outer language, which then creates a separate subtree, and continuing to type
-inserts tokens into another remote subtree. in those cases we can't really do anything, which
-is why we added the line heuristic.}
+around text that forms a subtree
 and that we can find such places by recursively walking the parent nodes of the
 node in which a syntax error was found. However, by definition, at the point
 that the candidates heuristic is called the tree is, by definition, broken
@@ -665,18 +660,15 @@ that the candidates heuristic is called the tree is, by definition, broken
 Although the tree is generally broken in only minor ways, it can be broken in
 ways that would surprise users if they were aware of it.\lukas{there are two reasons we use history:
 1) subtrees on the current parsing stack may be detached from the root, so traversing parents
-up to the root is not always possible 2) the current parse tree may have reparsed
-contents of the language box in weird ways so that we cannot find the beginning of the language box
-anymore (which is somewhat decsribed by the previous sentence)} We thus use the
-history feature of the incremental parsing algorithm from
-\cite{wagner98incremental} which records all the states the tree has gone
-through. The history candidates heuristic uses this feature to walk over a
-previous version \laurie{do we just unwind one version? or do we unwind to the
-last non-broken tree? or ...?} \laurie{and why does going back a version allow
-us to walk over the tree in a different way?}\lukas{we don't really unwind
-anything. we just look at an old version of the tree. we use the version of the
-tree just before reparsing started, so that we have an intact parse tree that
-still contains all recent changes. it's 1 version back} of the tree.
+up to the root is not always possible}\laurie{can you explain this a bit more for me? detached in what way? i thought everything was attached, but perhaps attched to the wrong node? clearly i'm wrong in some way!} We thus use the
+versioning feature of the incremental parsing algorithm
+from~\cite{wagner98incremental} which, simplifying slightly, uses a
+monotonically increasing global version number. Each node in the parse tree can
+be viewed both in its current, and in an arbitrary previous, version. The
+history candidates heuristic uses this feature to walk over the version of the
+parse tree immediately preceding the parse that led to a syntax error (i.e.~we
+treat the parse tree as if the global version number was one less than its
+current value).
 Since we store
 previous parsing states onto the nodes in the parse tree \laurie{eh, this seems
 a comically inefficient use of memory! surely we wouldn't do this in
@@ -688,7 +680,7 @@ checking if a language box can be inserted without having to reparse the parse
 tree to that point. so, we don't really need to do this, but without some of these algorithms
 perferm a bit worse. That being said, given we can use incremental parsing for most of them,
 it might not be a huge performance loss, but that's hard to say without trying. Though if we
-want to optimise memory use storing only the diffs of changed tokens values might be a better target.}, we can just use the
+want to optimise memory use storing only the diffs of changed tokens values might be a better target.}\laurie{hang on, do we store the parsing stack or just a single parsing state? if it's the latter, fine (it's just a machine word at worse).}, we can just use the
 state of the parent's left neighbour to test if a language box can be inserted
 here. However, in order to confirm the candidate during the filtering
 heuristic, it is still required to recreate the parsing stack to the state just
