@@ -1021,19 +1021,46 @@ recogniser so that later stages don't have to do needless work?}
 
 Simplifying somewhat, automatic language boxes can be seen as implementing a
 simplified, predictable, online variant of generalised parsing. Since they are
-simplified there are situations where they do not perform as well as hoped.
+simplified, there are situations where they do not perform as well as hoped.
 Although (as we shall see in Section~\ref{sec:evaluation}) these cases are
 rare, it is useful to enumerate some of their fundamental weaknesses.
 
-Although our solution to highly ambiguous compositions (see Section~\ref{highly
+Although our solution to highly ambiguous compositions (see Section~\ref{sec:highly
 ambiguous compositions}) works well when the outer language matches specific
 input (e.g.~Java) and the inner language matches nearly anything (e.g.~HTML),
-the reverse does not work well. For example, if we compose HTML and Java where
+the reverse does not hold. For example, if we compose HTML and Java where
 Java expressions are valid wherever HTML tags are valid, automatic language
 boxes almost never trigger, since there are few ways of making a syntax error
 in HTML. We are unable to imagine a solution to this problem.
 
+Lexical ambiguities between languages can also cause subtle problems. For
+example, imagine that we assume Java and Lua, such that Lua expressions are
+valid wherever Java expressions are valid and then input `\texttt{int x = 3 //
+4 + 1;}'. This leads to a syntax error at the beginning of the line following
+this statement and no automatic language boxes are inserted. However, this is
+confusing for users, since `\texttt{//}' is Lua's integer division operator,
+and they might reasonably expect a Lua language box to be put around `\texttt{3
+// 4}' and/or `\texttt{3 // 4 + 1}'. However, since \texttt{//} is the Java
+comment prefix, `\texttt{// 4 + 1;}' is ignored entirely. Since the resulting
+syntax error is thus forced onto the following line, this means that not even
+the line candidates heuristic can find a starting point for language boxes that
+matches a human's intuition. Fortunately, such ambiguities happen
+rarely.
+
+Automatic language boxes inherit incremental parsing's weaknesses on multiline
+comments and strings. For example, in a naive Java grammar, typing
+`\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
+file (whether it is inside or outside a language box) to be relexed. \laurie{I
+have no idea what this sentence means} However, since the lexing only happens
+virtually and is not applied to the input (unless this result in the insertion
+of a new language box), this does not affect the parse tree of the outer
+language. And since lexing is generally quite fast, the performance impact will
+also be insignificant.
+
+
 \subsection{Wrong detection}
+
+\laurie{does this ever trigger for anything except the java/python example?}
 
 Sometimes, while the user is typing, language boxes are inserted prematurely,
 and wrap contents of the outer language into the language box, that weren't
@@ -1069,121 +1096,13 @@ the user to type language boxes out-of-order.  For example, they can't start
 typing the body of a Python function and add the method header afterwards, as
 then the body will be older than the header.
 
-\subsection{Grammar limitations}
-
-\lukas{this is partially solved by the line heuristic, unless we insert a newline
-into the examples below.}
-
-Sometimes the structure of a grammar can be responsible for the failure to
-generate automatic language boxes. For example, let's consider a composition of
-PHP and Python, that allows Python expressions wherever PHP expressions are
-valid. The user then edits the composition as follows:
-
-\begin{center}
-\includegraphics[width=0.45\textwidth]{images/autobox_limitphpgrammar.png}
-\end{center}
-
-The user might reasonably expect to have a second option here, which would
-allow the content \qtt{1 or not 2} to be wrapped into a Python language box.
-The algorithm, however, couldn't detect this and instead only found a single
-candidate, \qtt{not 2}, which was automatically inserted.  The problem lies
-within the PHP grammar, which also has a keyword \qtt{or}, and how the location
-for language box candidates are calculated. As described earlier in this
-chapter, we use a technique similar to error recovery, that rewinds the parse
-stack to find a position on the stack, where the language can be inserted.
-However, the way the PHP grammar is structured and thus parses the above input,
-makes it impossible to find a location on the stack that allows \qtt{1 or not
-2} to be wrapped into a language box, as Figure \ref{fig_auto_phplimit} shows.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.49\textwidth]{images/limitation_php}
-\end{center}
-\caption{An example showing how sometimes the grammar of a language can
-keep the automatic language box detection from finding appropriate candidates.
-Shown on the left is the elided parse tree after the user edited the PHP expression
-\qtt{\$x = 1;} by inserting the Python code \qtt{or not 2}. However, we
-can see on the right, that by the time the error occurs, PHP has already reduced \qtt{\$x = 1} to \texttt{expr\textsubscript{2}}, and shifted
-\texttt{or} onto the stack. The only valid locations for a language
-box we can thus find are before \texttt{expr\textsubscript{2}} and \qtt{or}. In particular,
-we cannot find the location before \qtt{1} which would allow us to wrap the entire expression
-into a box.}
-\label{fig_auto_phplimit}
-\end{figure}
-
-Other compositions suffer from the same issue:
-\begin{itemize}
-    \item[JavaLua] `\verb|int x = 1, 2|', can't wrap `\verb|1, 2|' in a Lua
-        language box, since Java has already reduced parts of the parse tree
-        after seeing the `\texttt{,}', so that neither heuristic can reach the
-        beginning of the expression.
-    \item[JavaSQL] `\verb|int x = BEGIN; SELECT a FROM t;|'. Since `\texttt{BEGIN;}` is a
-        valid Java expression, it has already been reduced to a subtree which
-        can't be reached from the error that occurs in `\texttt{FROM}'.
-    \item[LuaJava] `\verb|x = new int[1]|'. Error occurs after the Java expr, at
-        which point it has already been reduced in Lua.
-    \item[LuaSQL] `\verb|local x = SELECT a, b FROM t1;|'. After parsing
-        `\texttt{,}', the parse tree is reduced in a way that makes reaching the
-        beginning of the expression impossible for the heuristics.
-    \item[LuaSQL] `\verb|local x = SELECT a.b FROM t1;]|'. Same as the above but
-        with `\texttt{.}' instead of `\texttt{,}'.
-\end{itemize}
-
-\subsection{Problems with comments}
-
-Sometimes comments can be the reason for a failed insertion. For example, when
-composing Lua and Java, a possible composed program may look like this:
-
-\begin{lstdefault}[language={[5.2]Lua}]
-function decrease(x)
-    y = --x
-    return y
-end
-\end{lstdefault}
-
-where `\verb|--x|' is meant to be a Java expression. However, since `\texttt{--}'
-in Lua is a comment, the error happens later in `\texttt{return}', making it
-impossible for the heuristic to find the beginning of the expression.
-Similarly, when composing Java and Lua while using Lua's floor division, e.g.~
-`\verb|int x = 3//4 + 1;|', no language box is inserted, as `\texttt{//}' is interpreted
-as a Java comment, which means the error occurs at a location which makes it impossible
-for the heuristic to find the beginning of the expression.
-
-Another problem with comments appears in compositions of PHP and SQL:
-
-\begin{lstdefault}[language=PHP]
-$x = SELECT a FROM t1 -- comment;
-$y = 2;
-\end{lstdefault}
-
-At first, when typing the SQL statement, as language box is correctly inserted
-around \verb|SELECT a FROM t1|. However, after typing the first \texttt{-}
-inside the language box, the box is shrunken, moving the \texttt{-} to the
-outside. One would assume that the box gets expanded again as soon as we
-continue typing the comment. However, when testing if the box can be expanded,
-the lexer for SQLite lexes the entire comment to the end of the line, including
-the semicolon finishing the PHP statement. Without this semicolon, PHP cannot
-parse successfully, breaking the condition for the expansion, which is thus
-aborted. The same problem can appear in other compositions where semicolons are
-used to end a statement, e.g.~Java.
-
-\subsection{Problems with strings}
-
-Some languages, like PHP, allow newlines within strings. Embedding such a
-language inside another language can thus sometimes require the entire file to
-be lexed during automatic language box detection. For example when typing the
-PHP expression \texttt{\$x = 'a'} into Java, this will cause the entire
-remaining Java program to be lexed as long as the single quote has not been
-closed. However, since the lexing only happens virtually and is not applied to
-the input (unless this result in the insertion of a new language box), this
-does not affect the parse tree of the outer language. And since lexing is
-generally quite fast, the performance impact will also be insignificant.
-
 
 \section{Orphan}
 
 \subsection{Incremental Recogniser for auto removal}
 \label{sec:impl_removerec}
+
+\laurie{i'm not sure what to do with this section. do we need it?}
 
 Section \ref{subsec_autoremoval} described how automatically inserted language
 boxes can automatically be removed again, if they become invalid. The condition
