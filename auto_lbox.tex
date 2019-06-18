@@ -669,7 +669,7 @@ our implementation is first-come/first-served.''. From here we can argue,
 that the second of the two node is the error node, which hasn't been parsed yet,
 and thus is still attached to its old parent. But the old parent has already been
 reused and attached to a new nonterminal (which is detached). Thus there is no path
-from the error node to the root.}
+from the error node to the root.}\laurie{we need to do something here: on the basis that, after you, i probably understand wagner's algorithm as well as nearly anyone, i don't have a clue what the problem is, or why our solution works. we've either got to explain it fully, or reference something that explains it. i'll be honest and say that i'm baffled that nodes can become detached: it runs counter to my intuitions about how wagner's algorithm works. is this connected to the fact that parsing increments the versions by two?}
 We thus use the
 versioning feature of the incremental parsing algorithm
 from~\cite{wagner98incremental} which, simplifying slightly, uses a
@@ -685,22 +685,27 @@ parse tree which only had tokens added in. we only get detached parse trees in t
 parse trees once parsing has finished, so there are never any detached parse trees in the history.}
 Since each node stores the parser state it was valid in, we need only check
 a candidate language box's immediate left neighbour to see if it would be valid
-at that point or not. However, unlike the stack heuristic, candidate language boxes created by the history heuristic will not have a valid parsing stack associated with them. We must therefore use the incremental parser to create a valid stack \laurie{how does it do it?}
-\lukas{How to recreate the parsing stack is explained at the end of \ref{sec:filtering}. However,
-for the candidate heuristic we don't actually need to recreate the parsing stack. It is sufficient
-to check if the parse table has an action for the language box at the given state. This doesn't
-guarentee that the language box is fully valid at that point (e.g. the lbox could first cause a reduction
-but in the following state results in an error). But since the filtering heuristic does this check properly by
-recreating the stack and then parsing the language box (plus whatever comes after), it will
-filter out those cases afterwards.}.
+at that point or not.
 
 The third candidates heuristic is the \emph{line} approach, which searches
 backwards, one node at a time, from the error node to the beginning of the line
 that contains that token for candidates. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
-in a way that is unlikely to cause a noticeable slowdown. Once candidates are found,
-we use the same approach as in the history heuristic to create a valid parsing
-stack for each candidate.
+in a way that is unlikely to cause a noticeable slowdown.
+
+In order for later stages in the algorithm to work correctly, each candidate
+needs to come with a valid parse stack. Candidates produced by the stack
+heuristic naturally come with a valid parse stack. However, we need to create a
+valid parse stack for candidates from the history and line heuristics.
+Fortunately, we can do so by using incremental parsing \laurie{i think we mean
+to say ``we can do so by using the state of the incremental parser''?}
+\laurie{the rest of this sentence is so terse that i can't understand it} to
+skip all subtrees
+that are not a direct ancestor of the node after which we want to insert the
+language box. This way we can recreate the parsing stack as if we had inserted
+the language box at that point and reparsed the changed parse tree (see Figure
+\ref{fig_preparse} \laurie{this figure doesn't seem obviously related
+to the main algorithm?}).
 
 Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
 
@@ -811,21 +816,6 @@ language box (see Figure~\ref{fig:autobox_nonwhitespace} for an example).
 Note that we do not need to check the tokens preceding a candidate language box
 for correctness since, by definition, the parser will be in a correct state
 at that point.
-
-Similar to the candidates heuristic, the filtering heuristic also uses a
-recogniser to confirm candidates, since language boxes need to be virtually
-inserted and parsing continued without actually altering the parse tree. Before
-we can virtually insert and parse the language box, however, we need to put the
-recogniser into the appropriate state. When using the stack heuristic, this
-means simply copying the current parsing stack up to the candidate's location.
-The other two heuristics require some more preparation, since the chosen
-location likely doesn't exist on the current parsing stack. Luckily, there is
-no need to reparse the entire program up to the location we want to insert the
-language box at. Instead, we can use incremental parsing to skip all subtrees
-that are not a direct ancestor of the node after which we want to insert the
-language box. This way we can recreate the parsing stack as if we had inserted
-the language box at that point and reparsed the changed parse tree (see Figure
-\ref{fig_preparse}).
 
 
 \subsection{Applying or presenting candidates}
