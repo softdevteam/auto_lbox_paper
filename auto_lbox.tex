@@ -832,7 +832,7 @@ unable to predict what was about to happen on each key press. We could instead
 rank candidates (perhaps by `relevance', or length, or starting position etc.),
 but we were unable to find a ranking system which matches the user's intentions
 often enough to be worthwhile. We therefore simply present all the candidates
-as options to the user from which they must choose one (see Figure \ref{languagebox_choices}). As we shall see in
+as options to the user from which they must choose one (see Figure~\ref{fig:multiplecnds}). As we shall see in
 Section~\ref{sec:evaulation}, this happens rarely enough that it is not a
 significant problem. It is also worth noting that this is an
 example of a fundamental difference between traditional batch parsing and
@@ -852,22 +852,18 @@ on each (batch) parse.
     \put(0,53){\textcolor{black}{\textbf{(d)}}}
 \end{picture}
 \vspace{-1.5em}
-\caption{
-Example showing multiple language box options for the same error.
-\textbf{a)} The user is currently in the process of editing an existing Java program and has
-just deleted the expression after \qtt{remote}.
-\textbf{b)} After inserting an SQL statement an error appears in line 3. However,
-since the heuristic
-found multiple options to resolve the error, no language box is automatically inserted.
-The editor indicates that there are multiple solutions for an error by showing
-a lightbulb on the left hand side.
-\textbf{c)} Clicking on the lightbulb reveals a drop-down list of the
-candidates the heuristic has found.
-\textbf{d)} Clicking on one of the options inserts the language box. This is
-treated as a manua insertion, marking the language box as committed, which
-means it will not be automatically removed or resized, unless the user
-manually marks it as uncommitted.}
-\label{languagebox_choices}
+\caption{An example of multiple language box candidates in our running Java and SQL
+  composition. \textbf{(a)} The user is editing an existing Java programme,
+  and has just deleted the expression after \qtt{remote}.
+  \textbf{(b)} Inserting an SQL statement leads a syntax error in Java. The
+  automatic language box algorithm then finds multiple valid language box
+  candidates. Rather than picking one at random, the syntax error remains, and
+  the existence of multiple candidates is indicated to the user by the light
+  bulb image.
+  \textbf{(c)} Clicking on the light bulb displays the candidate language boxes
+  that could be inserted. In this example, the user clicks on the first in the
+  drop-down list. \textbf{(d)} The appropriate language box is inserted.}
+\label{fig:multiplecnds}
 \end{figure*}
 
 \begin{center}
