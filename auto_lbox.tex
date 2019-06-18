@@ -821,6 +821,7 @@ language box. This way we can recreate the parsing stack as if we had inserted
 the language box at that point and reparsed the changed parse tree (see Figure
 \ref{fig_preparse}).
 
+
 \subsection{Applying or presenting candidates}
 \label{applying and presenting}
 
@@ -937,7 +938,7 @@ we currently need to check these every time the program is reparsed which is not
 an alternative approach could be to only check these boxes if the surrounding area has changed, though
 that itself is hard to determine, e.g.~how large should be make this surrounding area? the easiest
 would be to only recheck these boxes if they are encountered by the parser (i.e.~not skipped) but
-that may not be enough.}
+that may not be enough.}\laurie{yes, but it's deeply unclear to me what ``every time the program is reparsed'' means: do we have to inspect the whole tree or ...?}
 
 \begin{figure}
 \begin{center}
