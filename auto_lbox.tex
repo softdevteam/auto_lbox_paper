@@ -829,6 +829,7 @@ the language box at that point and reparsed the changed parse tree (see Figure
 \ref{fig_preparse}).
 
 \subsection{Applying or presenting candidates}
+\label{applying and presenting}
 
 Once the filtering heuristic has run, we will have zero or more possible
 language boxes to insert. If there are zero candidates, then the algorithm
@@ -900,11 +901,9 @@ state when the user, directly or indirectly, shows that they are finished
 editing at the current point (e.g.~when they move the cursor outside of the
 language box); users can manually change a committed box to uncommitted if they
 later want it to be subject to the algorithm again.
-
-\laurie{how do we remove and resize? do we rerun the complete algorithm, and
-simply ignore the uncommitted language boxes? if so, do we actually remove
-language box nodes and replace them (which would, admittedly, be imperceptible)
-or ...?}
+A language box in an uncommitted state is subject to automatic changes. If the
+language box or its surrounding area changes, they may automatically removed
+or resized by the algorithm.
 
 \subsection{Automatically removing boxes}
 \label{subsec_autoremoval}
@@ -1003,11 +1002,36 @@ well as the outer program to parse correctly. A language box may shrink, if it
 contains an error which can be resolved by moving content into the outer
 language. It may expand if tokens following the language box can be included in it,
 especially if those tokens are syntactically incorrect in the outer language.
-Similar to the removal of language boxes, this only applies if the language box
-is unlocked.
-\lukas{We have a design choice here: Should a language box always encompass the
-maximum amount of code, or should it only grow if it can remove errors in the
-outer language doing so?}
+
+In order to expand a language box, we first use a recogniser parser to parse
+the contents of the language box until just before the EOS token to bring the
+parser in a state where it can accept more input. We then start lexing nodes
+from the outer language following the language box, and parse them using the
+recogniser parser, generating candidates along the way. If the recogniser
+parser encounters an error we stop. If only a single candidate has been
+produced, we remove the affected nodes from the outer language and move them
+inside the language box. Afterwards, both language box and outer language are
+reparsed.  If multiple candidates were found, we present the options to the
+user as described in \autoref{applying and presenting}.
+
+\lukas{Currently, we always expand language boxes if that is possible. An alternative
+would be to only expand it, if it resolves an error in the outer language this way.
+I'm not sure what the better way is. The former means we prioritise the inner language,
+the latter prioritises the outer which is probably better. Or we make the expansion
+optional (lightbulb icon) if its valid in both.}
+
+A language box is only reduced in size, if it contains an error and doing so
+resolves it.  To check if a language box can be shrunken, we thus first need to
+check, if the content of the language box up to (but excluding) the error node,
+is a valid program on its own.  We then need to check if the remaining input of
+the language box can be parsed in the outer language. For this we need to
+create a recogniser for the outer language, and initalise it to the state just
+after the language box. We then proceed lexing and parsing the remaining
+context of the language box in the recogniser of the outer language. If the
+entire remaining input of the language box can be parsed, it is removed from
+the box and inserted into the outer language. Both the language box and the
+outer language are reparsed afterwards to integrate those changes.
+
 \lukas{Add example showing shrinking/expansion}
 
 
