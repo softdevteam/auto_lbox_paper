@@ -1087,21 +1087,19 @@ particular language compositions we created can be seen as the $x$-axis labels
 in Figure~\ref{tbl_valid}.
 
 We then collected a corpus of inputs in each language.
-For PHP, we used the sourcecode of Wordpress, which consists of 365 files that are
-valid when parsed with our PHP grammar, and amount to 173368 LoC. We also
-removed any occurence of HTML from each file, since such files would otherwise
-be invalid in a pure PHP grammar.
-For Java, we used the Java Standard Library 5 which consists of 6556 files and
-424051 LoC.
-For Lua, we used Lua's test suite, which consists of 32 files totalling 13990
-LoC.
+For PHP, we used the source code of Wordpress \laurie{which version}, which consists of 365 files that are
+valid when parsed with our PHP grammar, which total 173,368 LoC after we
+have stripped out the embedded HTML which is not part of the PHP
+language as such. For Java, we used the Java Standard Library 5 which consists
+of 6,556 files and 424,051 LoC.
+For Lua, we used Lua's test suite, which consists of 32 files totalling 13,990 LoC.
 For SQL, we used SQLite's test suite, consisting of 1100 test files which
-contain 27526 tests totalling 89211 LoC.
+contain 27,526 tests totalling 89,211 LoC.
 We then ran each program through a parser to identify the positions and spans
 of function definitions and expressions, collecting the longest match when an
 expression contained several subexpressions. Overall, we extracted 2474
-expressions and 518 functions for PHP, 52687 expressions and 6743 functions for
-Java, 4476 expressions and 230 functions for Lua, and 36017 statements for SQL.
+expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
+Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
 
 For each language composition, we then created a test framework which took in
 random pairs (\emph{base file}, \emph{function definition or expression
