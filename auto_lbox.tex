@@ -1055,11 +1055,11 @@ for incremental parsing \laurie{cite the page range in your thesis that shows
 this}. However, this is not applicable to our situation, where candidates
 recognisers may end up lexing until the end of the file. Fortunately, this is
 unlikely to be a performance problem in practice. First, this can only happen
-if an inner language shares sufficient lexing rules with an outer language that
-the rest of a file matches both language's lexing rules\lukas{not entirely true. all they need to
-share is comment or string syntax, in which case an open comment/string will lex to the end of the file}. Second, lexing is a
-fast activity in general, and particularly fast in the recogniser because we
-are not altering the parse tree in any way.
+if an inner language has sufficient lexical overlap with the outer language
+(e.g.~sharing the same syntax for comments) and the rest of a file matches both
+language's lexing rules.  Second, lexing is a fast activity in general and
+particularly fast in the recogniser because we are not altering the parse tree
+in any way.
 
 \section{Evaluation}
 \label{sec:evaluation}
