@@ -634,7 +634,7 @@ and continue. `\texttt{SELECT 1 + }' errors at the EOS token, so we continue.
 terminates, even if there is input after the fragment.
 
 
-\subsubsection{The stack, history, and line heuristics}
+\subsubsection{The stack, parse tree, and line heuristics}
 
 We eventually created three distinct candidates heuristics, each of which has
 different strengths and weaknesses.
@@ -650,83 +650,19 @@ inserted, parsing can continue as normal from that position in the parsing
 stack. However, the weakness of this heuristic is that it tries relatively few
 locations, and often misses out possibilities which seem plausible to humans.
 
-The second candidates heuristic is the \emph{history} approach which aims to
+The second candidates heuristic is the \emph{parse tree} approach which aims to
 find plausible candidates based on the structure of the parse tree. The
 intuition underlying this is that a likely point to insert a language box is
-around text that forms a subtree
-and that we can find such places by recursively walking the parent nodes of the
-node in which a syntax error was found. However, at the point
-that the candidates heuristic is called the tree is, by definition, broken
-(since a syntax error is used to trigger the automatic language box algorithm).
-Although the tree is generally broken in only minor ways, it can be broken in
-ways that would surprise users if they were aware of it; in particular, in
-certain situations nodes can end up disconnected from the root \laurie{we need to cite a page or pages from wagner's thesis that backs this up, because otherwise we're going to have to explain it ourselves, which is a scary thought}.
-\lukas{This is going to be difficult. I don't think he mentions anything along
-those lines. The closest I could find is this when he talks about ambiguous node reuse: ``Consider what happens if two
-children of a node both exist in the new version of the tree but with different
-parents -- which, if either, should be the reuse site?  The policy we adopt in
-our implementation is first-come/first-served.''. From here we can argue,
-that the second of the two node is the error node, which hasn't been parsed yet,
-and thus is still attached to its old parent. But the old parent has already been
-reused and attached to a new nonterminal (which is detached). Thus there is no path
-from the error node to the root.}\laurie{we need to do something here: on the basis that, after you, i probably understand wagner's algorithm as well as nearly anyone, i don't have a clue what the problem is, or why our solution works. we've either got to explain it fully, or reference something that explains it. i'll be honest and say that i'm baffled that nodes can become detached: it runs counter to my intuitions about how wagner's algorithm works. is this connected to the fact that parsing increments the versions by two?}
-\lukas{I may have not been very clear about the detaching thing. Nodes can
-become detached, but only briefly during parsing. As soon as parsing finishes
-everything is back in order.  Just think about an empty parse tree into which
-we insert a single token. Let's take the familiar calculator grammar as an
-example. We insert 1 which then gets reparsed. The parser shifts `1` onto the
-stack. Then `1` gets reduced to `P` for which we create a new nonterminal
-(since there are no nonterminals to reuse yet) and push that onto the stack.
-This nonterminal `P` has no parent yet. This means that `1` which is a child of
-`P` is now detached from the root of the parse tree (note, that we can still
-traverse down to `1` from the root using the previous parse tree -- whenever
-the incremental parser reparses a parse tree, it always needs to traverse the
-previous version since we are actively changing stuff around during parsing,
-kindof like iterating over a list that we add/remove elements from).  Now we
-continue parsing, which applys the reductions `T->P` and `E->T`, which attaches
-P to T, and T to E, however, E is still detached. Then the parser reaches an
-accept state, which means there should only be a single node left on the tree
-which is pretty much our entire new parse tree (intertwined from new and old
-nonterminals). We then just take this node from the top of the stack and whack
-inbetween BOS and EOS and we're done.  This is how subtrees in general can
-become detached. However, this doesn't explain how the error node can become
-attached, since it hasn't even been parsed yet, which means it couldn't have
-been reduced and attached to a new nonterminal. This is were node reuse comes
-into play. Whenever a reduction happens, we see if we can reuse an old node
-which already exists in the tree.  There are two variants of node reuse.
-Unambiguous node reuse can only reuse an old nonterminal, if the new children
-and the old children are all the same, which is a bit too strict. Which is why
-there is another variant: ambiguous node reuse. There only one of the children
-needs to be the same. Let's now assume we have two nodes, `1` and `e`, which
-are both attached to a nonterminal `A`. The node `e` was just inserted and
-needs to be reparsed. Let's then assume `1` gets reduced using a rule `A->1`,
-so we can reuse the previous `A`. However, due to the `e` being there things
-are being parsed differently, and we use a rule `X->A`, but no nonterminal `X`
-exists yet. So we create a new nonterminal `X` and attach `A` to it. `X` is not
-detached. However, `e` which now causes an error still has a parent pointer to
-`A` (since we haven't parsed `e` yet), and thus be definition `e` is now also
-detached from the root. Of course then error recovery kicks and and isolates
-trees and reverts them and so on, so at the end of the parse no detached
-subtrees exist. However, since the candidate heuristic gets triggered at the
-point of the error, the parse tree is still broken, and thus when traversing
-the tree upwards from the error node, we need to use the previous version of
-the parse tree.  }
-We thus use the
-versioning feature of the incremental parsing algorithm
-from~\cite{wagner98incremental} which, simplifying slightly, uses a
-monotonically increasing global version number. Each node in the parse tree can
-be viewed both in its current, and in an arbitrary previous, version. The
-history candidates heuristic uses this feature to walk over the version of the
-parse tree immediately preceding the parse that led to a syntax error (i.e.~we
-treat the parse tree as if the global version number was one less than its
-current value). \laurie{why does putting things back one version guarantee that we don't have disconnected nodes?}\lukas{because
-after every parse we have an intact parse tree. It may contain isolated errors, but there can't be any detached nonterminals
-since parsing has completed and all reductions have been applied. if we go one version back we get a (at some point) reparsed
-parse tree which only had tokens added in. we only get detached parse trees in the middle of the parse. we only store
-parse trees once parsing has finished, so there are never any detached parse trees in the history.}
-Since each node stores the parser state it was valid in, we need only check
-a candidate language box's immediate left neighbour to see if it would be valid
-at that point or not.
+around text that forms a subtree and that we can find such points by
+recursively walking the parent nodes of the node in which a syntax error was
+found. However, there is a slight subtlety in that the parse tree is, by
+definition, broken at the point the candidates heuristic is called. In a sense,
+the incremental parser parses the tree in two stages, and the candidates
+heuristic is called after the first of these, when it is possible for newly
+inserted terminals to be detached from the tree. Fortunately, we can solve this
+easily by using the versioning feature of the incremental parsing algorithm
+from~\cite{wagner98incremental} \laurie{cite the page in wagner} which allows
+us to view the tree as if the first stage of parsing had not yet occurred.
 
 The third candidates heuristic is the \emph{line} approach, which searches
 backwards, one node at a time, from the error node to the beginning of the line
@@ -737,7 +673,7 @@ in a way that is unlikely to cause a noticeable slowdown.
 In order for later stages in the algorithm to work correctly, each candidate
 needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
-valid parse stack for candidates from the history and line heuristics which
+valid parse stack for candidates from the history and parse tree heuristics which
 requires reparsing the program. Fortunately, the incremental parser makes this
 a cheap operation, because any subtree that isn't a direct ancestor of the
 candidate language box will be optimistically shifted (i.e.~skipped).
@@ -759,7 +695,7 @@ def stack(parser, node):
         cnds.extend(cnds_recogniser(la, lang))
   return cnds
 
-def history(parser, node):
+def parse_tree(parser, node):
   cnds = []
   node = node.version(global_version - 1)
   while node is not None:
@@ -787,9 +723,11 @@ starting point of language boxes (using the candidates recogniser from
     Figure~\ref{fig:recogniser}) \laurie{what is the intuition behind \texttt{next\_lookahead}?\lukas{this used to be called poplookahead by Wagner, but in my thesis
     I changed this to nextlookahead. It simply returns the next node in the parse tree (similar to a depth-first traversal)}} \laurie{sinc we later define `prev\_terminal' can we use `next\_terminal' in the algorithm and explain that it's called poplookahead in wagner's thesis and nextlookahead in yours? that way the algorithm will be more intuitive for readers}. The \texttt{stack} heuristic walks the parse
 stack, finding the node matching each point in the stack (line 6) and then
-searching for candidate language boxes (line 7). The history heuristic
-walks up (line 17) a previous version of the parse tree (line 12) for
-candidate language boxes (line 15--16). The \texttt{line} heuristic searches
+searching for candidate language boxes (line 7). The \texttt{parse\_tree} heuristic
+walks up the parse tree (line 12) for candidate language boxes (line 15--16).
+Because the parse tree is, in a sense, only partially parsed at the point the
+candidates heuristic is called, we view the parse tree as it was before parsing
+began (line 12). The \texttt{line} heuristic searches
 backwards each token from the error node back (line 26) until the beginning of
 the line which contains that node (line 22) for
 candidate language boxes (lines 24--25).}
