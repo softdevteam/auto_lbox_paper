@@ -1061,6 +1061,7 @@ language's lexing rules.  Second, lexing is a fast activity in general and
 particularly fast in the recogniser because we are not altering the parse tree
 in any way.
 
+
 \section{Evaluation}
 \label{sec:evaluation}
 
@@ -1107,15 +1108,11 @@ Java, 4476 expressions and 230 functions for Lua, and 36017 statements for SQL.
 
 For each language composition, we then created a test framework which took in
 random pairs (\emph{base file}, \emph{function definition or expression
-fragment}) \laurie{did we record which pairs so that other people can replay
-exactly the same things we used?}\lukas{yes. though we store absolute paths to the files,
-so the experiment requires some adjustments} and: loaded \emph{base file} into our
+fragment}) and: loaded \emph{base file} into our
 extension of Eco; moved the cursor to the \emph{location} of a random function definition or expression (as
 appropriate) and emulated the key presses to delete it; then emulated the key
 presses to insert \emph{function definition or expression fragment} in its
-place. \laurie{did we only insert linearly? i thought we were also going to try
-non-linear insertions?}\lukas{Unfortunately, I never got around implementing this.}
-For each pair we recorded whether a language box was inserted or not, if the insertion
+place. For each pair we recorded whether a language box was inserted or not, if the insertion
 lead to a valid or invalid program, and if it didn't for what reason (i.e.~a wrong
 language box was inserted; no candidate was found; or multiple candidates were found).
 We repeated the experiment for each heuristic using the same \emph{base file}, \emph{fragement},
