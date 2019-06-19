@@ -737,21 +737,13 @@ in a way that is unlikely to cause a noticeable slowdown.
 In order for later stages in the algorithm to work correctly, each candidate
 needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
-valid parse stack for candidates from the history and line heuristics.
-Fortunately, we can do so by using incremental parsing \laurie{i think we mean
-to say ``we can do so by using the state of the incremental
-parser''?}\lukas{no, we are basically reparsing the entire parse tree again all
-the way up to the candidate location where we want to insert the language box.
-however, because anything subtree that isn't a direct ancestor of that location
-can just be skipped (i.e.~optimistically shifted).  This is equivalent to
-changing the node at the candidate location as changed, and then reparsing the
-parse tree all the way to that node.}
-to generate the parse stack without revisiting the entire tree, by skipping
-subtrees are not on a direct path to the candidate location.
-This way we can recreate the parsing stack as if we had inserted
-the language box at that point and reparsed the changed parse tree (see Figure
-\ref{fig_preparse} \laurie{this figure doesn't seem obviously related
-to the main algorithm?}).
+valid parse stack for candidates from the history and line heuristics which
+requires reparsing the program. Fortunately, the incremental parser makes this
+a cheap operation, because any subtree that isn't a direct ancestor of the
+candidate language box will be optimistically shifted (i.e.~skipped).
+\laurie{(see Figure
+\ref{fig_preparse} this figure doesn't seem obviously related
+to the main algorithm?).}
 
 Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
 
@@ -793,7 +785,7 @@ def line(parser, node):
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
     Figure~\ref{fig:recogniser}) \laurie{what is the intuition behind \texttt{next\_lookahead}?\lukas{this used to be called poplookahead by Wagner, but in my thesis
-    I changed this to nextlookahead. It simply returns the next node in the parse tree (similar to a depth-first traversal)}}. The \texttt{stack} heuristic walks the parse
+    I changed this to nextlookahead. It simply returns the next node in the parse tree (similar to a depth-first traversal)}} \laurie{sinc we later define `prev\_terminal' can we use `next\_terminal' in the algorithm and explain that it's called poplookahead in wagner's thesis and nextlookahead in yours? that way the algorithm will be more intuitive for readers}. The \texttt{stack} heuristic walks the parse
 stack, finding the node matching each point in the stack (line 6) and then
 searching for candidate language boxes (line 7). The history heuristic
 walks up (line 17) a previous version of the parse tree (line 12) for
@@ -1046,12 +1038,13 @@ an HTML language box, which is unlikely to match the user's intentions.
 
 To solve many such cases, we thus have to relax the `no hints' constraint from
 Section~\ref{the problem} by allowing language composition authors to specify
-either or both of\lukas{I think the two are mutually exclusive}: those token types which can start a
+either or both of\lukas{I think the two are mutually exclusive}\laurie{not necessarily: i could say `accept every string beginning with < but exclude anything beginning with <escape'. This isn't a major point though}: those token types which can start a
 language box; and those which can't start a language box. For example, in the
 case of the Java and HTML composition, a good choice for the language
 composition is to specify HTML tags as being the only valid starting input for
-a candidate language box. \laurie{i assume we enforce this in the candidates
-recogniser so that later stages don't have to do needless work?}\lukas{correct!}
+a candidate language box. Any such hints given by language composition authors
+are checked in the candidates recogniser so that inappropriate candidates do
+not cause pointless work in later stages of the algorithm.
 
 
 \section{Limitations}
@@ -1088,14 +1081,16 @@ rarely.
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
 `\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
-file (whether it is inside or outside a language box) to be relexed. \laurie{I
-have no idea what this sentence means}\lukas{It basically means,
-since we are only pretend-lexing things for the recogniser, this has no
-impact other than the performance hit.} However, since the lexing only happens
-virtually and is not applied to the input (unless this result in the insertion
-of a new language box), this does not affect the parse tree of the outer
-language. And since lexing is generally quite fast, the performance impact will
-also be insignificant.
+file (whether it is inside or outside a language box) to be relexed and tokens
+flattened. Interestingly, a slight variant on language boxes solves this problem
+for incremental parsing \laurie{cite the page range in your thesis that shows
+this}. However, this is not applicable to our situation, where candidates
+recognisers may end up lexing until the end of the file. Fortunately, this is
+unlikely to be a performance problem in practice. First, this can only happen
+if an inner language shares sufficient lexing rules with an outer language that
+the rest of a file matches both language's lexing rules. Second, lexing is a
+fast activity in general, and particularly fast in the recogniser because we
+are not altering the parse tree in any way.
 
 
 \subsection{Wrong detection}
@@ -1110,6 +1105,7 @@ y = 2; // Old Java code
 \end{lstdefault}
 
 \lukas{If we keep this subsection, I will update the example accordingly.}
+\laurie{aha, i like that example: it makes more sense to me now}
 
 Sometimes, while the user is typing, language boxes are inserted prematurely,
 and wrap contents of the outer language into the language box, that weren't
@@ -1206,7 +1202,7 @@ def preparse(bos, lbox, parser):
         node = node.right_neighbour()
 \end{lstdefault}
 \end{minipage}
-\caption{A parse tree with a language box that we want to automatically remove (left)
+\caption{\laurie{do we need this figure?}A parse tree with a language box that we want to automatically remove (left)
 and the preparse-algorithm (right). In
 order to test if the box's content is valid in the outer language, we
 initialise a recogniser to the state just before we would parse the language box,
