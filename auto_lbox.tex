@@ -1155,37 +1155,53 @@ language boxes on that suite.
 \subsection{The benchmark suite}
 
 To create a benchmark suite, we took the grammars of 4 real-world languages
-(Java \laurie{7 or 8?}, Lua \laurie{5.3?}, PHP \laurie{what version?}, and
-SQLite \laurie{what version?}) and created 12 language compositions from them.
+(Java 5, Lua 5.3, PHP 5.6, and
+SQLite 3.27) and created 12 language compositions from them.
 For each language composition of $L_1$ (outer) and $L_2$ (inner), we allow
 expressions and function definitions in $L_2$ to be used wherever expressions
 and function definitions in $L_1$ are normally valid. For example, in the
 composition \emph{JavaLua}, Java is the outer language and Lua the inner
 language: Lua function definitions and expressions can be used wherever Java
-function definitions and expressions (respectively) are valid \laurie{this
-makes sense for java/lua/php, but what is a function definition in SQL?}.  The
+function definitions and expressions (respectively) are valid\footnote{Note that, since the concept
+of function definitions doesn't exist in SQL, any composition
+with SQL as the inner language only allows statements to be embedded.}. The
 particular language compositions we created can be seen as the $x$-axis labels
 in Figure~\ref{tbl_valid}.
 
-We then collected a corpus of inputs in each language. \laurie{we
-need facts and figures here. at a minimum: where did we get the source code?
-how many files were there? roughly how many lines?} We then ran each program
-through a parser to identify the positions and spans of function definitions
-and expressions. \laurie{how many of each did we find? did we use every
-possible position? did we use subexpressions (e.g.~in 
-\texttt{int x = 2 + 3 * 4} did we cut out `2 + 3 * 4' as a single expression or
-did we also cut out `2 + 3'?}
+We then collected a corpus of inputs in each language.
+For PHP, we used the sourcecode of Wordpress, which consists of 365 files that are
+valid when parsed with our PHP grammar, and amount to 173368 LoC. We also
+removed any occurence of HTML from each file, since such files would otherwise
+be invalid in a pure PHP grammar.
+For Java, we used the Java Standard Library 5 which consists of 6556 files and
+424051 LoC.
+For Lua, we used Lua's test suite, which consists of 32 files totalling 13990
+LoC.
+For SQL, we used SQLite's test suite, consisting of 1100 test files which
+contain 27526 tests totalling 89211 LoC.
+We then ran each program through a parser to identify the positions and spans
+of function definitions and expressions, collecting the longest match when an
+expression contained several subexpressions. Overall, we extracted 2474
+expressions and 518 functions for PHP, 52687 expressions and 6743 functions for
+Java, 4476 expressions and 230 functions for Lua, and 36017 statements for SQL.
 
 For each language composition, we then created a test framework which took in
 random pairs (\emph{base file}, \emph{function definition or expression
 fragment}) \laurie{did we record which pairs so that other people can replay
-exactly the same things we used?} and: loaded \emph{base file} into our
-extension of Eco; moved the cursor to a function definition or expression (as
+exactly the same things we used?}\lukas{yes. though we store absolute paths to the files,
+so the experiment requires some adjustments} and: loaded \emph{base file} into our
+extension of Eco; moved the cursor to the \emph{location} of a random function definition or expression (as
 appropriate) and emulated the key presses to delete it; then emulated the key
 presses to insert \emph{function definition or expression fragment} in its
 place. \laurie{did we only insert linearly? i thought we were also going to try
-non-linear insertions?} For each pair we recorded \laurie{what did we record?}.
-
+non-linear insertions?}\lukas{Unfortunately, I never got around implementing this.}
+For each pair we recorded whether a language box was inserted or not, if the insertion
+lead to a valid or invalid program, and if it didn't for what reason (i.e.~a wrong
+language box was inserted; no candidate was found; or multiple candidates were found).
+We repeated the experiment for each heuristic using the same \emph{base file}, \emph{fragement},
+\emph{location} combination, which were recorded during the first run.
+Note, that if any editor related bugs occured during a run, all results from that \emph{base file}
+were discarded.
 
 \subsection{Results}
 
