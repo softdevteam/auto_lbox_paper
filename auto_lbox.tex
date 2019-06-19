@@ -670,16 +670,42 @@ that contains that token for candidates. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown.
 
+
+\begin{figure}
+\begin{lstdefault}[]
+def lang_pstack(lbox):
+  path_to_lbox = set()
+  parent = lbox.parent
+  while True
+    path_to_lbox.add(parent)
+    parent = parent.parent
+    if parent is None:
+      break
+
+  parser = <! \textrm{\textit{initialise parser}} !>
+  node = <! \textrm{\textit{root node}} !>
+  while node is not lbox:
+    # should this be "if node in path_to_lbox"?
+    if node not in path_to_lbox:
+      parser.parse(node)
+      # we seem to enter an infinite loop at this point because
+      # node isn't changed
+    else:
+      if node.children:
+        node = node.children[0]
+      else:
+        node = node.right_neighbour()
+\end{lstdefault}
+\caption{An algorithm for quickly creating a parse stack after a language box
+has been inserted into the parse tree.}
+\label{fig:createparsestack}
+\end{figure}
+
 In order for later stages in the algorithm to work correctly, each candidate
 needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
 valid parse stack for candidates from the history and parse tree heuristics which
-requires reparsing the program. Fortunately, the incremental parser makes this
-a cheap operation, because any subtree that isn't a direct ancestor of the
-candidate language box will be optimistically shifted (i.e.~skipped).
-\laurie{(see Figure
-\ref{fig_preparse} this figure doesn't seem obviously related
-to the main algorithm?).}
+requires reparsing the program. \laurie{ref \ref{fig:createparsestack}}
 
 Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
 
@@ -1114,48 +1140,11 @@ can be successfully parsed in the outer language, the box can be removed.  Of
 course, depending on the parsing status of the box, we may also need to parse
 at least one non-whitespace token following the former language box.
 
-\begin{figure}
-\begin{minipage}{0.45\textwidth}
-\includegraphics[width=0.9\textwidth]{images/autoremoval}
-\end{minipage}
-\begin{minipage}{0.5\textwidth}
-\begin{lstdefault}[basicstyle=\linespread{1.0}\footnotesize\ttfamily]
-def preparse(bos, lbox, parser):
-  # "mark" ancestors of lbox
-  path_to_lbox = set()
-  parent = lbox.parent
-  while parent is not <!\textit{Root}!>:
-    path_to_lbox.add(parent)
-    parent = parent.parent
-
-  # initialise parser
-  node = bos
-  while node is not lbox:
-    if node not in path_to_lbox:
-      parser.parse(node)
-    else: # traverse node
-      if node.children:
-        node = node.children[0]
-      else:
-        node = node.right_neighbour()
-\end{lstdefault}
-\end{minipage}
-\caption{\laurie{do we need this figure?}A parse tree with a language box that we want to automatically remove (left)
-and the preparse-algorithm (right). In
-order to test if the box's content is valid in the outer language, we
-initialise a recogniser to the state just before we would parse the language box,
-using the recogniser's \texttt{preparse} method. This is done,
-by `marking' the ancestors of the language box, as if the language box
-contained changes (lines 3--7), and then incrementally parse those subtrees
-up to the box (lines 10--18).}
-\label{fig_preparse}
-\end{figure}
-
 
 \section{Evaluation}
 \label{sec:evaluation}
 
-To evaluate the efficacy of automatic language boxes, a large-scale evaluation
+To evaluate the efficacy of automatic language boxes, a large-scale experiment
 is necessary. However, since composed programs of the type we are aiming to
 support with automatic language boxes are currently rare, there is no
 off-the-shelf benchmark suite we can use. In this section we first detail
@@ -1199,6 +1188,8 @@ non-linear insertions?} For each pair we recorded \laurie{what did we record?}.
 
 
 \subsection{Results}
+
+We break the results of our experiment down in two ways: 
 
 Figure \ref{tbl_valid} shows the total percentage of
 acceptable outcomes for each heuristic used broken down by each composition.
