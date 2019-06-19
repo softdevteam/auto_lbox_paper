@@ -1111,13 +1111,15 @@ place. For each pair we recorded whether a language box was inserted or not, if 
 lead to a valid or invalid program, and if it didn't for what reason (i.e.~a wrong
 language box was inserted; no candidate was found; or multiple candidates were found).
 We repeated the experiment for each heuristic using the same \emph{base file}, \emph{fragement},
-\emph{location} combination, which were recorded during the first run.
-Note, that if any editor related bugs occured during a run, all results from that \emph{base file}
-were discarded.
+\emph{location} combination, which were recorded during the first run. We
+generated \laurie{XXX} pairs from our corpus.
+
 
 \subsection{Results}
 
-We break the results of our experiment down in two ways: 
+We break the results of our experiment down in two ways: by acceptable results
+per language composition (Table~\ref{tbl:vald}); and by detailed outcome in the
+overall benchmark suite (Table~\ref{tbl:breakdown}).
 
 Figure \ref{tbl_valid} shows the total percentage of
 acceptable outcomes for each heuristic used broken down by each composition.
@@ -1146,20 +1148,24 @@ leading to a reduction. This reduction removes \texttt{SELECT} from the stack,
 replacing it with a subtree and making it impossible to find a valid location
 to insert a language box at.
 
-\begin{figure*}[hbt]
+\begin{table*}[hbt]
     \input{tables/tbl_valid.tex}
+
+    \vspace{7pt}
     \caption{The total percentage of acceptable outcomes for each benchmark and
-    heuristic. Acceptable outcomes are one of the following: a language box
-    gets succesfully inserted; no language box was inserted since the insertion
-    was already valid in the outer language; the insertion had multiple options
+    heuristic. Acceptable outcomes are that: a valid automatic language box
+    was inserted; no language box was inserted since the inserted fragment
+    was also valid in the outer language; the insertion had multiple options
     which are presented to the user. In other words, the total percentage
     doesn't include invalid insertions of language boxes and errors for which
     no language box could be found automatically.}
     \label{tbl_valid}
-\end{figure*}
+\end{table*}
 
-\begin{figure*}[hbt]
+\begin{table*}[hbt]
     \input{tables/tbl_breakdown.tex}
+
+    \vspace{7pt}
     \caption{Overall performance of the different
     heuristics on all benchmarks per outcome category. The categories are:
     \textbf{Valid insertion}, a language box was successfully inserted, \textbf{Invalid insertion},
@@ -1168,8 +1174,8 @@ to insert a language box at.
     code fragment is valid syntax, \textbf{No insertion (Error)}, no language box could be
     found to fix the error, \textbf{No insertion (Multi)}, multiple language box options
     were found.}
-    \label{tbl_breakdown}
-\end{figure*}
+    \label{tbl:breakdown}
+\end{table*}
 
 
 \section{Threats to validity}
