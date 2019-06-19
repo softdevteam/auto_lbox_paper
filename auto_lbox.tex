@@ -939,29 +939,26 @@ language boxes as uncommitted, the only uncommitted language boxes can be at
 the local location, so their number is typically small and the performance
 implications trivial.
 
-\begin{figure}
+\begin{figure*}
 \begin{center}
-\vspace{0.8em}
-\includegraphics[width=0.45\textwidth]{images/autoremove_foo.png}
+\includegraphics[width=0.70\textwidth]{images/auto_remove_java_sql.png}
+\begin{picture}(0,0)
+    \put(-375,5.5){\textcolor{black}{\textbf{(a)}}}
+    \put(-175,5.5){\textcolor{black}{\textbf{(b)}}}
+\end{picture}
 \vspace{-0.8em}
 \end{center}
-\caption{An example showing the constraints for automatic language box removal in practice.
-The example uses a composition of PHP and Python where Python expressions are valid at
-PHP's top-level.
-We can see that as the user types, language boxes are getting automatically
-inserted and removed depending on their content. At the beginning the user types
-\qtt{f}, which is not valid in PHP and thus gets replaced by a Python
-language box, making the program valid again. The box stays until the user
-inserts \qtt{(} which makes the Python language box invalid, and since all of
-its content can be parsed in the outer language, the box is removed.
-As soon as the user inserts the closing bracket \qtt{)}, a Python box is
-inserted again to fix the PHP parsing error caused by a missing semicolon. When the
-user eventually inserts the missing semicolon the contents of the language box
-are valid in both PHP and Python. However, since the box can be removed
-without introducing an error, we prioritise the outer
-language, and remove it again.}
+\caption{An example showing the automatic language box removal in practice.
+\textbf{(a)} The user has meant to write a Java expression, but has forgotten
+the second \qtt{*} after \qtt{from}, which has resulted in a language box
+being inserted.
+\textbf{(b)} Since uncommitted language boxes can be automatically removed
+again, the user doesn't need to revert the accidental language box
+themselves. Instead they can just fix their mistake inside of the box,
+which will remove it, since its content is now invalid in the SQL box, but
+valid the outer Java.}
 \label{fig_autoremoval}
-\end{figure}
+\end{figure*}
 
 
 \subsubsection{Resizing}
