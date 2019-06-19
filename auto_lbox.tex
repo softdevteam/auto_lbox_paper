@@ -685,16 +685,11 @@ def lang_pstack(lbox):
   parser = <! \textrm{\textit{initialise parser}} !>
   node = <! \textrm{\textit{root node}} !>
   while node is not lbox:
-    # should this be "if node in path_to_lbox"?
     if node not in path_to_lbox:
       parser.parse(node)
-      # we seem to enter an infinite loop at this point because
-      # node isn't changed
+      node = node.next_lookahead()
     else:
-      if node.children:
-        node = node.children[0]
-      else:
-        node = node.right_neighbour()
+      node = node.children[0]
 \end{lstdefault}
 \caption{An algorithm for quickly creating a parse stack after a language box
 has been inserted into the parse tree.}
@@ -704,7 +699,7 @@ has been inserted into the parse tree.}
 In order for later stages in the algorithm to work correctly, each candidate
 needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
-valid parse stack for candidates from the history and parse tree heuristics which
+valid parse stack for candidates from the parse tree and line heuristics which
 requires reparsing the program. \laurie{ref \ref{fig:createparsestack}}
 
 Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
