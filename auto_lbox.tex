@@ -721,8 +721,8 @@ def stack(parser, node):
   for state, node in reversed(parser.stack):
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
-        la = node.next_lookahead()
-        cnds.extend(cnds_recogniser(la, lang))
+        t = node.next_terminal()
+        cnds.extend(cnds_recogniser(t, lang))
   return cnds
 
 def parse_tree(parser, node):
@@ -750,10 +750,10 @@ def line(parser, node):
   passed a \texttt{node}, which is the point at which an error is detected, and
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
-    Figure~\ref{fig:recogniser}) \laurie{what is the intuition behind \texttt{next\_lookahead}?\lukas{this used to be called poplookahead by Wagner, but in my thesis
-    I changed this to nextlookahead. It simply returns the next node in the parse tree (similar to a depth-first traversal)}} \laurie{sinc we later define `prev\_terminal' can we use `next\_terminal' in the algorithm and explain that it's called poplookahead in wagner's thesis and nextlookahead in yours? that way the algorithm will be more intuitive for readers}. The \texttt{stack} heuristic walks the parse
+Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
 stack, finding the node matching each point in the stack (line 6) and then
-searching for candidate language boxes (line 7). The \texttt{parse\_tree} heuristic
+searching for candidate language boxes (line 7) starting at the first terminal
+following that node (line 6). The \texttt{parse\_tree} heuristic
 walks up the parse tree (line 12) for candidate language boxes (line 15--16).
 Because the parse tree is, in a sense, only partially parsed at the point the
 candidates heuristic is called, we view the parse tree as it was before parsing
@@ -979,13 +979,12 @@ fixes the error inside the language box and does not
 introduce additional syntax errors in the outer language.
 
 Fortunately both growing and shrinking can be handled with our existing
-candidates recogniser (see Section~\ref{sec:recognisers}). When there is a
-change \laurie{near/after?}\lukas{this is tricky to define,
-since its unclear how far/close an edit needs to happen to affect the box.
-currently we only check for shrinking if the box contains errors, while
-expansion is checked everytime an edit happens anywhere in the program}\laurie{we have to define it ;) do we check every uncommitted language box on every parse or ...?} or inside
-an uncommitted language
-box, we run our altered candidates recogniser at the start of the language box.
+candidates recogniser (see Section~\ref{sec:recognisers}).
+While there is a clear indicator for when a language box may need to be shrunk (e.g.~
+when it contains an error), this is not the case for the expansion of language boxes.
+On every parse we thus run our altered candidates recogniser at the start of
+each uncommitted language box (luckily, unless the user has manually marked
+language boxes as uncommitted, this should only be a single language box).
 This returns all the possible right hand extents of the language box. Starting
 from the candidate which matches the most content and working backwards, we then
 filter out candidates which do not meet the above conditions. If none remain,
@@ -1006,7 +1005,8 @@ an HTML language box, which is unlikely to match the user's intentions.
 
 To solve many such cases, we thus have to relax the `no hints' constraint from
 Section~\ref{the problem} by allowing language composition authors to specify
-either or both of\lukas{I think the two are mutually exclusive}\laurie{not necessarily: i could say `accept every string beginning with < but exclude anything beginning with <escape'. This isn't a major point though}: those token types which can start a
+either or both of\lukas{I think the two are mutually exclusive}\laurie{not necessarily: i could say `accept every string beginning with < but exclude anything beginning with <escape'. This isn't a major point though}\lukas{not if we use token type, which we do. We thus can only
+say, the start token of the language box needs to be in a given set, or must not be in given set.}: those token types which can start a
 language box; and those which can't start a language box. For example, in the
 case of the Java and HTML composition, a good choice for the language
 composition is to specify HTML tags as being the only valid starting input for
