@@ -904,6 +904,7 @@ automatically removed or resized by the algorithm.
 
 
 \subsubsection{Removing}
+\label{sec:removing}
 
 The simplest example of when we might want an automatic language box removed is if
 the user deletes a character immediately after an automatic language box has
@@ -934,7 +935,7 @@ Note, that while the first two situations are triggered by an error occuring eit
 the box or on the box itself, the third situation has no clear trigger. On each
 run of the incremental parser we thus check the third situation for each uncommitted
 language box in the program. Fortunately, unless the user has manually marked some
-language boxes as uncommitted, the only uncommitted language boxes\lukas{is it box or boxes?} can be at
+language boxes as uncommitted, the only uncommitted language boxes can be at
 the local location, so their number is typically small and the performance
 implications trivial.
 
@@ -978,14 +979,15 @@ contain a syntax error and moving the content to the outer language both
 fixes the error inside the language box and does not
 introduce additional syntax errors in the outer language.
 
-Fortunately both growing and shrinking can be handled with our existing
+Both growing and shrinking can be handled with our existing
 candidates recogniser (see Section~\ref{sec:recognisers}).
-While there is a clear indicator for when a language box may need to be shrunk (e.g.~
-when it contains an error), this is not the case for the expansion of language boxes.
-On every parse we thus run our altered candidates recogniser at the start of
-each uncommitted language box (luckily, unless the user has manually marked
-language boxes as uncommitted, this should only be a single language box).
-This returns all the possible right hand extents of the language box. Starting
+While there is a clear indicator for when a language box may need to be shrunk
+(e.g.~when it contains an error), this is not the case for expansion. We are
+must therefore run our altered candidates recogniser at the start of
+each uncommitted language box; fortunately, as in automatic language box
+removal (see Section~\ref{sec:removing}), there are almost never enough of
+these to cause performance concerns. The candidates recogniser
+returns all the possible right hand extents of the language box. Starting
 from the candidate which matches the most content and working backwards, we then
 filter out candidates which do not meet the above conditions. If none remain,
 the algorithm completes; if one remains,
@@ -1005,12 +1007,10 @@ an HTML language box, which is unlikely to match the user's intentions.
 
 To solve many such cases, we thus have to relax the `no hints' constraint from
 Section~\ref{the problem} by allowing language composition authors to specify
-either or both of\lukas{I think the two are mutually exclusive}\laurie{not necessarily: i could say `accept every string beginning with < but exclude anything beginning with <escape'. This isn't a major point though}\lukas{not if we use token type, which we do. We thus can only
-say, the start token of the language box needs to be in a given set, or must not be in given set.}: those token types which can start a
-language box; and those which can't start a language box. For example, in the
-case of the Java and HTML composition, a good choice for the language
-composition is to specify HTML tags as being the only valid starting input for
-a candidate language box. Any such hints given by language composition authors
+either the valid or the invalid token types which can appear at the start of
+a language box. For example, in the case of the Java and HTML composition, a
+good choice is to specify HTML tags as being the only valid starting token
+types for a candidate language box. Any such hints given by language composition authors
 are checked in the candidates recogniser so that inappropriate candidates do
 not cause pointless work in later stages of the algorithm.
 
