@@ -673,26 +673,33 @@ in a way that is unlikely to cause a noticeable slowdown.
 
 \begin{figure}
 \begin{lstdefault}[]
-def lang_pstack(lbox):
+def recreate_parsing_stack(lbox):
   path_to_lbox = set()
   parent = lbox.parent
-  while True
+  while True:
     path_to_lbox.add(parent)
     parent = parent.parent
     if parent is None:
       break
 
-  parser = <! \textrm{\textit{initialise parser}} !>
-  node = <! \textrm{\textit{root node}} !>
+  parser = <!\textrm{\textit{initialise parser}} !>
+  node = <!\textrm{\textit{root node}} !>
   while node is not lbox:
-    if node not in path_to_lbox:
+    if node in path_to_lbox:
+      node = node.children[0]
+    else:
       parser.parse(node)
       node = node.next_lookahead()
-    else:
-      node = node.children[0]
 \end{lstdefault}
-\caption{An algorithm for quickly creating a parse stack after a language box
-has been inserted into the parse tree.}
+\caption{An algorithm for efficiently creating a parse stack after a language box
+has been inserted into the parse tree. We do this in two steps. First we
+collect all the nodes on the path from the language box to the root node (lines
+2--8). Second we then follow equivalent steps as when a node is marked as
+changed and the incremental parser runs \laurie{cite a page from wagner's
+thesis}: we reparse all nodes up to the language box (lines 10--17), skipping
+subtrees which can't be relevant to the parsing stack (lines 16--17). The
+\texttt{next\_lookahead} function (line 17) returns the next node in the parse
+tree in preorder.}
 \label{fig:createparsestack}
 \end{figure}
 
@@ -700,7 +707,9 @@ In order for later stages in the algorithm to work correctly, each candidate
 needs to come with a valid parse stack. Candidates produced by the stack
 heuristic naturally come with a valid parse stack. However, we need to create a
 valid parse stack for candidates from the parse tree and line heuristics which
-requires reparsing the program. \laurie{ref \ref{fig:createparsestack}}
+requires reparsing the program. Fortunately, we can do this efficiently by
+using a similar approach to that the incremental parser uses to reparse changed
+nodes (see Figure~\ref{fig:createparsestack}).
 
 Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
 
