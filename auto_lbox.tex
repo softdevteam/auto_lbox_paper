@@ -1178,7 +1178,7 @@ From a user perspective, the major question to be answered is: do automatic lang
 
 \begin{description*}
   \item[Valid insertion] A language box was automatically inserted around the inner fragment, which fixed the initial error that resulted from the insertion of the fragment.
-  \item[Invalid insertion] A language box was inserted, but the initial error that triggered the heuristics remained.
+  \item[Invalid insertion] A language box was inserted, but the outer language is still has syntax errors. Since we initially start with a syntactically valid program, before inserting the fragment, this means that the insertion of the language box was invalid (e.g.~if the inserted language box does not encompass the whole fragment).
   \item[Valid in outer language] Since the inner fragment was also valid in the outer language, the heuristics did not trigger and thus no language boxes were inserted.
   \item[Missed insertion] The new input fragment resulted in an error, however, no candidate language boxes were found to fix the error.
   \item[Multiple candidates] Multiple language box candidates were found, which means no language box is inserted and instead options are presented to the user.
