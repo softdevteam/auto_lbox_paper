@@ -203,7 +203,7 @@ user when it cannot.
       not if it then leads to a syntax error immediately after the inserted
       language box. It is thus too early to insert an automatic language box
       around the SQL as it would cause a syntax error in the first non-whitespace token
-      afterwards (`\texttt{,}'). \textbf{(b)} After typing `\texttt{,}' an SQL
+      afterwards (`\texttt{\}}'). \textbf{(b)} After typing `\texttt{,}' an SQL
       language box is automatically inserted since the next non-whitespace Java token
       (`\texttt{,}') is now syntactically valid. \textbf{(c)} The user continues
       typing a (now incomplete) SQL statement. This causes syntax errors in the
@@ -269,10 +269,10 @@ essence, we present an algorithm which can automatically insert, remove, or resi
 boxes in many useful cases. The algorithm is, in essence, comprised of several
 stages: determining what user inputs should trigger it; finding candidate language
 boxes to insert, remove, or resize; filtering out those which would make the
-overall program worse; and then applying them. One of the main challenges with
+overall program worse; and then applying the remaining candidates. One of the main challenges with
 automatic language boxes is to determine what portion of the program to search
 for possible language boxes: we present several heuristics for this case
-(including the ability to take the user's previous input into consideration)
+(including the ability to take the user's previous input into consideration\lukas{i think this related to historic tokens, a section we removed })
 which, when combined, lead to an effective heuristic for many cases. Figure
 \ref{intro_example} shows a simple example and walks readers through the high-level
 parts of the algorithm and accompanying heuristics.
