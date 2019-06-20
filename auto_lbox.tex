@@ -1231,7 +1231,23 @@ replacing it with a subtree and making it impossible to find a valid location
 to insert a language box at.
 
 
-\section{Threats to validity}
+\subsection{Threats to validity}
+
+There are two overall threats to validity in our evaluation.
+
+First, it is possible that our suite of language compositions and corpus of
+programs are unrepresentative. We have reduced these chances somewhat by using
+4 real-world programming languages and a fairly large number of well-known
+programs written in those languages, but of course it is possible to compose
+very different styles of languages, and to compose them in very different ways.
+
+Second, we have made various claims about performance in this paper, but Eco is
+a poor vehicle for evaluating them: it is written in Python, but only runs on
+CPython, a relatively slow implementation; and Eco's choice of data-structures
+was designed for flexibility, not efficiency. For example, nodes in Eco's parse
+tree are very heavy weight, without any of the optimisations described
+in~\citet{wagner98incremental}. Despite that, \laurie{what i'd hope to say here
+is something like ``the slowest time to insert was XXXs which isn't too bad''.}
 
 
 \section{Related Work}
