@@ -248,13 +248,18 @@ tree that represent a different language: the language box is surrounded by
 explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
 there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
-ways and places during editing. However, language boxes lack the most appealing aspect of
-ambiguous parsing: users must explicitly, and tediously, state when they want
-to insert or remove language boxes.
+ways and places during editing. Language boxes have the virtue that they
+work for any language composition. However, this generality has a cost:
+users explicitly, and tediously, state when they want
+to insert or remove language boxes. This stands in stark contrast to
+generalised parsing: while this only works well on language compositions which
+users can, and have, defined appropriate disambiguations, generalised parsing
+requires no subsequent effort on the part of the end user.
 
-The fundamental research question underlying this paper is whether it is
-possible to reduce the need for the users to explicitly insert and remove language
-boxes. For example, in a composition of Java and SQL (where SQL is allowed
+The fundamental research question underlying this paper is thus whether it is
+possible to extend some of the benefits of generalised parsing to language
+boxes, while not losing their generality.
+For example, in a composition of Java and SQL (where SQL is allowed
 wherever a Java expression is valid), can such a system automatically insert an
 SQL language box around the SQL in \texttt{for (String n: SELECT name FROM table) \{ ...
 \}}? It is important to acknowledge from the outset that a perfect solution
