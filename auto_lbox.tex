@@ -676,7 +676,7 @@ in a way that is unlikely to cause a noticeable slowdown.
 def recreate_parsing_stack(lbox):
   v = global_version - 1
   path_to_lbox = set()
-    parent = lbox.parent(v)
+  parent = lbox.parent(v)
   while True:
     path_to_lbox.add(parent)
     parent = parent.parent(v)
@@ -697,10 +697,15 @@ has been inserted into the parse tree. We do this in two steps. First we
 collect all the nodes on the path from the language box to the root node (lines
 2--8). Second we then follow equivalent steps as when a node is marked as
 changed and the incremental parser runs \cite[p.~63]{wagner98practicalalgorithms}:
-we reparse all nodes up to the language box (lines 10--17), skipping
-subtrees which can't be relevant to the parsing stack (lines 16--17). The
-\texttt{next\_lookahead} function (line 17) returns the next node in the parse
-tree in preorder.}
+we reparse all nodes up to the language box (lines 11--18), skipping
+subtrees which can't be relevant to the parsing stack (lines 17--18). The
+\texttt{next\_lookahead} function (line 18) returns the next node in the parse
+tree in preorder. Note that we have to iterate over a previous version of the
+parse tree: \texttt{node.parent(V)} and \texttt{node.children(V)} both work in
+the same way e.g.~ \texttt{node.parent(\textit{V})} returns \texttt{node}'s
+parent as when \texttt{node} was at in version \texttt{V} (which may be
+different to \texttt{node}'s parent in the current version of the tree,
+\texttt{global\_version}).}
 \label{fig:createparsestack}
 \end{figure}
 
@@ -733,7 +738,7 @@ def parse_tree(parser, node):
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted before \texttt{node.version(v)}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
-    node = node.get_parent(v)
+    node = node.parent(v)
   return cnds
 
 def line(parser, node):
@@ -758,9 +763,7 @@ following that node (line 6). The \texttt{parse\_tree} heuristic
 walks up the parse tree to find candidate language boxes (line 14--15).
 Because the parse tree is, in a sense, only partially parsed at the point the
 candidates heuristic is called, we have to view the parse tree as it was before parsing
-began (line 16) -- \texttt{node.get\_parent(\textit{V})} returns
-\texttt{node}'s parent as when \texttt{node} was at in version \texttt{V} (which may be different
-to \texttt{node}'s parent in \texttt{global\_version}). The \texttt{line} heuristic searches
+began (line 16). The \texttt{line} heuristic searches
 backwards each token from the error node (line 25) until the beginning of
 the line which contains that node (line 21) for
 candidate language boxes (lines 23--24).}
