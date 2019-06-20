@@ -659,9 +659,9 @@ found. However, there is a slight subtlety in that the parse tree is, by
 definition, broken at the point the candidates heuristic is called. In a sense,
 the incremental parser parses the tree in two stages, and the candidates
 heuristic is called after the first of these, when it is possible for newly
-inserted terminals to be detached from the tree. Fortunately, we can solve this
-easily by using the versioning feature of the incremental parsing algorithm
-from~\cite{wagner98incremental} \laurie{cite the page in wagner} which allows
+inserted terminals to be detached from the tree~\cite[p.~60]{wagner98practicalalgorithms}\lukas{It's not directly spelled out here but ``the input is a mixture of old subtrees from the previous version of the tree'' somewhat implies it}. Fortunately, we can solve this
+easily by using the versioning feature described in ~\citet[p.~15]{wagner98practicalalgorithms}
+which allows
 us to view the tree as if the first stage of parsing had not yet occurred.
 
 The third candidates heuristic is the \emph{line} approach, which searches
@@ -695,8 +695,8 @@ def recreate_parsing_stack(lbox):
 has been inserted into the parse tree. We do this in two steps. First we
 collect all the nodes on the path from the language box to the root node (lines
 2--8). Second we then follow equivalent steps as when a node is marked as
-changed and the incremental parser runs \laurie{cite a page from wagner's
-thesis}: we reparse all nodes up to the language box (lines 10--17), skipping
+changed and the incremental parser runs \cite[p.~63]{wagner98practicalalgorithms}:
+we reparse all nodes up to the language box (lines 10--17), skipping
 subtrees which can't be relevant to the parsing stack (lines 16--17). The
 \texttt{next\_lookahead} function (line 17) returns the next node in the parse
 tree in preorder.}
@@ -1048,8 +1048,8 @@ comments and strings. For example, in a naive Java grammar, typing
 `\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
 file (whether it is inside or outside a language box) to be relexed and tokens
 flattened. Interestingly, a slight variant on language boxes solves this problem
-for incremental parsing \laurie{cite the page range in your thesis that shows
-this}. However, this is not applicable to our situation, where candidates
+for incremental parsing \cite[p.~108--122]{diekmann18editing}.
+However, this is not applicable to our situation, where candidates
 recognisers may end up lexing until the end of the file. Fortunately, this is
 unlikely to be a performance problem in practice. First, this can only happen
 if an inner language has sufficient lexical overlap with the outer language
