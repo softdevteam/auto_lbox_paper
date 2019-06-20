@@ -659,7 +659,7 @@ found. However, there is a slight subtlety in that the parse tree is, by
 definition, broken at the point the candidates heuristic is called. In a sense,
 the incremental parser parses the tree in two stages, and the candidates
 heuristic is called after the first of these, when it is possible for newly
-inserted terminals to be detached from the tree~\cite[p.~60]{wagner98practicalalgorithms}\lukas{It's not directly spelled out here but ``the input is a mixture of old subtrees from the previous version of the tree'' somewhat implies it}. Fortunately, we can solve this
+inserted terminals to be detached from the tree~\cite[p.~60]{wagner98practicalalgorithms}\lukas{It's not directly spelled out here but ``the input is a mixture of old subtrees from the previous version of the tree'' somewhat implies it}\laurie{is there somewhere in your thesis that explains it?}. Fortunately, we can solve this
 easily by using the versioning feature described in ~\citet[p.~15]{wagner98practicalalgorithms}
 which allows
 us to view the tree as if the first stage of parsing had not yet occurred.
@@ -736,7 +736,7 @@ def parse_tree(parser, node):
 
 def line(parser, node):
   cnds = []
-  while node._type not in ["BOS", "Newline"]:
+  while node.type_ not in ["BOS", "Newline"]:
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
@@ -755,8 +755,10 @@ searching for candidate language boxes (line 7) starting at the first terminal
 following that node (line 6). The \texttt{parse\_tree} heuristic
 walks up the parse tree to find candidate language boxes (line 14--15).
 Because the parse tree is, in a sense, only partially parsed at the point the
-candidates heuristic is called, we view the parse tree as it was before parsing
-began (line 16). The \texttt{line} heuristic searches
+candidates heuristic is called, we have to view the parse tree as it was before parsing
+began (line 16) -- \texttt{node.get\_parent(\textit{V})} returns
+\texttt{node}'s parent as when \texttt{node} was at in version \texttt{V} (which may be different
+to \texttt{node}'s parent in \texttt{global\_version}). The \texttt{line} heuristic searches
 backwards each token from the error node (line 25) until the beginning of
 the line which contains that node (line 21) for
 candidate language boxes (lines 23--24).}
