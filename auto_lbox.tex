@@ -727,17 +727,16 @@ def stack(parser, node):
 
 def parse_tree(parser, node):
   cnds = []
-  node = node.version(global_version - 1)
   while node is not None:
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
-    node = node.parent
+    node = node.get_parent(global_version - 1)
   return cnds
 
 def line(parser, node):
   cnds = []
-  while node is not None and node.typ not in ["BOS", "Newline"]:
+  while node._type not in ["BOS", "Newline"]:
     for lang in <!\textrm{\textit{composition}}!>:
       if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
@@ -754,13 +753,13 @@ Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
 stack, finding the node matching each point in the stack (line 6) and then
 searching for candidate language boxes (line 7) starting at the first terminal
 following that node (line 6). The \texttt{parse\_tree} heuristic
-walks up the parse tree (line 12) for candidate language boxes (line 15--16).
+walks up the parse tree to find candidate language boxes (line 14--15).
 Because the parse tree is, in a sense, only partially parsed at the point the
 candidates heuristic is called, we view the parse tree as it was before parsing
-began (line 12). The \texttt{line} heuristic searches
-backwards each token from the error node back (line 26) until the beginning of
-the line which contains that node (line 22) for
-candidate language boxes (lines 24--25).}
+began (line 16). The \texttt{line} heuristic searches
+backwards each token from the error node (line 25) until the beginning of
+the line which contains that node (line 21) for
+candidate language boxes (lines 23--24).}
 \label{lst:find_candidates}
 \end{minipage}
 \end{figure*}
