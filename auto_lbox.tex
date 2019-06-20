@@ -1082,29 +1082,66 @@ in any way.
 \label{sec:evaluation}
 
 To evaluate the efficacy of automatic language boxes, a large-scale experiment
-is necessary. However, since composed programs of the type we are aiming to
-support with automatic language boxes are currently rare, there is no
-off-the-shelf benchmark suite we can use. In this section we first detail
-the benchmark suite we created before analysing the results of automatic
-language boxes on that suite.
+is necessary. We first present our methodology before looking at the results of
+our experiment.
 
 
-\subsection{The benchmark suite}
+\subsection{Methodology}
 
-To create a benchmark suite, we took the grammars of 4 real-world languages
-(Java 5, Lua 5.3, PHP 5.6, and
-SQLite 3.27) and created 12 language compositions from them.
+Since there is no equivalent work that we know of, we have to
+define our own methodology. From a user perspective, the major question we
+ultimately want an answer to is: do automatic language boxes work well in most
+cases? Answering this is not completely trivial, because there are several
+possible outcomes from inserting text in an inner language. We have chosen to
+break these down into five categories:
+
+\laurie{these will change}
+\begin{description*}
+  \item[Valid insertion] A language box was automatically inserted around the inner fragment, which fixed the initial error that resulted from the insertion of the fragment.
+  \item[Invalid insertion] A language box was inserted, but the outer language is still has syntax errors. Since we initially start with a syntactically valid program, before inserting the fragment, this means that the insertion of the language box was invalid (e.g.~if the inserted language box does not encompass the whole fragment).
+  \item[Valid in outer language] Since the inner fragment was also valid in the outer language, the heuristics did not trigger and thus no language boxes were inserted.
+  \item[Missed insertion] The new input fragment resulted in an error, however, no candidate language boxes were found to fix the error.
+  \item[Multiple candidates] Multiple language box candidates were found, which means no language box is inserted and instead options are presented to the user.
+\end{description*}
+\laurie{collate these into `acceptable' and `unacceptable'}
+
+In order to produce numbers that are plausibly representative of situations
+that real users might encounter, we created 12 language compositions of
+real-world languages, and created \totalinsertions tests from real-world
+programs. Each test is a tuple (\emph{base file}, \emph{base file function
+definition or expression offset}, \emph{base file function definition or
+expression span}, \emph{function definition or expression fragment}) where
+`base file' is an instance of the outer language in the composition and
+`fragment' is an instance of the inner language. For each test, we then loaded
+\emph{base file} into our extension of Eco; emulated key presses which move the
+cursor to the \emph{offset} and deleted \emph{span} characters; and then
+emulated key presses which inserted \emph{fragment}. For each test we recorded
+\laurie{this will need updating} whether a language box was inserted or not, if
+the insertion lead to a valid or invalid program, and if it didn't for what
+reason (i.e.~a wrong language box was inserted; no candidate was found; or
+multiple candidates were found).
+
+
+\subsubsection{Language compositions}
+
+To create our 12 language compositions, we used the grammars of 4 real-world
+languages (Java 5, Lua 5.3, PHP 5.6, and SQLite 3.27).
 For each language composition of $L_1$ (outer) and $L_2$ (inner), we allow
 expressions and function definitions in $L_2$ to be used wherever expressions
 and function definitions in $L_1$ are normally valid. For example, in the
 composition \emph{JavaLua}, Java is the outer language and Lua the inner
 language: Lua function definitions and expressions can be used wherever Java
-function definitions and expressions (respectively) are valid. Since SQL
-has no concept of function definitions and it makes little sense for SQL expressions
-to appear on their own, compositions with SQL as the
-inner language may only replace expressions with whole SQL statements. The
+function definitions and expressions (respectively) are valid. The one exception
+to this is when SQL is the inner language: since our corpus consists of SQL
+statements, it makes little sense to allow SQL statementes where a Java/Lua/PHP
+function is valid. In this case, we restrict the composition to only insert SQL
+statements where Java/Lua/PHP expressions are valid (i.e.~we do not insert
+function definitions at all). The
 particular language compositions we created can be seen as the $x$-axis labels
 in Table~\ref{tbl:valid}.
+
+
+\subsubsection{Program corpus}
 
 We then collected a corpus of inputs in each language.
 For PHP, we used the source code of Wordpress 4.6.13, which consists of 365 files that are
@@ -1115,25 +1152,12 @@ of 6,556 files and 424,051 LoC.
 For Lua, we used Lua's test suite, which consists of 32 files totalling 13,990 LoC.
 For SQL, we used SQLite's test suite, consisting of 1,100 test files which
 contain 27,526 tests totalling 89,211 LoC.
-We then ran each program through a parser to identify the positions and spans
+
+We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. Overall, we extracted 2,474
+expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
-
-For each language composition, we then created a test framework which took in
-random pairs (\emph{base file}, \emph{function definition or expression
-fragment}) and: loaded \emph{base file} into our
-extension of Eco; moved the cursor to the \emph{location} of a random function definition or expression (as
-appropriate) and emulated the key presses to delete it; then emulated the key
-presses to insert \emph{function definition or expression fragment} in its
-place. For each pair we recorded whether a language box was inserted or not, if the insertion
-lead to a valid or invalid program, and if it didn't for what reason (i.e.~a wrong
-language box was inserted; no candidate was found; or multiple candidates were found).
-We repeated the experiment for each heuristic using the same \emph{base file}, \emph{fragement},
-\emph{location} combination, which were recorded during the first run. We
-generated \totalinsertions pairs from our corpus, split amongst the
-language compositions as shown in Table~\ref{tbl:valid}.
 
 
 \subsection{Results}
@@ -1173,16 +1197,6 @@ overall benchmark suite (Table~\ref{tbl:breakdown}). Appendix~\ref{apdx:tables}
 contains several tables which give a more detailed breakdown of information
 that is, in a sense, a combination of that between Tables~\ref{tbl:valid}
 and~\ref{tbl:breakdown}.
-
-From a user perspective, the major question to be answered is: do automatic language boxes work well in most cases? Answering this is not completely trivial, because there are several possible outcomes from inserting text in an inner language. We have chosen to break these down into five categories:
-
-\begin{description*}
-  \item[Valid insertion] A language box was automatically inserted around the inner fragment, which fixed the initial error that resulted from the insertion of the fragment.
-  \item[Invalid insertion] A language box was inserted, but the outer language is still has syntax errors. Since we initially start with a syntactically valid program, before inserting the fragment, this means that the insertion of the language box was invalid (e.g.~if the inserted language box does not encompass the whole fragment).
-  \item[Valid in outer language] Since the inner fragment was also valid in the outer language, the heuristics did not trigger and thus no language boxes were inserted.
-  \item[Missed insertion] The new input fragment resulted in an error, however, no candidate language boxes were found to fix the error.
-  \item[Multiple candidates] Multiple language box candidates were found, which means no language box is inserted and instead options are presented to the user.
-\end{description*}
 
 In both cases we show
 the differences in the various candidates heuristics, which shows that while
