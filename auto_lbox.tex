@@ -634,23 +634,14 @@ and continue. `\texttt{SELECT 1 + }' errors at the EOS token, so we continue.
 terminates, even if there is input after the fragment.
 
 
-\subsubsection{The stack, parse tree, and line heuristics}
+\subsubsection{The parse tree, stack, and line heuristics}
 
 We eventually created three distinct candidates heuristics, each of which has
-different strengths and weaknesses.
+different strengths and weaknesses. We now describe each candidates heuristic
+in detail; see Figure~\ref{lst:find_candidates} for a semi-formal version of
+each.
 
-The first candidates heuristic is the \emph{stack} approach, which is based on
-the idea that each point in the parsing stack naturally defines a plausible
-breaking point between one language and another. It walks backwards over the
-parsing stack, at each point looking at the associated node. This heuristic has
-two significant advantages
-advantages: the parsing stack is nearly always fairly small, so only a small number
-of places in the program need to be checked; and if a language box can be
-inserted, parsing can continue as normal from that position in the parsing
-stack. However, the weakness of this heuristic is that it tries relatively few
-locations, and often misses out possibilities which seem plausible to humans.
-
-The second candidates heuristic is the \emph{parse tree} approach which aims to
+The \emph{parse tree} candidates heuristic aims to
 find plausible candidates based on the structure of the parse tree. The
 intuition underlying this is that a likely point to insert a language box is
 around text that forms a subtree and that we can find such points by
@@ -664,12 +655,22 @@ easily by using the versioning feature described in ~\citet[p.~15]{wagner98pract
 which allows
 us to view the tree as if the first stage of parsing had not yet occurred.
 
-The third candidates heuristic is the \emph{line} approach, which searches
+The \emph{stack} candidates heuristic is based on
+the idea that each point in the parsing stack naturally defines a plausible
+breaking point between one language and another. It walks backwards over the
+parsing stack, at each point looking at the associated node. This heuristic has
+two significant advantages
+advantages: the parsing stack is nearly always fairly small, so only a small number
+of places in the program need to be checked; and if a language box can be
+inserted, parsing can continue as normal from that position in the parsing
+stack. However, the weakness of this heuristic is that it tries relatively few
+locations, and often misses out possibilities which seem plausible to humans.
+
+The \emph{line} candidates heuristic approach, which searches
 backwards, one node at a time, from the error node to the beginning of the line
 that contains that token for candidates. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown.
-
 
 \begin{figure}
 \begin{lstdefault}[]
@@ -717,20 +718,9 @@ requires reparsing the program. Fortunately, we can do this efficiently by
 using a similar approach to that the incremental parser uses to reparse changed
 nodes (see Figure~\ref{fig:createparsestack}).
 
-Figure~\ref{lst:find_candidates} shows a more formal version of each of these heuristics.
-
 \begin{figure*}[t]
 \begin{minipage}[t]{0.55\textwidth}
 \begin{lstdefault}[]
-def stack(parser, node):
-  cnds = []
-  for state, node in reversed(parser.stack):
-    for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
-        t = node.next_terminal()
-        cnds.extend(cnds_recogniser(t, lang))
-  return cnds
-
 def parse_tree(parser, node):
   cnds = []
   v = global_version - 1
@@ -739,6 +729,15 @@ def parse_tree(parser, node):
       if <!\textrm{\textit{lang can be shifted before \texttt{node.version(v)}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
     node = node.parent(v)
+  return cnds
+
+def stack(parser, node):
+  cnds = []
+  for state, node in reversed(parser.stack):
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
+        t = node.next_terminal()
+        cnds.extend(cnds_recogniser(t, lang))
   return cnds
 
 def line(parser, node):
@@ -756,17 +755,20 @@ def line(parser, node):
   passed a \texttt{node}, which is the point at which an error is detected, and
 finds sensible points before that node in the parse tree to be the possible
 starting point of language boxes (using the candidates recogniser from
-Figure~\ref{fig:recogniser}). The \texttt{stack} heuristic walks the parse
-stack, finding the node matching each point in the stack (line 6) and then
-searching for candidate language boxes (line 7) starting at the first terminal
-following that node (line 6). The \texttt{parse\_tree} heuristic
-walks up the parse tree to find candidate language boxes (line 15--16).
+Figure~\ref{fig:recogniser}).
+The \texttt{parse\_tree} candidates heuristic
+walks up the parse tree to find candidate language boxes (line 6--7).
 Because the parse tree is, in a sense, only partially parsed at the point the
 candidates heuristic is called, we have to view the parse tree as it was before parsing
-began (lines 15, 17). The \texttt{line} heuristic searches
+began (line 8).
+The \texttt{stack} candidates heuristic walks the parse
+stack, finding the node matching each point in the stack (line 13) and then
+searching for candidate language boxes (line 15) starting at the first terminal
+following that node (line 16).
+The \texttt{line} candidates heuristic searches
 backwards each token from the error node (line 26) until the beginning of
 the line which contains that node (line 22) for
-candidate language boxes (lines 24--25).}
+candidate language boxes (line 24).}
 \label{lst:find_candidates}
 \end{minipage}
 \end{figure*}
@@ -1124,8 +1126,9 @@ generated \totalinsertions pairs from our corpus.
 \subsection{Results}
 
 We break the results of our experiment down in two ways: by acceptable results
-per language composition (Table~\ref{tbl:valid}); and by detailed outcome in the
-overall benchmark suite (Table~\ref{tbl:breakdown}).
+per language composition (Table~\ref{tbl:valid}); and by outcome in the
+overall benchmark suite (Table~\ref{tbl:breakdown}). Appendix~\ref{apdx:tables}
+has
 
 Table \ref{tbl:valid} shows the total percentage of
 acceptable outcomes for each heuristic used broken down by each composition.
@@ -1256,6 +1259,8 @@ arbitrary compositions.
 \appendix
 
 \section{Tables}
+\label{apdx:tables}
+
 \subsection{Breakdown: All heuristics}
 \input{tables/tbl_bench_all.tex}
 \subsection{Breakdown: Parse-tree-based heuristic}
