@@ -271,15 +271,14 @@ not be unduly impacted; and users should be able to broadly predict if, and
 why, language boxes are inserted or removed.
 
 The solution we present to this problem are \emph{automatic language boxes}. In
-essence, we present an algorithm which can automatically insert, remove, or resize language
+essence, we present an algorithm which can automatically insert, remove, and resize language
 boxes in many useful cases. The algorithm is, in essence, comprised of several
 stages: determining what user inputs should trigger it; finding candidate language
 boxes to insert, remove, or resize; filtering out those which would make the
 overall program worse; and then applying the remaining candidates. One of the main challenges with
 automatic language boxes is to determine what portion of the program to search
-for possible language boxes: we present several heuristics for this case
-(including the ability to take the user's previous input into consideration\lukas{i think this related to historic tokens, a section we removed })
-which, when combined, lead to an effective heuristic for many cases. Figure
+for possible language boxes: we present several sub-heuristics for this
+which, when combined, lead to an effective overall heuristic. Figure
 \ref{intro_example} shows a simple example and walks readers through the high-level
 parts of the algorithm and accompanying heuristics.
 
