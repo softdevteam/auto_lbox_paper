@@ -674,11 +674,12 @@ in a way that is unlikely to cause a noticeable slowdown.
 \begin{figure}
 \begin{lstdefault}[]
 def recreate_parsing_stack(lbox):
+  v = global_version - 1
   path_to_lbox = set()
-  parent = lbox.parent
+    parent = lbox.parent(v)
   while True:
     path_to_lbox.add(parent)
-    parent = parent.parent
+    parent = parent.parent(v)
     if parent is None:
       break
 
@@ -686,7 +687,7 @@ def recreate_parsing_stack(lbox):
   node = <!\textrm{\textit{root node}} !>
   while node is not lbox:
     if node in path_to_lbox:
-      node = node.children[0]
+      node = node.children(v)[0]
     else:
       parser.parse(node)
       node = node.next_lookahead()
@@ -727,11 +728,12 @@ def stack(parser, node):
 
 def parse_tree(parser, node):
   cnds = []
+  v = global_version - 1
   while node is not None:
     for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
+      if <!\textrm{\textit{lang can be shifted before \texttt{node.version(v)}}}!>:
         cnds.extend(cnds_recogniser(node, lang))
-    node = node.get_parent(global_version - 1)
+    node = node.get_parent(v)
   return cnds
 
 def line(parser, node):
