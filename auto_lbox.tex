@@ -659,7 +659,7 @@ found. However, there is a slight subtlety in that the parse tree is, by
 definition, broken at the point the candidates heuristic is called. In a sense,
 the incremental parser parses the tree in two stages, and the candidates
 heuristic is called after the first of these, when it is possible for newly
-inserted terminals to be detached from the tree~\cite[p.~60]{wagner98practicalalgorithms}\lukas{It's not directly spelled out here but ``the input is a mixture of old subtrees from the previous version of the tree'' somewhat implies it}\laurie{is there somewhere in your thesis that explains it?}. Fortunately, we can solve this
+inserted terminals to be detached from the tree~\cite[p.~58, 60]{wagner98practicalalgorithms}. Fortunately, we can solve this
 easily by using the versioning feature described in ~\citet[p.~15]{wagner98practicalalgorithms}
 which allows
 us to view the tree as if the first stage of parsing had not yet occurred.
