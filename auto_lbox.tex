@@ -1172,15 +1172,12 @@ and~\ref{tbl:breakdown}.
 
 From a user perspective, the major question to be answered is: do automatic language boxes work well in most cases? Answering this is not completely trivial, because there are several possible outcomes from inserting text in an inner language. We have chosen to break these down into five categories:
 
-\laurie{i suggest we rename these to something like: `Valid insertion',
-`invalid insertion', `valid in outer', `missed' (maybe `ignored'?), `multiple'.
-we also need to beef up their definitions.}
 \begin{description*}
-  \item[Valid insertion] A language box was automatically inserted around the inner fragment.
-  \item[Invalid insertion] \laurie{``a language box was inserted but it did not fix the error or introduced new ones'' is both vague and confusing. i don't get it}
-  \item[No insertion (valid)] No language box was inserted because the inner fragment was also valid in the outer language.
-  \item[No insertion (error)] No language box was inserted around the inner fragment, even though it was not valid in the outer language.
-  \item[No insertion (multi)] Multiple language box candidates were found.
+  \item[Valid insertion] A language box was automatically inserted around the inner fragment, which fixed the initial error that resulted from the insertion of the fragment.
+  \item[Invalid insertion] A language box was inserted, but the initial error that triggered the heuristics remained.
+  \item[Valid in outer language] Since the inner fragment was also valid in the outer language, the heuristics did not trigger and thus no language boxes were inserted.
+  \item[Missed insertion] The new input fragment resulted in an error, however, no candidate language boxes were found to fix the error.
+  \item[Multiple candidates] Multiple language box candidates were found, which means no language box is inserted and instead options are presented to the user.
 \end{description*}
 
 In both cases we show
