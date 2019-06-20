@@ -1084,7 +1084,7 @@ function definitions and expressions (respectively) are valid\footnote{Note that
 of function definitions doesn't exist in SQL, any composition
 with SQL as the inner language only allows statements to be embedded.}. The
 particular language compositions we created can be seen as the $x$-axis labels
-in Figure~\ref{tbl_valid}.
+in Table~\ref{tbl:valid}.
 
 We then collected a corpus of inputs in each language.
 For PHP, we used the source code of Wordpress 4.6.13, which consists of 365 files that are
@@ -1118,28 +1118,28 @@ generated \totalinsertions pairs from our corpus.
 \subsection{Results}
 
 We break the results of our experiment down in two ways: by acceptable results
-per language composition (Table~\ref{tbl:vald}); and by detailed outcome in the
+per language composition (Table~\ref{tbl:valid}); and by detailed outcome in the
 overall benchmark suite (Table~\ref{tbl:breakdown}).
 
-Figure \ref{tbl_valid} shows the total percentage of
+Table \ref{tbl:valid} shows the total percentage of
 acceptable outcomes for each heuristic used broken down by each composition.
-Acceptable outcomes are one of the following: a language box gets succesfully
+Acceptable outcomes are one of the following: a language box gets successfully
 inserted; no language box was inserted since the insertion was already valid in
 the outer language; the insertion had multiple options which are presented to
 the user.
 
 The results show that while each heuristic has weaknesses, when put together
 they result in over 96\% of acceptable outcomes. Weaknesses in the heuristics
-are based on the composition. For example, the history-based heuristic only
+are based on the composition. For example, the parse-tree-based heuristic only
 achieves 67\% of acceptable outcomes when used on the Java+Lua composition. The
 reason for this low number can be accounted to the insertion of Lua functions
 right after a Java comment.  Since the insertion is attached to the comment
-subtree, the history-based heuristic is not able to find a valid location for
+subtree, the parse-tree-based heuristic is not able to find a valid location for
 the language box by traversing the parse tree.  The line-based heuristic on the
 other hand has difficulties with the composition of Java+PHP. The reason for
 this is that PHP's function syntax is similar to Java's, e.g.~\texttt{function
 x() \{\}} is a valid Java function, where \texttt{function} represents a type.
-This leads to many errors only occuring in one of the following lines, which
+This leads to many errors only occurring in one of the following lines, which
 the line-based heuristic can not deal with. The stack-based heuristic also has
 a weakness with the composition of Lua+SQLite. The problem here is related to
 the way Lua parses certain inputs. For example, when composing \texttt{x =
@@ -1159,7 +1159,7 @@ to insert a language box at.
     which are presented to the user. In other words, the total percentage
     doesn't include invalid insertions of language boxes and errors for which
     no language box could be found automatically.}
-    \label{tbl_valid}
+    \label{tbl:valid}
 \end{table*}
 
 \begin{table*}[hbt]
@@ -1252,7 +1252,7 @@ arbitrary compositions.
 \section{Tables}
 \subsection{Breakdown: All heuristics}
 \input{tables/tbl_bench_all.tex}
-\subsection{Breakdown: History-based heuristic}
+\subsection{Breakdown: Parse-tree-based heuristic}
 \input{tables/tbl_bench_hist.tex}
 \subsection{Breakdown: Stack-based heuristic}
 \input{tables/tbl_bench_stack.tex}
