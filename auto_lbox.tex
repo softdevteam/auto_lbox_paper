@@ -1098,7 +1098,7 @@ language: Lua function definitions and expressions can be used wherever Java
 function definitions and expressions (respectively) are valid. Since SQL
 has no concept of function definitions and it makes little sense for SQL expressions
 to appear on their own, compositions with SQL as the
-inner language always embed entire SQL statements. The
+inner language always embed entire SQL statements\laurie{this suggests that we replace `def f(): pass' with `SELECT * from name' which sounds very wrong?!}. The
 particular language compositions we created can be seen as the $x$-axis labels
 in Table~\ref{tbl:valid}.
 
