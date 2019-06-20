@@ -773,7 +773,7 @@ candidate language boxes (line 24).}
 \end{minipage}
 \end{figure*}
 
-As we shall see in Section\~ref{sec:evaluation}, each of the candidates
+As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics above has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all} which first
 attempts to find candidates using the parse tree heuristic; if that fails,
@@ -834,7 +834,7 @@ often inserts a whitespace token after a candidate language box, and that
 whitespace token is by definition syntactically valid, though not particularly
 insightful. We thus need to skip such tokens in order to get to a
 token which tells us something useful about the context surrounding a candidate
-language box (see Figure~\ref{fig:autobox_nonwhitespace} for an example).
+language box.
 Note that we do not need to check the tokens preceding a candidate language box
 for correctness since, by definition, the parser will be in a correct state
 at that point.
@@ -891,7 +891,7 @@ rank candidates (perhaps by `relevance', or length, or starting position etc.),
 but we were unable to find a ranking system which matches the user's intentions
 often enough to be worthwhile. We therefore simply present all the candidates
 as options to the user from which they must choose one (see Figure~\ref{fig:multiplecnds}). As we shall see in
-Section~\ref{sec:evaulation}, this happens rarely enough that it is not a
+Section~\ref{sec:evaluation}, this happens rarely enough that it is not a
 significant problem. It is also worth noting that this is an
 example of a fundamental difference between traditional batch parsing and
 incremental parsing: it is entirely feasible for us
@@ -1232,7 +1232,7 @@ be required~\cite{zook04generating, bravenboer05generalized}.
 Unfortunately, since these approaches are dependent on types, they do not work
 for dynamically typed languages. Furthermore, heuristics such as picking the
 shortest path on multiple valid options can hide options the user cares about
-(as shown in Section~\ref{auto_handling_multiple_solutions}).
+(as seen in Figure~\ref{fig:multiplecnds}).
 
 Despite these improvements, Spoofax's grammar definition SDF,
 which allows arbitrary CFGs, can give no guarantees that its grammars are unambiguous,
