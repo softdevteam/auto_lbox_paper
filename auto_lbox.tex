@@ -1159,7 +1159,7 @@ contain 27,526 tests totalling 89,211 LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}
+expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}\lukas{this number only represents actual right-hand-side expressions. i.e.~it doesn't include expressions from function calls or array values, as these are typically only single values (e.g.~strings) and are thus not very interesting. also wordpress has quite some files which are essentially just function calls, so they push this number further down.}
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
 
@@ -1252,6 +1252,12 @@ was designed for flexibility, not efficiency. For example, nodes in Eco's parse
 tree are very heavy weight, without any of the optimisations described
 in~\citet{wagner98incremental}. Despite that, \laurie{what i'd hope to say here
 is something like ``the slowest time to insert was XXXs which isn't too bad''.}
+\lukas{this is going to be difficult. The last run we did had Min: 0.0004s, Max: 792s, Avg: 0.58s. The reason
+for this high number is that PHP compositions often relex the entire file when opening strings. Until
+the string is closed, each keypress lexes the whole file, and some insertions have strings with 100 characters
+that are typed one char at a time. There is also an unfortunate problem with wagner's error recovery,
+which results in automatic language boxes being triggered multiple times on the same error,
+while error recovery is trying to find an isolation tree (tho this we can probably fix)}
 
 
 \section{Conclusions}
@@ -1270,7 +1276,10 @@ This research was funded by the EPSRC Lecture (EP/L02344X/1) fellowship.
 \section{Tables}
 \label{apdx:tables}
 
-\laurie{lukas: these tables need a brief intro and explanation}
+The following tables show for each heuristic, the outcomes per benchmark. The
+x-axis shows the outcomes of the insertions, similar to
+Table~\ref{tbl:breakdown}, while the y-axis shows the benchmarks used.
+\lukas{update this to show the same outcomes as in Table 2}
 
 \subsection{Breakdown: All heuristics}
 \input{tables/tbl_bench_all.tex}
