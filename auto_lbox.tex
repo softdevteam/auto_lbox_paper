@@ -1159,7 +1159,7 @@ contain 27,526 tests totalling 89,211 LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}\lukas{this number only represents actual right-hand-side expressions. i.e.~it doesn't include expressions from function calls or array values, as these are typically only single values (e.g.~strings) and are thus not very interesting. also wordpress has quite some files which are essentially just function calls, so they push this number further down.}
+expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}\lukas{this number only represents actual right-hand-side expressions. i.e.~it doesn't include expressions from function calls or array values, as these are typically only single values (e.g.~strings) and are thus not very interesting. also wordpress has quite some files which are essentially just function calls, so they push this number further down.}\laurie{we need to define carefully which expressions we considered interesting. i'm not really sure what `actual right-hand-side' expressions means, for example.}
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
 
@@ -1249,7 +1249,7 @@ Second, we have made various claims about performance in this paper, but Eco is
 a poor vehicle for evaluating them: it is written in Python, but only runs on
 CPython, a relatively slow implementation; and Eco's choice of data-structures
 was designed for flexibility, not efficiency. For example, nodes in Eco's parse
-tree are very heavy weight, without any of the optimisations described
+tree are very heavy weight, and do not include any of the optimisations described
 in~\citet{wagner98incremental}. Despite that, \laurie{what i'd hope to say here
 is something like ``the slowest time to insert was XXXs which isn't too bad''.}
 \lukas{this is going to be difficult. The last run we did had Min: 0.0004s, Max: 792s, Avg: 0.58s. The reason
@@ -1258,6 +1258,11 @@ the string is closed, each keypress lexes the whole file, and some insertions ha
 that are typed one char at a time. There is also an unfortunate problem with wagner's error recovery,
 which results in automatic language boxes being triggered multiple times on the same error,
 while error recovery is trying to find an isolation tree (tho this we can probably fix)}
+\laurie{i guess those times are the length of time for the whole fragment to be inserted?
+because it now occurs to me that what we probably care about is the maximum
+length of time for any given keypress. i suppose we can guesstimate this by
+dividing the time per file by the number of characters, but that might hide
+outliers.}
 
 
 \section{Conclusions}
