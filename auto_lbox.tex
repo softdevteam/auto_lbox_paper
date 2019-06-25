@@ -1276,24 +1276,36 @@ This research was funded by the EPSRC Lecture (EP/L02344X/1) fellowship.
 
 \bibliography{bib}
 
+\clearpage
 \appendix
 
 \section{Tables}
 \label{apdx:tables}
 
-The following tables show for each heuristic, the outcomes per benchmark. The
-x-axis shows the outcomes of the insertions, similar to
-Table~\ref{tbl:breakdown}, while the y-axis shows the benchmarks used.
+In this appendix, we show detailed outcomes by candidates heuristic, in
+similar fashion to Table~\ref{tbl:breakdown}.
 \lukas{update this to show the same outcomes as in Table 2}
 
-\subsection{Breakdown: All heuristics}
+
+\begin{table}[b]
 \input{tables/tbl_bench_all.tex}
-\subsection{Breakdown: Parse-tree-based heuristic}
+\caption{The \emph{all} candidates heuristics}
+\end{table}
+
+\begin{table}[b]
 \input{tables/tbl_bench_hist.tex}
-\subsection{Breakdown: Stack-based heuristic}
+\caption{The \emph{parse tree} candidates heuristics}
+\end{table}
+
+\begin{table}[b]
 \input{tables/tbl_bench_stack.tex}
-\subsection{Breakdown: Line-based heuristic}
+\caption{The \emph{stack} candidates heuristics}
+\end{table}
+
+\begin{table}[b]
 \input{tables/tbl_bench_line.tex}
+\caption{The \emph{line} candidates heuristics}
+\end{table}
 
 
 \end{document}
