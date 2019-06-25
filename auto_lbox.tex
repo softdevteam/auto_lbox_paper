@@ -252,13 +252,14 @@ ways and places during editing. Language boxes have the virtue that they
 work for any language composition. However, this generality has a cost:
 users explicitly, and tediously, state when they want
 to insert or remove language boxes. This stands in stark contrast to
-generalised parsing: while this only works well on language compositions which
-users can, and have, defined appropriate disambiguations, generalised parsing
-requires no subsequent effort on the part of the end user.
+generalised parsing which can automatically determine when input
+has shifted between languages, but require the language composition author
+to have defined appropriate disambiguations.
 
 The fundamental research question underlying this paper is thus whether it is
-possible to extend some of the benefits of generalised parsing to language
-boxes, while not losing their generality.
+possible to usefully extend some of the benefits of generalised parsing to language
+boxes, while not losing their generality. Put another way, can we define a generic
+disambiguation scheme which users do not have to override too often?
 For example, in a composition of Java and SQL (where SQL is allowed
 wherever a Java expression is valid), can such a system automatically insert an
 SQL language box around the SQL in \texttt{for (String n: SELECT name FROM table) \{ ...
@@ -270,8 +271,8 @@ require significant extra work for the authors of composed languages; performanc
 not be unduly impacted; and users should be able to broadly predict if, and
 why, language boxes are inserted or removed.
 
-The solution we present to this problem are \emph{automatic language boxes}. In
-essence, we present an algorithm which can automatically insert, remove, and resize language
+In this paper we present the \emph{automatic language boxes} algorithm which
+can automatically insert, remove, and resize language
 boxes in many useful cases. The algorithm is, in essence, comprised of several
 stages: determining what user inputs should trigger it; finding candidate language
 boxes to insert, remove, or resize; filtering out those which would make the
