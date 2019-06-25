@@ -1253,11 +1253,14 @@ programs written in those languages, but of course it is possible to compose
 very different styles of languages, and to compose them in very different ways.
 
 Second, we have made various claims about performance in this paper, but Eco is
-a poor vehicle for evaluating them: it is written in Python, but only runs on
-CPython, a relatively slow implementation; and Eco's choice of data-structures
-was designed for flexibility, not efficiency. For example, nodes in Eco's parse
-tree are very heavy weight, and do not include any of the optimisations described
-in~\citet{wagner98incremental}. Despite that, \laurie{what i'd hope to say here
+a poor vehicle for evaluating them: it is written in Python, a relatively
+slow language; and Eco's choice of data-structures
+was designed for flexibility, not efficiency . For example, nodes in Eco's
+parse tree are very heavy weight (with a base size of around 2KiB, which grows
+rapidly as undo history is added), and do not include any of the optimisations
+described in~\citet{wagner98practicalalgorithms} (which would approximately reduce the
+base size to a tenth of its current size and substantially reduce the costs of
+additional undo history). Despite that, \laurie{what i'd hope to say here
 is something like ``the slowest time to insert was XXXs which isn't too bad''.}
 \lukas{this is going to be difficult. The last run we did had Min: 0.0004s, Max: 792s, Avg: 0.58s. The reason
 for this high number is that PHP compositions often relex the entire file when opening strings. Until
