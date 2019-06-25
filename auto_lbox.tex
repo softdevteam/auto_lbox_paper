@@ -1166,9 +1166,15 @@ contain 27,526 tests totalling 89,211 LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. Overall, we identified 2,474 \laurie{this is a really low total: less than 10 expressions per PHP file?}\lukas{this number only represents actual right-hand-side expressions. i.e.~it doesn't include expressions from function calls or array values, as these are typically only single values (e.g.~strings) and are thus not very interesting. also wordpress has quite some files which are essentially just function calls, so they push this number further down.}\laurie{we need to define carefully which expressions we considered interesting. i'm not really sure what `actual right-hand-side' expressions means, for example.}
+expression contained several subexpressions. Overall, we identified 2,474
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
+Some of the expression numbers, e.g.~PHP, may seem small considering the amount
+of files they were extracted from. This is because we only extracted
+expressions from assignments, because they are more likely to contain complex
+expressions, whereas expressions in function calls or array initialisations are
+typically single value strings, numbers, or variable names and thus rarely lead
+to the insertion of a language box.\lukas{Currently only for PHP, Java}
 
 
 \subsection{Results}
