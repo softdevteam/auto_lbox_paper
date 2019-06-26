@@ -251,7 +251,7 @@ there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
 ways and places during editing.
 
-Language boxes have the virtue that they work `out of the box' for any
+Language boxes have the virtue that they work for any possible
 language composition. However, this generality comes at a cost:
 users must explicitly, and tediously, state when they want
 to insert or remove language boxes. Interestingly, this is the exact
@@ -259,11 +259,11 @@ opposite of the situation with generalised parsing: language composition
 authors must disambiguate each new composition anew, but users can then
 freely write text in any of the languages in the composition.
 The fundamental research question underlying this paper is thus whether it is
-possible to usefully extend some of the benefits of generalised parsing to language
+possible to extend some of the benefits of generalised parsing to language
 boxes, while not losing language box's generality.
-For example, in a composition of Java and SQL (where SQL is allowed
-wherever a Java expression is valid), can such a system automatically insert an
-SQL language box around the SQL in `\texttt{for (String n: SELECT name FROM table) \{ ...
+For example, in a composition of Java and SQL, where SQL is allowed
+wherever a Java expression is valid, can such a system automatically insert an
+appropriate SQL language box in `\texttt{for (String n: SELECT name FROM table) \{ ...
 \}}'?
 
 In this paper we present \emph{automatic language boxes}, which can
@@ -273,12 +273,12 @@ applied to any language composition. In other words, given several languages in
 a composition, automatic language boxes find a non-strict subset of the
 possible ambiguous parses: in many cases, only one possibility remains, and
 language boxes inserted or updated as appropriate. Default disambiguation may
-seem a strange choice, because it would be a poor choice for traditional batch
+seem a strange choice, because it would be inappropriate in traditional batch
 parsing, where disambiguation is invisible to the user, and the consequences of
 an incorrect choice dire. However, in an incremental parsing setting, the
 results of disambiguation are visible to the user, and the consequences of an
 incorrect choice mild, since it can be simply, and permanently, overridden. The
-algorithm is, in essence, comprised of several stages: determining what user
+algorithm is, in essence, comprised of several stages / heuristics: determining what user
 inputs should trigger it; finding candidate language boxes to insert, remove,
 or resize; filtering out those which would make the overall program worse; and
 then applying the remaining candidates. Figure \ref{intro_example} shows a
@@ -292,7 +292,7 @@ and composed programs in those compositions by extracting fragments from real-wo
 In other words, our experiment is equivalent to opening a file
 in one language, moving the cursor to a given position, deleting a fixed amount
 of text, and then inserting text one character at a time from another language.
-Our experiments show that in \validalloverall of cases, automatic language boxes achieve an
+\laurie{this stuff needs updating} Our experiments show that in \validalloverall of cases, automatic language boxes achieve an
 acceptable result by which we mean they either: inserted a single valid
 language box (\breakdownallvalid); did not insert a language box because the
 inserted fragment was valid in both languages (\breakdownallnovalid); or an ambiguity
@@ -434,9 +434,8 @@ reality, language boxes do have content, though it is not visible to the outer
 language: they contain a separate parse tree for the inner language within
 them.
 
-This simple definition belies its power. Consider a composition of Java and
-SQL, where SQL expressions can be used wherever a Java expression is
-syntactically valid. Java's grammar must have a reference from Java's
+This simple definition belies its power. Consider our running Java and
+SQL example composition. Java's grammar must have a reference from Java's
 expression rule to a special symbol type `language box' (conventionally
 represented between angle brackets to visually separate it from rules and
 tokens). At run-time, if the Java parse tree has an SQL language box at the
