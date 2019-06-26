@@ -1101,23 +1101,9 @@ our experiment.
 \subsection{Methodology}
 
 Since there is no equivalent work that we know of, we have to
-define our own methodology. From a user perspective, the major question we
-ultimately want an answer to is: do automatic language boxes work well in most
-cases? Answering this is not completely trivial, because there are several
-possible outcomes from inserting text in an inner language. We have chosen to
-break these down into five categories:
+define our own methodology.
 
-\laurie{these will change}
-\begin{description*}
-  \item[Valid insertion] A language box was automatically inserted around the inner fragment, which fixed the initial error that resulted from the insertion of the fragment.
-  \item[Invalid insertion] A language box was inserted, but the outer language is still has syntax errors. Since we initially start with a syntactically valid program, before inserting the fragment, this means that the insertion of the language box was invalid (e.g.~if the inserted language box does not encompass the whole fragment).
-  \item[Valid in outer language] Since the inner fragment was also valid in the outer language, the heuristics did not trigger and thus no language boxes were inserted.
-  \item[Missed insertion] The new input fragment resulted in an error, however, no candidate language boxes were found to fix the error.
-  \item[Multiple candidates] Multiple language box candidates were found, which means no language box is inserted and instead options are presented to the user.
-\end{description*}
-\laurie{collate these into `acceptable' and `unacceptable'}
-
-In order to produce numbers that are plausibly representative of situations
+First, in order to produce numbers that are plausibly representative of situations
 that real users might encounter, we created 12 language compositions of
 real-world languages, and created \totalinsertions tests from real-world
 programs. Each test is a tuple (\emph{base file}, \emph{base file function
@@ -1133,6 +1119,35 @@ the insertion lead to a valid or invalid program, and if it didn't for what
 reason (i.e.~a wrong language box was inserted; no candidate was found; or
 multiple candidates were found).
 
+Second, we need to classify the outcome of each test. The overall question we
+want an answer to is: do automatic language boxes work well in most
+cases? Answering this is not completely trivial, because there are several
+possible outcomes from inserting text in an inner language. We have chosen to
+break these down into six categories:
+
+\begin{description*}
+  \item[Complete insertion] A language box was automatically inserted around
+    all of the inner fragment.
+  \item[Partial insertion (no errors)] A language box was automatically
+    inserted around part of the inner fragment, and the resulting text that was left
+    in the outer language did not cause any errors.
+  \item[Partial insertion (errors)] A language box was automatically inserted
+    around part of the inner fragment, but the resulting text that was left
+    in the outer language caused one or more syntax errors later in the file.
+  \item[No insertion (valid)] No language box was automatically inserted because
+    the fragment was valid in the outer language.
+  \item[No insertion (errors)] No language box was automatically inserted even
+    though the fragment was not valid in the outer language.
+  \item[No insertion (multi)] No language box was automatically inserted because
+    there were multiple possible candidates.
+\end{description*}
+
+We then group these into `acceptable' -- complete insertion, partial insertion
+(no errors), no insertion (valid), and no insertion (multi) -- and
+`unacceptable' -- partial insertion (errors), no insertion (errors) -- groups.
+If automatic language boxes are to be useful, we would need to see a high value
+for the acceptable group and a low value for the unacceptable group.
+
 
 \subsubsection{Language compositions}
 
@@ -1145,7 +1160,7 @@ composition \emph{JavaLua}, Java is the outer language and Lua the inner
 language: Lua function definitions and expressions can be used wherever Java
 function definitions and expressions (respectively) are valid. The one exception
 to this is when SQL is the inner language: since our corpus consists of SQL
-statements, it makes little sense to allow SQL statementes where a Java/Lua/PHP
+statements, it makes little sense to allow SQL statements where a Java/Lua/PHP
 function is valid. In this case, we restrict the composition to only insert SQL
 statements where Java/Lua/PHP expressions are valid (i.e.~we do not insert
 function definitions at all). The
@@ -1167,7 +1182,7 @@ contain 27,526 tests totalling 89,211 LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. Overall, we identified 2,474
+expression contained several subexpressions. \laurie{do we have macros for these numbers?}Overall, we identified 2,474
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
 Some of the expression numbers, e.g.~PHP, may seem small considering the amount
