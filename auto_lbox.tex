@@ -1045,9 +1045,8 @@ not cause pointless work in later stages of the algorithm.
 \section{Limitations}
 \label{sec:lbox_limitations}
 
-Simplifying somewhat, automatic language boxes can be seen as implementing a
-simplified, predictable, online variant of generalised parsing. Since they are
-simplified, there are situations where they do not perform as well as hoped.
+Since automatic language boxes are a default disambiguation mechanism,
+there are inevitably situations where they do not perform as well as hoped.
 Although (as we shall see in Section~\ref{sec:evaluation}) these cases are
 rare, it is useful to enumerate some of their fundamental weaknesses.
 
@@ -1057,7 +1056,9 @@ input (e.g.~Java) and the inner language matches nearly anything (e.g.~HTML),
 the reverse does not hold. For example, if we compose HTML and Java where
 Java expressions are valid wherever HTML tags are valid, automatic language
 boxes almost never trigger, since there are few ways of making a syntax error
-in HTML. We are unable to imagine a solution to this problem.
+in HTML. The only way this can be solved is by using a consideration
+heuristic which is not triggered by syntax errors, but it is not clear to
+us what a sensible alternative might be.
 
 Lexical ambiguities between languages can also cause subtle problems. For
 example, imagine that we compose Java and Lua, such that Lua expressions are
