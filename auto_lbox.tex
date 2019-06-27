@@ -300,9 +300,9 @@ box is inserted because the fragment is also valid in the outer language) and
 `unacceptable' (a language box was inserted but caused an error elsewhere in
 the file; or no language box was inserted despite the fragment being invalid in
 the outer language). Across the \totalinsertions tests we ran, \validalloverall are
-classified as acceptable, with the majority of those
-(\breakdownallvalidsame) leading to a language box being inserted
-around the entire fragment, and most of the rest (\breakdownallvaliddiff)\lukas{I wasn't sure if you meant partial insertions or noinsertions here? The text suggested the former, but the comment the latter.}
+classified as acceptable, with the majority
+(\breakdownallvalidsame of the total) leading to a language box being inserted
+around the entire fragment, and most of the rest (\breakdownallnovalid of the total)
 being instances of the fragment being valid in both the outer and inner
 languages. We believe that this data shows that automatic language boxes
 are a practical editing mechanism for language composition.
@@ -1187,7 +1187,7 @@ contain \corpussqltests tests totalling \corpussqlloc LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. For PHP and Java \laurie{why not lua too?}\lukas{The extracted lua expressions didn't suffer as much from the same program, so I left them as is. This can be changed tho.}
+expression contained several subexpressions. For PHP and Java \laurie{why not lua too?}\lukas{The extracted lua expressions didn't suffer as much from the same program, so I left them as is. This can be changed tho.}\laurie{it'll confuse readers less if we're consistent -- unless it reduces the number of lua expressions to a ludicrously low amount}
 we found that most expressions are so simple (e.g.~a function call with numeric
 parameters) that they make highly repetitive, and uninformative, tests: we thus
 extracted only expressions which form the right hand side of assignments, since
@@ -1203,7 +1203,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
     \input{tables/tbl_valid.tex}
 
     \vspace{7pt}
-    \caption{\lukas{Explain what corpus size means, or maybe change it to "test size"?}The total percentage of acceptable outcomes for each benchmark and
+    \caption{\lukas{Explain what corpus size means, or maybe change it to "test size"?}\laurie{How about `\#{}tests'?}The total percentage of acceptable outcomes for each benchmark and
     heuristic. Acceptable outcomes are that: a valid automatic language box
     was inserted; no language box was inserted since the inserted fragment
     was also valid in the outer language; the insertion had multiple options
