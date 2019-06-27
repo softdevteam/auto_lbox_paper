@@ -801,9 +801,18 @@ candidate language boxes (line 24).}
 
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics above has strengths and weaknesses. We therefore combine them into a
-single candidates heuristic imaginatively called \emph{all} which first
-attempts to find candidates using the parse tree heuristic; if that fails,
-tries the stack heuristic; and if that also fails, falls back to the line heuristic.
+single candidates heuristic imaginatively called \emph{all}.
+This heuristic runs all three heuristics individually, collecting candidates from
+each one.
+\lukas{we might need to move this into the next section}
+All candidates are then ranked by how far (in characters) they allow to
+continue parsing after the language box -- to do this, we parse after each
+language box for a maximum of 10 tokens, collecting the distance in characters.
+If two candidates share the same starting point, only the one that allows
+parsing furthest is kept in the list, and the other removed. Of course, if
+candidates with different starting points are not filtered this way. After this
+process, we have for each starting point only those candidates left in the
+list, which allow the program to parse furthest past the language box.
 
 
 \subsection{The filtering heuristic}
