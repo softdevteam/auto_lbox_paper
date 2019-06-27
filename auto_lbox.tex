@@ -85,6 +85,7 @@
 \newcommand{\hotkeyleavelbox}[0]{\keys{Ctrl+Shift+L}\xspace}
 
 \include{experimentstats}
+\include{corpusstats}
 
 \lstnewenvironment{lstdefault}[1][]
   {
@@ -1175,14 +1176,14 @@ in Table~\ref{tbl:valid}.
 \subsubsection{Program corpus}
 
 We then collected a corpus of inputs in each language.
-For PHP, we used the source code of Wordpress 4.6.13, which consists of 365 files that are
-valid when parsed with our PHP grammar, which total 173,368 LoC after we
+For PHP, we used the source code of Wordpress 4.6.13, which consists of \corpusphpfiles files that are
+valid when parsed with our PHP grammar, which total \corpusphploc LoC after we
 have stripped out the embedded HTML which is not part of the PHP
 language as such. For Java, we used the Java Standard Library 5 which consists
-of 6,556 files and 424,051 LoC.
-For Lua, we used Lua's test suite, which consists of 32 files totalling 13,990 LoC.
-For SQL, we used SQLite's test suite, consisting of 1,100 test files which
-contain 27,526 tests totalling 89,211 LoC.
+of \corpusjavafiles files and \corpusjavaloc LoC.
+For Lua, we used Lua's test suite, which consists of \corpusluafiles files totalling \corpuslualoc LoC.
+For SQL, we used SQLite's test suite, consisting of \corpussqlfiles test files which
+contain \corpussqltests tests totalling \corpussqlloc LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
@@ -1191,9 +1192,9 @@ we found that most expressions are so simple (e.g.~a function call with numeric
 parameters) that they make highly repetitive, and uninformative, tests: we thus
 extracted only expressions which form the right hand side of assignments, since
 we found that these more often contain somewhat interesting expressions.
-\laurie{do we have macros for these numbers?}Overall, we identified 2,474
-expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
-Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
+Overall, we identified \corpusphpexprs
+expressions and \corpusphpfuncs functions for PHP, \corpusjavaexprs expressions and \corpusjavafuncs functions for
+Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \corpussqlstmts statements for SQL.
 
 
 \subsection{Results}
