@@ -801,18 +801,19 @@ candidate language boxes (line 24).}
 
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics above has strengths and weaknesses. We therefore combine them into a
-single candidates heuristic imaginatively called \emph{all}.
-This heuristic runs all three heuristics individually, collecting candidates from
-each one.
-\lukas{we might need to move this into the next section}
-All candidates are then ranked by how far (in characters) they allow to
-continue parsing after the language box -- to do this, we parse after each
-language box for a maximum of 10 tokens, collecting the distance in characters.
-If two candidates share the same starting point, only the one that allows
-parsing furthest is kept in the list, and the other removed. Of course, if
-candidates with different starting points are not filtered this way. After this
-process, we have for each starting point only those candidates left in the
-list, which allow the program to parse furthest past the language box.
+single candidates heuristic imaginatively called \emph{all}. This aggregates
+the candidates from the individual heuristics, ranks them, and removes
+all of the non-best candidates. In essence, our ranking mechanism orders
+candidates by how far we can parse successfully after them without encountering
+a syntax error. However, since different language boxes can encompass different
+parts of the input, and since inserting different language boxes can change how
+much input subsequent tokens consume, precisely defining ``how far'' is
+surprisingly difficult. As a reasonable proxy, we use the absolute offset in
+the input in characters as the precise ordering mechanism. To bound the
+performance cost of this check, we check a fixed number (currently 10)
+non-whitespace tokens forward from the \laurie{point of the syntax error?}: if
+one or more candidates is successful up to that point it outranks all
+candidates which have syntax errors within that token range.
 
 
 \subsection{The filtering heuristic}
