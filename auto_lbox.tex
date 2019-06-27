@@ -1241,43 +1241,67 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 \end{table*}
 
 We break the results of our experiment down in two ways: by acceptable results
-per language composition (Table~\ref{tbl:valid}); and by outcome in the
-overall benchmark suite (Table~\ref{tbl:breakdown}). Appendix~\ref{apdx:tables}
-contains several tables which give a more detailed breakdown of information
+per language composition (Table~\ref{tbl:valid}); and by detailed outcome in the
+overall benchmark suite (Table~\ref{tbl:breakdown}). In both cases we show
+the differences in the various candidates heuristics, which shows that while
+each has strengths and weaknesses, collectively they work well.
+Appendix~\ref{apdx:tables}
+contains several tables that give a more detailed breakdown of information
 that is, in a sense, a combination of that between Tables~\ref{tbl:valid}
 and~\ref{tbl:breakdown}.
 
-In both cases we show
-the differences in the various candidates heuristics, which shows that while
-each has some language compositions where it performs poorly, when combined
-together they perform well across all 12 language compositions.
+The results of Table~\ref{tbl:valid} are clear: \validalloverall of tests have
+an acceptable outcome. Table~\ref{tbl:breakdown} allows us to explore the
+sub-categories: \breakdownallvalidsame of tests insert a complete language box
+around the fragment (by definition making the program syntactically correct);
+\breakdownallnovalid of tests have fragments which are valid in the inner and
+outer language. If we exclude tests whose fragments are valid in the inner and
+outer language, that means that \laurie{can we make a macro which is equivalent
+to breakdownallvalidsame*(100.0/(100-breakdownallnovalid) i.e. 88.3\% or so
+with the current values} of cases insert a language box around the fragment --
+in other words, automatic language boxes match one reasonable (if slightly
+naive) expectation in the vast majority of cases. The remainder of cases are
+mostly acceptable outcomes: partial language box insertions without errors
+(i.e.~part of the fragment is put in a language box but the remainder remains
+in the outer language) and no insertions due to multiple candidates are roughly
+equal in size.
 
-Table \ref{tbl:valid} shows the total percentage of
-acceptable outcomes for each heuristic used broken down by each composition.
-Acceptable outcomes are one of the following: a language box gets successfully
-inserted; no language box was inserted since the insertion was already valid in
-the outer language; the insertion had multiple options which are presented to
-the user.
+That leaves the two unacceptable cases. Partial insertions with errors
+(\breakdownallinvaliddiff of tests) are cases where a language box was inserted
+around part of the fragment, but some was left in the outer language, cause a
+syntax error later in the file. One solution to this might seem to be to
+increase our search of the parse tree for errors after a language box has been
+inserted, but this would come at a cost: it is difficult to distinguish syntax
+errors caused by the language box insertion from syntax errors caused by
+incomplete or deliberately incorrect user input. A better solution might be to
+experiment with comparing the number and location of syntax errors before and
+after candidate language box insertion, though this can only lessen, not fully
+solve, the problem. No insertions with errors means that a language box was not
+inserted around the fragment because it seemed to be valid in the outer
+language even though it caused a syntax errors later in the program
+(\breakdownallnoerror of tests). Solving this problem suffers from the same
+problem as for partial insertions with errors, and, since it is such a small
+proportion, is not a significant issue.
 
-The results show that while each heuristic has weaknesses, when put together
-they result in over 96\% of acceptable outcomes. Weaknesses in the heuristics
-are based on the composition. For example, the parse-tree-based heuristic only
-achieves 67\% of acceptable outcomes when used on the Java+Lua composition. The
-reason for this low number can be accounted to the insertion of Lua functions
-right after a Java comment.  Since the insertion is attached to the comment
-subtree, the parse-tree-based heuristic is not able to find a valid location for
-the language box by traversing the parse tree.  The line-based heuristic on the
-other hand has difficulties with the composition of Java+PHP. The reason for
-this is that PHP's function syntax is similar to Java's, e.g.~\texttt{function
-x() \{\}} is a valid Java function, where \texttt{function} represents a type.
-This leads to many errors only occurring in one of the following lines, which
-the line-based heuristic can not deal with. The stack-based heuristic also has
-a weakness with the composition of Lua+SQLite. The problem here is related to
-the way Lua parses certain inputs. For example, when composing \texttt{x =
-SELECT a, b FROM t}, everything up to `\texttt{b}' can be parsed in Lua,
-leading to a reduction. This reduction removes \texttt{SELECT} from the stack,
-replacing it with a subtree and making it impossible to find a valid location
-to insert a language box at.
+Both Tables~\ref{tbl:valid} and \ref{tbl:breakdown} present the statistics for
+our individual candidates heuristics. Unsurprisingly, the \texttt{lines}
+candidates heuristic is the most effective, because it correctly deals with
+nearly all insertions of expression fragments. The main exception is the
+JavaPHP composition with only \validlinejavaphp tests having an acceptable
+outcome. This is largely because the initial line of a PHP functions
+(e.g.~`function x() \{') looks like a Java function with a return type
+\texttt{function}: it is thus parsed as a Java function which leads to syntax
+errors on subsequent lines of PHP code. We expected the parse tree candidates
+heuristic to be more effective than the stack candidates heuristic, but the
+latter (\validstackoverall) has a noticeable greater proportion of acceptable
+outcomes than the former (\validhistoverall). \laurie{any idea why? i don't
+understand why it does so badly on both javalua and phplua -- is it something
+to do with lua's syntactic structure?} The stack candidates heuristic, however,
+performs poorly on LuaSQL because of the nature of Lua's grammar. For example,
+in the mixed Lua/SQL program  \texttt{x = SELECT a, b FROM t}, everything up to
+`\texttt{b}' can be parsed in Lua, leading to an LR reduction action which
+removes \texttt{SELECT} from the parsing stack, making it impossible for the
+heuristic to identify that as a valid location to insert a language box at.
 
 
 \subsection{Threats to validity}
