@@ -163,7 +163,7 @@
 Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters, or by selecting the desired parse tree from the parse forest.  In
-this paper we show that \emph{language boxes} -- a delimiter-based
+this paper we show that language boxes -- a delimiter-based
 algorithm atop incremental parsing -- can be extended in a way that creates
 a new point in the design space between these two extremes. In essence, we
 retain the use of delimiters, but
@@ -224,39 +224,39 @@ Language composition -- the ability to build larger languages out of multiple
 small languages -- offers an enticing solution to problems such as the
 development of domain-specific languages or the migration of legacy software.
 Unfortunately, writing and editing composed programs is often cumbersome.
-The basic problem is that grammar
-composition -- which underpins language composition -- can cause
-two provably unambiguous grammars to become ambiguous when composed,
-and determining whether a grammar is unambiguous or not is
+Arguably the major cause of this is due to ambiguity when parsing: language composition is underpinned by grammar
+composition; composing even two provably unambiguous grammars can lead to an
+ambiguous grammar; and determining whether a grammar is unambiguous or not is
 undecidable~\cite{cantor62ambiguity}. There are two fundamental approaches
-of coping with ambiguity: either ruling it out through the use of
+to dealing with such ambiguity:~either ruling it out through the use of
 delimiters (via explicit bracketing or syntax-directed
 editing); or using a generalised parsing algorithm that can create a parse
 forest, capturing all ambiguities
 (e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
-are visually intrusive and/or awkward to work with; and one can never know if all possible
-ambiguous parses have been covered by disambiguation operators.
+are visually intrusive and/or awkward to work with; and one can never know if
+disambiguation operators can filter all possible parse forests into a single
+parse tree.
 
-An alternative to traditional delimiter-based approaches are \emph{language boxes} which aim to
+An alternative to traditional delimiter-based approaches are \emph{language boxes}, which aim to
 combine the advantages of explicit bracketing and syntax-based
-editing~\cite{diekmann14eco}. In essence, an editor
-which supports language boxes needs to support an incremental parsing algorithm
-(we assume that of~\citet{wagner98practicalalgorithms}), which provides an
+editing~\cite{diekmann14eco}. Editors
+which support language boxes need to use incremental parsing
+(we assume use of the~\citet{wagner98practicalalgorithms} algorithm), which provides an
 online editing experience: unlike traditional editors, users do not directly edit
 a contiguous block of text in memory, but instead
 indirectly edit a parse tree, which is continuously updated as they type.
 A language box is then simply a node in the parse
-tree that represent a different language, surrounded by
+tree that represents a different language, surrounded by
 explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
 there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
 ways and places during editing.
 
 Language boxes have the virtue that they work for any possible
-language composition. However, this generality comes at a cost:
-users must explicitly, and tediously, state when they want
+language composition. However, this generality comes at a cost:~users
+must explicitly, and tediously, state when they want
 to insert or remove language boxes. Interestingly, this is the exact
-opposite of the situation with generalised parsing: language composition
+opposite of the situation with generalised parsing where language composition
 authors must disambiguate each new composition anew, but users can then
 freely write text in any of the languages in the composition.
 The fundamental research question underlying this paper is thus whether it is
@@ -294,7 +294,7 @@ and composed programs in those compositions by extracting fragments from real-wo
 In essence, our experiment is equivalent to opening a file
 in the outer language, moving the cursor to a given position, deleting a fixed amount
 of text, and then inserting text one character at a time from the inner language.
-We then group the possible outcomes of such actions into `acceptable' (roughly
+We then group the possible outcomes of such actions into two overall categories: `acceptable' (roughly
 speaking: a language box is inserted without causing an error; or no language
 box is inserted because the fragment is also valid in the outer language) and
 `unacceptable' (a language box was inserted but caused an error elsewhere in
@@ -404,8 +404,8 @@ Tokens have a mutable type (e.g.~`int')
 and a mutable value (e.g.~`3') but cannot have children at all.
 
 After input from the user is received, the incremental lexer is run first.
-Using lookahead information, it works out the affected area of the change,
-updates or creates tokens as necessary, and marks the path from each updated or
+Using lookahead information, it identifies the affected area of the change,
+updates or creates tokens as necessary, and marks path from each updated or
 created token to the root as changed. The incremental parser then runs,
 reparsing all subtrees with changes in them, and creating or removing
 nonterminals as needed.
@@ -449,7 +449,7 @@ SQL language box will have its own SQL parse tree inside which may or may not
 be syntactically correct. An elided example of such a tree-of-trees can be seen
 in Figure~\ref{fig:lboxtree}.
 
-Philosophically, language boxes thus form delimiters of sorts, albeit invisible
+Philosophically, language boxes thus form delimiters, albeit invisible
 ones, between languages: from a syntactic perspective, outer languages are
 ignorant of the contents of inner languages and vice versa. Thus we get much of
 the power of syntax-directed editing without the accompanying difficulty of
@@ -579,18 +579,11 @@ plausible nodes in the parse tree at which language boxes could be inserted -- w
 \emph{candidates heuristic}. The trade-off here is that identifying too many
 locations slows down the search and overwhelms the user with possibilities; but
 identifying too few locations means that useful candidates are missed. We thus
-define several sub-heuristics which we then combine together.
-
-A candidates heuristic
+define several sub-heuristics which we then combine together. A candidates heuristic
 can produce zero or more candidate language boxes at any given point; those
 candidate language boxes may cover different spans and/or be of different
-language types. Note that candidates heuristics merely need to suggest language
-boxes which consume existing content: the subsequent phase in the algorithm
-then determines if actually inserting such language boxes makes sense in the
-wider context of the program (see Section~\ref{sec:filtering}).
-
-Before we can define candidates heuristics, we first need to introduce the
-concept of recognisers, before defining the candidates heuristics themselves.
+language types. Before we define the candidates heuristics themselves, we first
+introduce the concept of recognisers, which all candidates heuristics use.
 
 
 \subsubsection{Recognisers}
@@ -689,7 +682,8 @@ advantages: the parsing stack is nearly always small, so few additional
 places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
 stack. However, the weakness of this heuristic is that it tries relatively few
-locations, and often misses out possibilities which seem plausible to humans.
+locations, and that it relies on the structure of LR grammars, which does not
+always match human expectations of a language's structure.
 
 The \emph{line} candidates heuristic captures the intuition that many language
 boxes are intra-line: it searches
@@ -799,11 +793,16 @@ candidate language boxes (line 24).}
 \end{minipage}
 \end{figure*}
 
+
+\subsection{Combining heuristics}
+
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
-heuristics above has strengths and weaknesses. We therefore combine them into a
+heuristics presented above has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all}. This aggregates
 the candidates from the individual heuristics, ranks them, and removes
-all of the non-best candidates. In essence, our ranking mechanism orders
+all of the non-best candidates.
+
+In essence, our ranking mechanism orders
 candidates by how far we can parse successfully after them without encountering
 a syntax error. However, since different language boxes can encompass different
 parts of the input, and since inserting different language boxes can change how
@@ -815,24 +814,6 @@ non-whitespace tokens forward from the \laurie{point of the syntax error?}: if
 one or more candidates is successful up to that point it outranks all
 candidates which have syntax errors within that token range.
 
-
-\subsection{The filtering heuristic}
-\label{sec:filtering}
-
-Once the candidates heuristic has run, we will have zero or more possible
-language boxes to insert. If there are zero candidates, then the algorithm
-completes. If one or more candidates have been found, then we need to see
-which of those candidates make sense in the wider context of the program --
-what we call the \emph{filtering heuristic}. The challenge here is to determine
-if the insertion of a language box causes further syntax errors: if it does,
-the language box may not be a good candidate for insertion. Performance is
-not a particular concern for the filtering heuristic as the incremental
-parser will naturally inform us if inserting a language box causes syntax
-errors elsewhere in the program. Rather, the main concern is that it is easy to
-reject candidates because of syntax errors caused by the fact that a program
-being typed is as yet incomplete (see Figure~\ref{fig:autoboxerrorafterinsert}
-for an example).
-
 \begin{figure*}[tb]
 \begin{center}
 \includegraphics[width=0.90\textwidth]{images/autoboxerrorafterinsert_javasql.png}
@@ -842,7 +823,7 @@ for an example).
     \put(-5,35.6){\textcolor{black}{\footnotesize\textbf{(b)}}}
 \end{picture}
 \vspace{-1.2em}
-\caption{An example showing why parsing too far beyond a candidate language box increases
+\caption{\laurie{i think this example is now irrelevant: ranking means that we naturally don't discard this language box. please check that i'm correct :)} An example showing why parsing too far beyond a candidate language box increases
   the chances of rejecting it. In \textbf{(a)}, we have altered Eco to only insert
 candidate language boxes that do not cause subsequent parse errors. However,
 the `\texttt{+}` operator is invalid in an SQL \texttt{FROM} clause meaning
@@ -856,33 +837,17 @@ the candidate SQL language box, that candidate is not filtered out.}
 \label{fig:autoboxerrorafterinsert}
 \end{figure*}
 
-Our filtering heuristic is thus simple: we accept all candidate language
-boxes which do not lead to a syntax error at the next non-whitespace token. In other
-words, if a language box is syntactically valid at its immediate surrounding
-context in the parse tree, we don't mind if it causes errors beyond that
-context, since we assume those are the result of an
-incomplete program. Note that, by definition, the tokens before the candidate
-language box will be valid, so we only need to check those tokens after the
-candidate. The reason that we specify that the first non-whitespace
-token must not contain an error is that grammars for incremental parsing almost
-always define whitespace as a token. This means that the incremental parser
-often inserts a whitespace token after a candidate language box, and that
-whitespace token is by definition syntactically valid, though not particularly
-insightful. We thus need to skip such tokens in order to get to a
-token which tells us something useful about the context surrounding a candidate
-language box.
-
 
 \subsection{Applying or presenting candidates}
 \label{applying and presenting}
 
-Once the filtering heuristic has run, we will have zero or more possible
+Once the `all' candidates heuristic has run, we will have zero or more possible
 language boxes to insert. If there are zero candidates, then the algorithm
 completes. If there is one candidate, we simply insert it to the user's
 program. If the user is unhappy with the insertion, they can remove it by
-pressing undo (conventionally \keys{Ctrl+Z}). Implemented naively, this isn't
-enough, as on each subsequent key press the algorithm may try to insert the
-same unwanted language box. Therefore removing a language box in this way marks
+pressing undo (conventionally \keys{Ctrl+Z}). However, implemented naively,
+the language box can simply reappear on each subsequent repress, which is
+unlikely to de desired. Therefore removing a language box in this way marks
 a flag \texttt{noinsert} on the node with a syntax error identified by the
 consideration heuristic. When set to \texttt{true}, the candidates heuristic
 will notice and deliberately ignore such nodes so that language boxes are not
@@ -963,17 +928,17 @@ composition (see Figure~\ref{fig_autoremoval}). The full set of situations that
 we handle is as follows:
 
 \begin{enumerate}
-  \item If an uncommitted language box's content causes a syntax error within
-    the language box, then the language box should be removed if its contents
-    can be successfully parsed in the outer language.
+  \item If an uncommitted language box has a syntax error within it, and
+    if its contents are valid in the outer language, then the language box
+    should be removed.
   \item If an uncommitted language box becomes part of a syntax error in the outer
-    language then it should be removed if its contents are valid in the
-    outer language.
+    language, and if its contents are valid in the outer language, then the
+    language box should be removed.
   \item If an uncommitted language box's content is valid in both the inner and
     outer languages, then the language box should be removed if that would not
     then cause subsequent parse errors. Following the precedent from
     Section~\ref{sec:filtering}, we use the first non-whitespace token after
-    the language box as a proxy for this.
+    the language box as a proxy for this\laurie{is this/should this be still true?}.
 \end{enumerate}
 
 Note, that while the first two situations are triggered by an error occuring either inside
@@ -1011,11 +976,11 @@ valid the outer Java.}
 Although we do not change the starting position of uncommitted language boxes
 (which can be highly distracting), their right hand extent can be automatically
 changed to encompass more or less content (Figure~\ref{intro_example} shows an
-example of the former). A language boxes is expanded to encompass more content
+example of the former). A language box is expanded to encompass more content
 if: its parse tree does not contain a syntax error; if encompassing the
 additional content does not cause a syntax error within the language box; and
 if removing the content from the outer language does not cause syntax errors in
-the first non-whitespace token in the outer language.
+the first non-whitespace token in the outer language \laurie{again, is this/should this be true?}.
 Language boxes are shrunk to encompass less content if they
 contain a syntax error and moving the content to the outer language both
 fixes the error inside the language box and does not
@@ -1029,8 +994,7 @@ must therefore run our altered candidates recogniser at the start of
 each uncommitted language box; fortunately, as in automatic language box
 removal (see Section~\ref{sec:removing}), there are almost never enough of
 these to cause performance concerns. The candidates recogniser
-returns all the possible right hand extents of the language box. Starting
-from the candidate which matches the most content and working backwards, we then
+returns all the possible right hand extents of the language box. We then
 filter out candidates which do not meet the above conditions. If none remain,
 the algorithm completes; if one remains,
 we resize the language box appropriately; if more than one remains, we present
@@ -1340,7 +1304,7 @@ in the editing design space.
 
 
 \begin{acks}
-This research was funded by \emph{removed for double blind review}.
+This research was funded by \emph{redacted for double blind review}.
 %the EPSRC Lecture (EP/L02344X/1) fellowship.
 \end{acks}
 
