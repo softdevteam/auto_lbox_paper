@@ -170,9 +170,9 @@ introduce an algorithm which provides a default disambiguation scheme that
 can automatically insert, remove, or resize
 language boxes -- leading to what we call \emph{automatic language
 boxes}. The very nature of the problem means that automatic language boxes
-cannot always match a user's intention: rather, we present a simple
-algorithm that does the right thing in most cases, while rarely surprising the
-user when it cannot.
+cannot always match a user's intention. However, our experimental
+evaluation shows that it behaves acceptably in \validalloverall of
+tests involving compositions of real-world programming languages.
 \end{abstract}
 
 \keywords{Parsing, language composition, programming languages}
@@ -287,21 +287,25 @@ and accompanying heuristics.
 
 We implemented automatic language boxes as an extension to the Eco
 editor~\cite{diekmann14eco}. In order to validate automatic language boxes, we
-created several language compositions involving large, real-world languages,
+created 12 language compositions involving large, real-world languages
+(Java, Lua, PHP, and SQL),
 and composed programs in those compositions by extracting fragments from real-world programs.
-In other words, our experiment is equivalent to opening a file
-in one language, moving the cursor to a given position, deleting a fixed amount
-of text, and then inserting text one character at a time from another language.
-\laurie{this stuff needs updating} Our experiments show that in \validalloverall of cases, automatic language boxes achieve an
-acceptable result by which we mean they either: inserted a single valid
-language box (\breakdownallvalid); did not insert a language box because the
-inserted fragment was valid in both languages (\breakdownallnovalid); or an ambiguity
-was found and there were multiple different ways of inserting language boxes
-(\breakdownallnomulti). As this suggests, the number of cases where automatic
-language boxes perform poorly is small and is split into two categories: a
-language box was inserted, but syntax errors remain because not all of the
-input was put into the language box (\breakdownallinvalid); or a language box wasn't
-inserted when we would have expected it to be (\breakdownallnoerror). Our fully
+In essence, our experiment is equivalent to opening a file
+in the outer language, moving the cursor to a given position, deleting a fixed amount
+of text, and then inserting text one character at a time from the inner language.
+We then group the possible outcomes of such actions into `acceptable' (roughly
+speaking: a language box is inserted without causing an error; or no language
+box is inserted because the fragment is also valid in the outer language) and
+`unacceptable' (a language box was inserted but caused an error elsewhere in
+the file; or no language box was inserted despite the fragment being invalid in
+the outer language). Across the \laurie{XXX} tests we ran, \validalloverall are
+classified as acceptable, with the majority of those
+(\laurie{completeinsertionall\%}) leading to a language box being inserted
+around the entire fragment, and most of the rest (\laurie{validallnoinsert\%})
+being instances of the fragment being valid in both the outer and inner
+languages. We believe that this data shows that automatic language boxes
+are a practical editing mechanism for language composition.
+Our fully
 repeatable experiment can be found at \emph{redacted for double blind review}
 and our extensions to the Eco editor can be found at \emph{redacted for double
 blind review}.
