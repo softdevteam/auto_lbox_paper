@@ -1186,15 +1186,14 @@ contain 27,526 tests totalling 89,211 LoC.
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
-expression contained several subexpressions. \laurie{do we have macros for these numbers?}Overall, we identified 2,474
+expression contained several subexpressions. For PHP and Java \laurie{why not lua too?}
+we found that most expressions are so simple (e.g.~a function call with numeric
+parameters) that they make highly repetitive, and uninformative, tests: we thus
+extracted only expressions which form the right hand side of assignments, since
+we found that these more often contain somewhat interesting expressions.
+\laurie{do we have macros for these numbers?}Overall, we identified 2,474
 expressions and 518 functions for PHP, 52,687 expressions and 6,743 functions for
 Java, 4,476 expressions and 230 functions for Lua, and 36,017 statements for SQL.
-Some of the expression numbers, e.g.~PHP, may seem small considering the amount
-of files they were extracted from. This is because we only extracted
-expressions from assignments, because they are more likely to contain complex
-expressions, whereas expressions in function calls or array initialisations are
-typically single value strings, numbers, or variable names and thus rarely lead
-to the insertion of a language box.\lukas{Currently only for PHP, Java}
 
 
 \subsection{Results}
