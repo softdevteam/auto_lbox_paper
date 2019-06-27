@@ -1315,28 +1315,21 @@ programs are unrepresentative. We have reduced these chances somewhat by using
 programs written in those languages, but of course it is possible to compose
 very different styles of languages, and to compose them in very different ways.
 
-Second, we have made various claims about performance in this paper, but Eco is
-a poor vehicle for evaluating them: it is written in Python, a relatively
-slow language; and Eco's choice of data-structures
-was designed for flexibility, not efficiency . For example, nodes in Eco's
+Second, we have made various suggestions about performance needs in this paper, but Eco is
+a poor vehicle for evaluating whether automatic language boxes match such claims:
+it is written in Python, a relatively slow language; and Eco's data-structures
+were originally designed to aid experimentation, and not performance. For example, nodes in Eco's
 parse tree are very heavy weight (with a base size of around 2KiB, which grows
 rapidly as undo history is added), and do not include any of the optimisations
 described in~\citet{wagner98practicalalgorithms} (which would approximately reduce the
 base size to a tenth of its current size and substantially reduce the costs of
-additional undo history). Despite that, \laurie{what i'd hope to say here
-is something like ``the slowest time to insert was XXXs which isn't too bad''.}
-\lukas{this is going to be difficult. The last run we did had Min: 0.0004s, Max: 792s, Avg: 0.58s. The reason
-for this high number is that PHP compositions often relex the entire file when opening strings. Until
-the string is closed, each keypress lexes the whole file, and some insertions have strings with 100 characters
-that are typed one char at a time. There is also an unfortunate problem with wagner's error recovery,
-which results in automatic language boxes being triggered multiple times on the same error,
-while error recovery is trying to find an isolation tree (tho this we can probably fix)}
-\laurie{i guess those times are the length of time for the whole fragment to be inserted?
-because it now occurs to me that what we probably care about is the maximum
-length of time for any given keypress. i suppose we can guesstimate this by
-dividing the time per file by the number of characters, but that might hide
-outliers.}
-\lukas{Here are the results per keypress: 2.8s (Longest keypress), 0.0008 (Shortest keypress), 0.015 (Average keypress), 46 (No of keypresses greater 0.1s), 1.6\% (Percentage of keypresses greater 0.1s)}
+additional undo history). Despite that, performance cost is generally
+acceptable: the average per-keypress wall-clock time of incremental parsing (including
+everything associated with automatic language boxes) was approximately 0.015s,
+with only 1.6\% of tests experiencing an average wall-clock time above 0.1s
+(roughly the threshold at which humans start to perceive some lag from typing)
+and a worst case of 2.8s. A more efficient implementation would probably reduce
+these costs by at least one order of magnitude, if not more.
 
 
 \section{Conclusions}
@@ -1344,7 +1337,8 @@ outliers.}
 \laurie{XXX}
 
 \begin{acks}
-This research was funded by the EPSRC Lecture (EP/L02344X/1) fellowship.
+This research was funded by \emph{removed for double blind review}.
+%the EPSRC Lecture (EP/L02344X/1) fellowship.
 \end{acks}
 
 
