@@ -1261,10 +1261,9 @@ heuristic entirely, though the stack heuristic works as per human intuition.
 A specific weakness of the parse tree heuristic can be seen in the JavaLua
 and PHPLua compositions. Many Lua fragments consists of Lua tables\footnote{Often called associative arrays,
 hashmaps, or dictionaries in other languages.}, which have the syntax
-`\texttt{\{e1, ..., en\}}'. As soon as the initial `\texttt{\{}' is
-inserted, a Java/PHP syntax error is detected, and the parse tree rewritten,
-generally in such a way that the `\texttt{\{}' character is placed after
-a terminal in an existing nonterminal -- at which point the parse tree
+`\texttt{\{e1, ..., en\}}'. When typing this fragment, the initial `\texttt{\{}' is
+inserted after a terminal in an existing nonterminal, and immediately causes a
+Java/PHP syntax error -- at which point the parse tree
 heuristic does not consider it as a starting location for a language box.
 The stack candidates heuristic, however,
 performs poorly on LuaSQL because of the nature of Lua's grammar. For example,
