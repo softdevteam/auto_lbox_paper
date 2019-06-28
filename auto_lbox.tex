@@ -1326,8 +1326,9 @@ This research was funded by \emph{redacted for double blind review}.
 
 \bibliography{bib}
 
-\clearpage
 \appendix
+\clearpage
+\onecolumn
 
 \section{Tables}
 \label{apdx:tables}
@@ -1336,25 +1337,25 @@ In this appendix, we show detailed outcomes by candidates heuristic, in
 similar fashion to Table~\ref{tbl:breakdown}.
 
 \laurie{is it possible to use the same order of language compositions that we do in table 1 columns (i.e. alphabetic)?}
-\begin{table*}[b]
+
+\begin{table*}[h]
 \input{tables/tbl_bench_all.tex}
 \caption{The \emph{all} candidates heuristics}
 \end{table*}
 
-\begin{table*}[b]
+\begin{table*}[h]
 \input{tables/tbl_bench_hist.tex}
 \caption{The \emph{parse tree} candidates heuristics}
 \end{table*}
 
-\begin{table*}[b]
+\begin{table*}[h]
 \input{tables/tbl_bench_stack.tex}
 \caption{The \emph{stack} candidates heuristics}
 \end{table*}
 
-\begin{table*}[b]
+\begin{table*}[h]
 \input{tables/tbl_bench_line.tex}
 \caption{The \emph{line} candidates heuristics}
 \end{table*}
-
 
 \end{document}
