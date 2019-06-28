@@ -799,8 +799,10 @@ candidate language boxes (line 24).}
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics presented above has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all}. This aggregates
-the candidates from the individual heuristics, ranks them, and removes
-all of the non-best candidates.
+the candidates from the individual heuristics, filters out any candidates which
+consist solely of a single whitespace token (since nearly all languages allow
+whitespace tokens, such candidates are valid, but not useful), ranks the
+remainder, and removes all of the non-best candidates.
 
 In essence, our ranking mechanism orders
 candidates by how far we can parse successfully after them without encountering
@@ -813,12 +815,6 @@ performance cost of this check, we check a fixed number (currently 10) of
 non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
 candidates which have syntax errors within that token range.
-\lukas{There are a few things that a missing now that were explained in the now
-deleted filtering heuristics section. One is that we automatically insert a box
-if there is only one candidate and let the user choose if there are more. The
-other is the thing about whitespace, which is still acurrate. While we now
-parse further than the first non-whitespace, we still don't accept language
-boxes that can only parse a single white-space token.}
 
 \begin{figure*}[tb]
 \begin{center}
