@@ -602,7 +602,7 @@ def cnds_recogniser(node, lang):
       return cnds
     parser.parse_token(token)
     if parser.accepted():
-      cnds.append(token.end_pos)
+      cnds.append((node, token.end_pos, lang))
     elif parser.error_node.type_ != "EOS":
         return cnds
 \end{lstdefault}
