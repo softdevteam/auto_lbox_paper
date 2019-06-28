@@ -235,8 +235,8 @@ editing); or using a generalised parsing algorithm that can create a parse
 forest, capturing all ambiguities
 (e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
 are visually intrusive and/or awkward to work with; and one can never know if
-disambiguation operators can filter all possible parse forests into a single
-parse tree.
+sufficient disambiguation operators have been used to filter all possible parse
+forests down to a single parse tree.
 
 An alternative to traditional delimiter-based approaches are \emph{language boxes}, which aim to
 combine the advantages of explicit bracketing and syntax-based
@@ -257,18 +257,18 @@ Language boxes have the virtue that they work for any possible
 language composition. However, this generality comes at a cost:~users
 must explicitly, and tediously, state when they want
 to insert or remove language boxes. Interestingly, this is the exact
-opposite of the situation with generalised parsing where language composition
-authors must disambiguate each new composition anew, but users can then
+opposite of the situation with generalised parsing, where language composition
+authors must disambiguate each new composition anew but users can then
 freely write text in any of the languages in the composition.
 The fundamental research question underlying this paper is thus whether it is
 possible to extend some of the benefits of generalised parsing to language
 boxes, while not losing language box's generality.
-For example, in a composition of Java and SQL, where SQL is allowed
+For example, in a composition of Java and SQL, where SQL statements are allowed
 wherever a Java expression is valid, can such a system automatically insert an
 appropriate SQL language box in `\texttt{for (String n: SELECT name FROM table) \{ ...
 \}}'?
 
-In this paper we present \emph{automatic language boxes}, which can
+In this paper we present the \emph{automatic language boxes} algorithm, which can
 automatically insert, remove, and resize language boxes in many useful cases.
 In essence, automatic language boxes are a default disambiguation mechanism
 applied to any language composition. In other words, given several languages in
@@ -280,7 +280,7 @@ parsing, where disambiguation is invisible to the user, and the consequences of
 an incorrect choice dire. However, in an incremental parsing setting, the
 results of disambiguation are visible to the user, and the consequences of an
 incorrect choice mild, since it can be simply, and permanently, overridden. The
-algorithm is, in essence, comprised of several stages / heuristics: determining what user
+algorithm is comprised of several stages / heuristics: determining what user
 inputs should trigger it; finding candidate language boxes to insert, remove,
 or resize; filtering out those which would make the overall program worse; and
 then applying the remaining candidates. Figure \ref{intro_example} shows a
@@ -296,8 +296,8 @@ In essence, our experiment is equivalent to opening a file
 in the outer language, moving the cursor to a given position, deleting a fixed amount
 of text, and then inserting text one character at a time from the inner language.
 We then group the possible outcomes of such actions into two overall categories: `acceptable' (roughly
-speaking: a language box is inserted without causing an error; or no language
-box is inserted because the fragment is also valid in the outer language) and
+speaking: a language box was inserted without causing an error; or no language
+box was inserted because the fragment is also valid in the outer language) and
 `unacceptable' (a language box was inserted but caused an error elsewhere in
 the file; or no language box was inserted despite the fragment being invalid in
 the outer language). Across the \totalinsertions tests we ran, \validalloverall are
@@ -324,7 +324,7 @@ this paper's purposes.
 \subsection{Delimiter-based approaches}
 
 The traditional approach to language composition is to use delimiters
-to make clear when the user has switched from one sub-language to another. The
+between languages. The
 most obvious way of achieving this is to use explicit brackets to make clear a
 switch from an outer to an inner language (e.g.~`\texttt{for (String e: <<SELECT name
 FROM table>>) \{ ... \}}'), though this is visually intrusive
@@ -336,6 +336,7 @@ cannot use `\texttt{>>}' as a bit-wise operator).
 Naive approaches inherit a severe restriction from traditional parsing, which
 separates lexing (i.e.~the splitting of the user's input into tokens) from
 parsing (i.e.~the structuring of tokens into a parse tree): all the languages
+in the composition
 must share the same lexing rules. This restriction can be somewhat eased if the
 lexer recognises the explicit brackets and extracts text between them wholesale
 for separate lexing and parsing (see e.g.~\cite[p.~13-14]{tratt08domainspecific}),
@@ -576,7 +577,8 @@ possibility of old syntax errors being considered a second time.
 \subsection{The candidates heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
-plausible nodes in the parse tree at which language boxes could be inserted -- we call this the
+plausible nodes in the parse tree, around the point of the syntax error, at which
+language boxes could be inserted -- we call this the
 \emph{candidates heuristic}. The trade-off here is that identifying too many
 locations slows down the search and overwhelms the user with possibilities; but
 identifying too few locations means that useful candidates are missed. We thus
@@ -611,7 +613,7 @@ def cnds_recogniser(node, lang):
   \texttt{lang}. In essence, we create a lexer and parser for \texttt{lang}
   (lines 2--3) and then try recognising substrings that grow one token at a
   time (lines 6 and 9), though note that the recogniser parser reuses the previous
-  state, so the run-time is linear. If we reach the end of the parse tree we are complete
+  state. If we reach the end of the parse tree we are complete
   (lines 7--8). If we successfully parse a substring, we add a candidate to the
   list (lines 10--11). If a substring causes a parse error on anything but the
   implicit EOS (End Of String) token, we know that further input cannot fix the parse
@@ -634,7 +636,7 @@ further input. If we stop too early, we will fail to recognise valid language
 boxes, but if we go too far, we will degrade performance. The technique
 we use is to try recognising gradually growing substrings as valid in an inner
 language, making use of the fact that the recogniser parser implicitly
-reuses state from the previous token, so that the running time is linear.
+reuses state from the previous token.
 If a substring is not valid, we then check where the parse failed:
 if it failed on the EOS (End Of String) token, then we know that more input
 would be needed to find a valid parse, so we continue the search; but if it
@@ -682,11 +684,13 @@ two significant
 advantages: the parsing stack is nearly always small, so few additional
 places in the program need to be checked; and if a language box can be
 inserted, parsing can continue as normal from that position in the parsing
-stack. However, the weakness of this heuristic is that it tries relatively few
-locations, and that it relies on the structure of LR grammars, which does not
-always match human expectations of a language's structure.
+stack.
 
-The \emph{line} candidates heuristic captures the intuition that many language
+The weakness of the parse tree and stack heuristics is that both try relatively
+few locations, and that they rely on the structure of the underlying LR
+grammars, which does not always match human expectations of a language's
+structure. The \emph{line} candidates heuristic is therefore very different,
+and captures the intuition that many language
 boxes are intra-line: it searches
 backwards for candidates, one node at a time, from the error node to the beginning of the line
 that contains the error. This heuristic ensures that all
@@ -802,7 +806,7 @@ As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics presented above has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all}. This aggregates
 the candidates from the individual heuristics, filters out those which
-immediately break the surrounding context, ranks the remainder, and removes all
+immediately break the surrounding context, ranks the remainder, and filters out all
 of the non-best candidates.
 
 We first filter out language boxes which are not valid in their immediate
@@ -810,11 +814,11 @@ context. By definition, our candidates heuristics will not have suggested
 candidate boxes which are syntactically incorrect relative to the preceding
 context, but they do not check the following context. A simple solution here
 might seem to be to filter out language boxes which are followed by errors, but
-this would cause us to filter out all candidates when the user themselves has
+this would lead to us filtering out candidates when the user has
 deliberately left a later part of the program in a syntactically incomplete
 state. We thus filter out only those candidates where the first non-whitespace
 token following the candidate language box contains an error. The reason we
-specify the first non-whitespace token, rather than simple the first token, is
+specify the first non-whitespace token, rather than simply the first token, is
 that grammars for incremental parsing almost always define whitespace as a
 token. This means that the incremental parser often inserts a whitespace token
 after a candidate language box, and that whitespace token is by definition
@@ -822,13 +826,12 @@ syntactically valid, though not particularly insightful. We thus need to skip
 such tokens in order to get to a token which tells us something useful about
 the context surrounding a candidate language box.
 
-In essence, our ranking mechanism orders
-candidates by how far we can parse successfully after them without encountering
+We then rank candidates by how far we can parse successfully after them without encountering
 a syntax error. However, since different language boxes can encompass different
 parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, precisely defining ``how far'' is
 surprisingly difficult. As a reasonable proxy, we use the absolute offset in
-the input in characters as the precise ordering mechanism. To bound the
+the input (measured in characters) as the ordering mechanism. To bound the
 performance cost of this check, we check a fixed number (currently 10) of
 non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
@@ -842,7 +845,7 @@ language boxes to insert. If there are zero candidates, then the algorithm
 completes. If there is one candidate, we simply insert it to the user's
 program. If the user is unhappy with the insertion, they can remove it by
 pressing undo (conventionally \keys{Ctrl+Z}). However, implemented naively,
-the language box can simply reappear on each subsequent repress, which is
+the language box can simply reappear on each subsequent keypress, which is
 unlikely to de desired. Therefore removing a language box in this way marks
 a flag \texttt{noinsert} on the node with a syntax error identified by the
 consideration heuristic. When set to \texttt{true}, the candidates heuristic
@@ -1043,11 +1046,11 @@ this statement and no automatic language boxes are inserted. However, this is
 confusing for users, since `\texttt{//}' is Lua's integer division operator,
 and they might reasonably expect a Lua language box to be put around `\texttt{3
 // 4}' and/or `\texttt{3 // 4 + 1}'. However, since \texttt{//} is the Java
-comment prefix, `\texttt{// 4 + 1;}' is ignored entirely. Since the resulting
-syntax error is thus forced onto the following line, this means that not even
+comment prefix, `\texttt{// 4 + 1;}' is ignored entirely, and the almost inevitable resulting
+syntax error is delayed onto the following line or later: in such cases, not even
 the line candidates heuristic can find a starting point for language boxes that
-matches a human's intuition. Fortunately, such ambiguities happen
-rarely.
+matches a human's intuition. Fortunately, such ambiguities are
+rare.
 
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
@@ -1096,24 +1099,24 @@ led to subsequent errors; or no candidates were found at all).
 Second, we need to classify the outcome of each test. The overall question we
 want an answer to is: do automatic language boxes work well in most
 cases? Answering this is not completely trivial, because there are several
-possible outcomes from inserting text in an inner language. We have chosen to
+possible outcomes from inserting text in an inner language. We have
 break these down into six categories: \label{detailed categories}
 
 \begin{description*}
   \item[Complete insertion] A language box was automatically inserted around
-    all of the inner fragment.
+    all of the fragment.
   \item[Partial insertion (no errors)] A language box was automatically
-    inserted around part of the inner fragment, and the resulting text that was left
+    inserted around part of the fragment, and the resulting text that was left
     in the outer language did not cause any errors.
   \item[Partial insertion (errors)] A language box was automatically inserted
-    around part of the inner fragment, but the resulting text that was left
+    around part of the fragment, but the resulting text that was left
     in the outer language caused one or more syntax errors later in the file.
   \item[No insertion (valid)] No language box was automatically inserted because
     the fragment was valid in the outer language.
   \item[No insertion (errors)] No language box was automatically inserted even
     though the fragment was not valid in the outer language.
   \item[No insertion (multi)] No language box was automatically inserted because
-    there were multiple possible candidates.
+    there were multiple candidates.
 \end{description*}
 
 We then group these into `acceptable' -- complete insertion, partial insertion
@@ -1130,7 +1133,7 @@ languages (Java 5, Lua 5.3, PHP 5.6, and SQLite 3.27).
 For each language composition of $L_1$ (outer) and $L_2$ (inner), we allow
 expressions and function definitions in $L_2$ to be used wherever expressions
 and function definitions in $L_1$ are normally valid. For example, in the
-composition \emph{JavaLua}, Java is the outer language and Lua the inner
+composition JavaLua, Java is the outer language and Lua the inner
 language: Lua function definitions and expressions can be used wherever Java
 function definitions and expressions (respectively) are valid. The one exception
 to this is when SQL is the inner language: since our corpus consists of SQL
@@ -1215,13 +1218,13 @@ sub-categories: \breakdownallvalidsame of tests insert a complete language box
 around the fragment (by definition making the program syntactically correct);
 \breakdownallnovalid of tests have fragments which are valid in the inner and
 outer language. If we exclude tests whose fragments are valid in the inner and
-outer language, that means that \breakdownallexclude of cases insert a language box around the fragment --
+outer language, that means that \breakdownallexclude of cases insert a language box around the whole fragment --
 in other words, automatic language boxes match one reasonable (if slightly
 naive) expectation in the vast majority of cases. The remainder of cases are
 mostly acceptable outcomes: partial language box insertions without errors
 (i.e.~part of the fragment is put in a language box but the remainder remains
 in the outer language) and no insertions due to multiple candidates are roughly
-equal in size.
+equal in proportion.
 
 That leaves the two unacceptable cases. Partial insertions with errors
 (\breakdownallinvaliddiff of tests) are cases where a language box was inserted
@@ -1280,15 +1283,15 @@ automatic language boxes.
 
 Second, we have made various suggestions about performance needs in this paper, but Eco is
 a poor vehicle for evaluating whether automatic language boxes match such claims:
-it is written in Python, a relatively slow language, and the GUI runs only
+it is written in Python, a relatively slow language; the GUI runs only
 in CPython, a particularly slow implementation; and Eco's data-structures
 were originally designed to aid experimentation, and not performance. For example, nodes in Eco's
 parse tree are very heavy weight (with a base size of around 2KiB per node, which grows
 rapidly as undo history is added), and do not include any of the optimisations
-described in~\citet{wagner98practicalalgorithms} (which would approximately reduce the
-base size to a tenth of its current size and substantially reduce the costs of
+described in~\citet{wagner98practicalalgorithms} (which would reduce the
+base node size to approximately a tenth of its current size and substantially reduce the costs of
 additional undo history). Despite that, editing performance with automatic
-language boxes is rarely affected. To try and get some idea of what the
+language boxes is rarely noticeable. To try and get some idea of what the
 overhead might be with a more efficient implementation, we altered Eco so that
 it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
