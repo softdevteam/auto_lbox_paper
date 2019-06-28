@@ -1096,7 +1096,7 @@ Second, we need to classify the outcome of each test. The overall question we
 want an answer to is: do automatic language boxes work well in most
 cases? Answering this is not completely trivial, because there are several
 possible outcomes from inserting text in an inner language. We have chosen to
-break these down into six categories:
+break these down into six categories: \label{detailed categories}
 
 \begin{description*}
   \item[Complete insertion] A language box was automatically inserted around
@@ -1175,12 +1175,11 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 
     \vspace{7pt}
     \caption{The total percentage of acceptable outcomes for each benchmark and
-    heuristic. Acceptable outcomes are that: a valid automatic language box
-    was inserted; no language box was inserted since the inserted fragment
-    was also valid in the outer language; the insertion had multiple options
-    which are presented to the user. In other words, the total percentage
-    doesn't include invalid insertions of language boxes and errors for which
-    no language box could be found automatically.}
+      heuristic. Acceptable outcomes are that: an automatic language box
+      (covering all or part of the fragment) was inserted, causing no syntax
+      errors; no language box was inserted since the fragment was also valid in
+      the outer language; or there multiple candidates were presented to the
+      user. Unacceptable outcomes are those which lead to syntax errors.}
     \label{tbl:valid}
 \end{table*}
 
@@ -1188,14 +1187,14 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
     \input{tables/tbl_breakdown.tex}
 
     \vspace{7pt}
-    \caption{Overall performance of the different
-    heuristics on all benchmarks per outcome category. The categories are:
-    \textbf{Valid insertion}, a language box was successfully inserted, \textbf{Invalid insertion},
-    a language box was inserted but it did not fix the error or introduced new
-    ones, \textbf{No insertion (Valid)}, no language box was inserted because the inserted
-    code fragment is valid syntax, \textbf{No insertion (Error)}, no language box could be
-    found to fix the error, \textbf{No insertion (Multi)}, multiple language box options
-    were found.}
+    \caption{The total percentage of outcomes by category. See
+    page~\pageref{detailed categories} for a detailed description of each category.
+  The largest categories by far are `complete insertion (no errors)', which
+  means that a language box was inserted around the entire input and `no
+  insertion (valid)' which means that no language box was inserted because the
+  fragment was valid in the outer language. Significantly, the unacceptable
+  categories (`partial insertion (error)' and `no insertion (error)') constitute
+  a very small portion of the total.}
     \label{tbl:breakdown}
 \end{table*}
 
