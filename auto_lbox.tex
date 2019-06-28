@@ -795,14 +795,31 @@ candidate language boxes (line 24).}
 
 
 \subsection{Combining heuristics}
+\label{sec:allheuristic}
 
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
 heuristics presented above has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all}. This aggregates
-the candidates from the individual heuristics, filters out any candidates which
-consist solely of a single whitespace token (since nearly all languages allow
-whitespace tokens, such candidates are valid, but not useful), ranks the
-remainder, and removes all of the non-best candidates.
+the candidates from the individual heuristics, filters out those which
+immediately break the surrounding context, ranks the remainder, and removes all
+of the non-best candidates.
+
+We first filter out language boxes which are not valid in their immediate
+context. By definition, our candidates heuristics will not have suggested
+candidate boxes which are syntactically incorrect relative to the preceding
+context, but they do not check the following context. A simple solution here
+might seem to be to filter out language boxes which are followed by errors, but
+this would cause us to filter out all candidates when the user themselves has
+deliberately left a later part of the program in a syntactically incomplete
+state. We thus filter out only those candidates where the first non-whitespace
+token following the candidate language box contains an error. The reason we
+specify the first non-whitespace token, rather than simple the first token, is
+that grammars for incremental parsing almost always define whitespace as a
+token. This means that the incremental parser often inserts a whitespace token
+after a candidate language box, and that whitespace token is by definition
+syntactically valid, though not particularly insightful. We thus need to skip
+such tokens in order to get to a token which tells us something useful about
+the context surrounding a candidate language box.
 
 In essence, our ranking mechanism orders
 candidates by how far we can parse successfully after them without encountering
@@ -939,8 +956,8 @@ we handle is as follows:
   \item If an uncommitted language box's content is valid in both the inner and
     outer languages, then the language box should be removed if that would not
     then cause subsequent parse errors. Following the precedent from
-    Section~\ref{sec:filtering}, we use the first non-whitespace token after
-    the language box as a proxy for this\laurie{is this/should this be still true?}.
+    Section~\ref{sec:allheuristic}, we use the first non-whitespace token after
+    the language box as a proxy for this.
 \end{enumerate}
 
 Note, that while the first two situations are triggered by an error occuring either inside
@@ -982,7 +999,7 @@ example of the former). A language box is expanded to encompass more content
 if: its parse tree does not contain a syntax error; if encompassing the
 additional content does not cause a syntax error within the language box; and
 if removing the content from the outer language does not cause syntax errors in
-the first non-whitespace token in the outer language \laurie{again, is this/should this be true?}.
+the first non-whitespace token in the outer language.
 Language boxes are shrunk to encompass less content if they
 contain a syntax error and moving the content to the outer language both
 fixes the error inside the language box and does not
