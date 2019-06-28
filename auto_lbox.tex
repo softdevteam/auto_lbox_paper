@@ -1026,13 +1026,13 @@ not cause pointless work in later stages of the algorithm.
 
 Since automatic language boxes are a default disambiguation mechanism,
 there are inevitably situations where they do not perform as well as hoped.
-Although (as we shall see in Section~\ref{sec:evaluation}) these cases are
+Despite (as we shall see in Section~\ref{sec:evaluation}) such cases being
 rare, it is useful to enumerate some of their fundamental weaknesses.
 
 Although our solution to highly ambiguous compositions (see Section~\ref{sec:highly
 ambiguous compositions}) works well when the outer language matches specific
 input (e.g.~Java) and the inner language matches nearly anything (e.g.~HTML),
-the reverse does not hold. For example, if we compose HTML and Java where
+the reverse situation does not work well. For example, if we compose HTML and Java where
 Java expressions are valid wherever HTML tags are valid, automatic language
 boxes almost never trigger, since there are few ways of making a syntax error
 in HTML. The only way this can be solved is by using a consideration
