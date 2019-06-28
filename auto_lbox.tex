@@ -1088,10 +1088,11 @@ expression span}, \emph{function definition or expression fragment}) where
 \emph{base file} into our extension of Eco; emulated key presses which move the
 cursor to the \emph{offset} and deleted \emph{span} characters; and then
 emulated key presses which inserted \emph{fragment}. For each test we recorded
-\laurie{this will need updating} whether a language box was inserted or not, if
+whether a language box was inserted or not, if
 the insertion lead to a valid or invalid program, and if it didn't for what
 reason (i.e.~a wrong language box was inserted; no candidate was found; or
-multiple candidates were found).
+multiple candidates were found). If a language box was inserted, we also
+recorded the length of the fragment and the length of the inserted language box.
 
 Second, we need to classify the outcome of each test. The overall question we
 want an answer to is: do automatic language boxes work well in most
