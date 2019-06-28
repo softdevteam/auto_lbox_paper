@@ -954,15 +954,15 @@ implications trivial.
 \end{picture}
 \vspace{-0.8em}
 \end{center}
-\caption{An example showing the automatic language box removal in practice.
-\textbf{(a)} The user has meant to write a Java expression, but has forgotten
-the second \qtt{*} after \qtt{from}, which has resulted in a language box
-being inserted.
-\textbf{(b)} Since uncommitted language boxes can be automatically removed
-again, the user doesn't need to revert the accidental language box
-themselves. Instead they can just fix their mistake inside of the box,
-which will remove it, since its content is now invalid in the SQL box, but
-valid the outer Java.}
+\caption{A (slightly contrived) example showing automatic language box removal
+  in our Java and SQL composition.
+\textbf{(a)} The user meant to write a Java expression, but forgot
+the second \qtt{*} after \qtt{from}: thus an SQL language box
+was inserted.
+\textbf{(b)} The user moves the cursor to before \qtt{from} and inserts the
+missing \qtt{*}. This makes the contents of the SQL language box syntactically
+invalid; the automatic language boxes algorithm then sees if the contents are
+valid in Java and, since they are, removes the language box.}
 \label{fig_autoremoval}
 \end{figure*}
 
