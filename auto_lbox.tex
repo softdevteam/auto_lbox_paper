@@ -833,30 +833,6 @@ non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
 candidates which have syntax errors within that token range.
 
-\begin{figure*}[tb]
-\begin{center}
-\includegraphics[width=0.90\textwidth]{images/autoboxerrorafterinsert_javasql.png}
-\end{center}
-\begin{picture}(0,0)
-    \put(-241,35.6){\textcolor{black}{\footnotesize\textbf{(a)}}}
-    \put(-5,35.6){\textcolor{black}{\footnotesize\textbf{(b)}}}
-\end{picture}
-\vspace{-1.2em}
-\caption{\laurie{i think this example is now irrelevant: ranking means that we naturally don't discard this language box. please check that i'm correct :)} An example showing why parsing too far beyond a candidate language box increases
-  the chances of rejecting it. In \textbf{(a)}, we have altered Eco to only insert
-candidate language boxes that do not cause subsequent parse errors. However,
-the `\texttt{+}` operator is invalid in an SQL \texttt{FROM} clause meaning
-that it will be left to the outer language (Java) where it also causes a syntax
-error. Thus the candidate language box around the SQL is rejected. In
-\textbf{(b)}, we use the heuristic described in Section~\ref{sec:filtering},
-where we only filter out candidate language boxes that cause syntax errors in
-the first non-whitespace token. Thus although there is still a syntax error in
-the program (at the `\texttt{\}}' character), since `\texttt{+}' is valid after
-the candidate SQL language box, that candidate is not filtered out.}
-\label{fig:autoboxerrorafterinsert}
-\end{figure*}
-
-
 \subsection{Applying or presenting candidates}
 \label{applying and presenting}
 
