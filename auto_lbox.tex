@@ -1304,29 +1304,37 @@ heuristic to identify that as a valid location to insert a language box at.
 
 \subsection{Threats to validity}
 
-There are two overall threats to validity in our evaluation.
+There are two overall threats to validity to our evaluation.
 
 First, it is possible that our suite of language compositions and corpus of
 programs are unrepresentative. We have reduced these chances somewhat by using
 4 real-world programming languages and a fairly large number of well-known
 programs written in those languages, but of course it is possible to compose
 very different styles of languages, and to compose them in very different ways.
+It is possible that doing so might change our view of the effectiveness of
+automatic language boxes.
 
 Second, we have made various suggestions about performance needs in this paper, but Eco is
 a poor vehicle for evaluating whether automatic language boxes match such claims:
-it is written in Python, a relatively slow language; and Eco's data-structures
+it is written in Python, a relatively slow language, and the GUI runs only
+in CPython, a particularly slow implementation; and Eco's data-structures
 were originally designed to aid experimentation, and not performance. For example, nodes in Eco's
-parse tree are very heavy weight (with a base size of around 2KiB, which grows
+parse tree are very heavy weight (with a base size of around 2KiB per node, which grows
 rapidly as undo history is added), and do not include any of the optimisations
 described in~\citet{wagner98practicalalgorithms} (which would approximately reduce the
 base size to a tenth of its current size and substantially reduce the costs of
-additional undo history). Despite that, performance cost is generally
-acceptable: the average per-keypress wall-clock time of incremental parsing (including
+additional undo history). Despite that, editing performance with automatic
+language boxes is rarely affected. To try and get some idea of what the
+overhead might be with a more efficient implementation, we altered Eco so that
+it can be run without the GUI on PyPy, a faster implementation of Python. On a
+Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
+to be inserted and derived average keypress times from that: the average
+per-keypress wall-clock time of incremental parsing (including
 everything associated with automatic language boxes) was approximately 0.015s,
 with only 1.6\% of tests experiencing an average wall-clock time above 0.1s
 (roughly the threshold at which humans start to perceive some lag from typing)
-and a worst case of 2.8s. A more efficient implementation would probably reduce
-these costs by at least one order of magnitude, if not more.
+and a worst case of 2.8s. We believe that a more efficient implementation could
+expect to reduce these costs by at least one order of magnitude, if not more.
 
 
 \section{Conclusions}
