@@ -813,6 +813,12 @@ performance cost of this check, we check a fixed number (currently 10)
 non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
 candidates which have syntax errors within that token range.
+\lukas{There are a few things that a missing now that were explained in the now
+deleted filtering heuristics section. One is that we automatically insert a box
+if there is only one candidate and let the user choose if there are more. The
+other is the thing about whitespace, which is still acurrate. While we now
+parse further than the first non-whitespace, we still don't accept language
+boxes that can only parse a single white-space token.}
 
 \begin{figure*}[tb]
 \begin{center}
