@@ -274,7 +274,7 @@ In essence, automatic language boxes are a default disambiguation mechanism
 applied to any language composition. In other words, given several languages in
 a composition, automatic language boxes find a non-strict subset of the
 possible ambiguous parses: in many cases, only one possibility remains, and
-language boxes inserted or updated as appropriate. Default disambiguation may
+language boxes are inserted or updated as appropriate. Default disambiguation may
 seem a strange choice, because it would be inappropriate in traditional batch
 parsing, where disambiguation is invisible to the user, and the consequences of
 an incorrect choice dire. However, in an incremental parsing setting, the
@@ -393,11 +393,11 @@ and a parse tree created from it. Incremental parsing, in contrast,
 continually parses text and updates a parse tree as the user types.
 In this paper we make use of the incremental lexing and
 LR incremental parsing algorithms of~\citet{wagner98practicalalgorithms},
-taking into account the several fixes found in~\cite{diekmann18editing}.
+taking into account the several fixes found in~\citet{diekmann18editing}.
 In this subsection we provide a brief overview of this algorithm sufficient
 to understand the rest of this paper.
 
-The incremental lexer and parse both operate on the parse tree. Parse tree nodes
+The incremental lexer and parser both operate on the parse tree. Parse tree nodes
 are either \emph{nonterminals} (representing rules in the grammar) or
 \emph{tokens} (representing terminal symbols). Nonterminal nodes have an
 immutable type (e.g.~`expr') but a mutable list of child nodes.
@@ -406,7 +406,7 @@ and a mutable value (e.g.~`3') but cannot have children at all.
 
 After input from the user is received, the incremental lexer is run first.
 Using lookahead information, it identifies the affected area of the change,
-updates or creates tokens as necessary, and marks path from each updated or
+updates or creates tokens as necessary, and marks the path from each updated or
 created token to the root as changed. The incremental parser then runs,
 reparsing all subtrees with changes in them, and creating or removing
 nonterminals as needed.
@@ -688,8 +688,8 @@ always match human expectations of a language's structure.
 
 The \emph{line} candidates heuristic captures the intuition that many language
 boxes are intra-line: it searches
-backwards, one node at a time, from the error node to the beginning of the line
-that contains that token for candidates. This heuristic ensures that all
+backwards for candidates, one node at a time, from the error node to the beginning of the line
+that contains the error. This heuristic ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown.
 
@@ -717,7 +717,7 @@ def recreate_parsing_stack(lbox):
 \caption{An algorithm for efficiently creating a parse stack after a language box
 has been inserted into the parse tree. We do this in two steps. First we
 collect all the nodes on the path from the language box to the root node (lines
-2--8). Second we then follow equivalent steps as when a node is marked as
+2--9). Second we then follow equivalent steps as when a node is marked as
 changed and the incremental parser runs \cite[p.~63]{wagner98practicalalgorithms}:
 we reparse all nodes up to the language box (lines 11--18), skipping
 subtrees which can't be relevant to the parsing stack (lines 17--18). The
@@ -1179,7 +1179,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
       heuristic. Acceptable outcomes are that: an automatic language box
       (covering all or part of the fragment) was inserted, causing no syntax
       errors; no language box was inserted since the fragment was also valid in
-      the outer language; or there multiple candidates were presented to the
+      the outer language; or there were multiple candidates which were presented to the
       user. Unacceptable outcomes are those which lead to syntax errors.}
     \label{tbl:valid}
 \end{table*}
@@ -1188,7 +1188,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
     \input{tables/tbl_breakdown.tex}
 
     \vspace{7pt}
-    \caption{\laurie{can we use `error' or `errors' in the table? at the moment we have `partial insertion (errors)' and `no insertion (error)'. i mildly prefer `errors' but don't feel strongly.}The total percentage of outcomes by category. See
+    \caption{The total percentage of outcomes by category. See
     page~\pageref{detailed categories} for a detailed description of each category.
   The largest categories by far are `complete insertion (no errors)', which
   means that a language box was inserted around the entire input and `no
