@@ -1088,11 +1088,9 @@ expression span}, \emph{function definition or expression fragment}) where
 \emph{base file} into our extension of Eco; emulated key presses which move the
 cursor to the \emph{offset} and deleted \emph{span} characters; and then
 emulated key presses which inserted \emph{fragment}. For each test we recorded
-whether a language box was inserted or not, if
-the insertion lead to a valid or invalid program, and if it didn't for what
-reason (i.e.~a wrong language box was inserted; no candidate was found; or
-multiple candidates were found). If a language box was inserted, we also
-recorded the length of the fragment and the length of the inserted language box.
+whether a language box was inserted or not, the number of characters covered
+by any such language box, and the cause of any errors (e.g.~an insertion
+led to subsequent errors; or no candidates were found at all).
 
 Second, we need to classify the outcome of each test. The overall question we
 want an answer to is: do automatic language boxes work well in most
@@ -1261,21 +1259,14 @@ tree heuristic is that many languages have grammar rules along the lines of
 inserted in the middle of the grammar rule. This defeats the parse tree
 heuristic entirely, though the stack heuristic works as per human intuition.
 A specific weakness of the parse tree heuristic can be seen in the JavaLua
-and PHPLua compositions. Many Lua fragments consists of Lua's tables\footnote{Often called associative arrays,
-hashmaps, or dictionaries in other languages.} constructors, which have the syntax
+and PHPLua compositions. Many Lua fragments consists of Lua tables\footnote{Often called associative arrays,
+hashmaps, or dictionaries in other languages.}, which have the syntax
 `\texttt{\{e1, ..., en\}}'. As soon as the initial `\texttt{\{}' is
-inserted, a Java/PHP syntax error is detected. However, since the initial token
-was inserted immediately after another token, both share the same parent, but since
-the valid insertion point is inbetween the two tokens, the parse tree heuristic cannot
-find this location. This problem doesn't occur, if the fragement starts with a token
-that is valid in the outer language, since this allows the incremental parser to reparse
-the parse tree, before the remaining fragment is inserted, thus often rearraging the tree
-in a way, that the preceding token and the inserted fragment don't share a parent anymore.
-\lukas{This reparse
-allows the tree to be rewritten just enough, so that the first fragment
-token and the bracket don't share the same immediate parent anymore,
-allowing the heuristic to find this location.}\laurie{isn't the bracket the
-first fragment token?}\lukas{no, the fragement is inserted inbetween the two brackets. I've tried to rewrite things. See if that makes sense.} The stack candidates heuristic, however,
+inserted, a Java/PHP syntax error is detected, and the parse tree rewritten,
+generally in such a way that the `\texttt{\{}' character is placed after
+a terminal in an existing nonterminal -- at which point the parse tree
+heuristic does not consider it as a starting location for a language box.
+The stack candidates heuristic, however,
 performs poorly on LuaSQL because of the nature of Lua's grammar. For example,
 in the mixed Lua/SQL program  \texttt{x = SELECT a, b FROM t}, everything up to
 `\texttt{b}' can be parsed in Lua, leading to an LR reduction action which
