@@ -809,7 +809,7 @@ parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, precisely defining ``how far'' is
 surprisingly difficult. As a reasonable proxy, we use the absolute offset in
 the input in characters as the precise ordering mechanism. To bound the
-performance cost of this check, we check a fixed number (currently 10)
+performance cost of this check, we check a fixed number (currently 10) of
 non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
 candidates which have syntax errors within that token range.
@@ -1262,22 +1262,26 @@ JavaPHP composition with only \validlinejavaphp tests having an acceptable
 outcome. This is largely because the initial line of a PHP functions
 (e.g.~`function x() \{') looks like a Java function with a return type
 \texttt{function}: it is thus parsed as a Java function which leads to syntax
-errors on subsequent lines of PHP code. We expected the parse tree candidates
+errors on subsequent lines of PHP code.
+
+We expected the parse tree candidates
 heuristic to be more effective than the stack candidates heuristic, but the
-latter (\validstackoverall) has a noticeable greater proportion of acceptable
-outcomes than the former (\validhistoverall). \laurie{any idea why? i don't
-understand why it does so badly on both javalua and phplua -- is it something
-to do with lua's syntactic structure?}\lukas{I looked into the logs and its a combination
-of various things: first, an often chosen location for an insertion is inside brackets, e.g.~\texttt{if (here)}.
-This means that the fragment is inserted immediately after the opening bracket, so that the first fragment
-token and the bracket share the same parent, so that the parse tree heuristic can't find the valid location
-after the bracket. However, this applies to all compositions with outer languages PHP/Java. But Lua has another
-unfortunate property. Many of the fragments look something like this \texttt{\{a,b\}}, which means they cause
-an error immediately when inserted. Whereas a PHP fragement inside Java, for example, often starts with an identifier, giving
-the incremental parser a chance to reparse the tree before the rest of the fragment is inserted. This reparse
-allows the tree to be rewritten just enough, so that the first fragment token and the bracket don't share the same
-immediate parent anymore, allowing the heuristic to find this location. Finally, some Lua fragments have the \texttt{//}
-problem we talk about in 4.6, which adds to the amount of undetected insertions.} The stack candidates heuristic, however,
+latter (\validstackoverall) has a noticeably greater proportion of acceptable
+outcomes than the former (\validhistoverall). A generic weakness of the parse
+tree heuristic is that many languages have grammar rules along the lines of
+`\texttt{if (\emph{expr}) \{ ... \}}' i.e.~we expect a language box to be
+inserted in the middle of the grammar rule. This defeats the parse tree
+heuristic entirely, though the stack heuristic works as per human intuition.
+A specific weakness of the parse tree heuristic can be seen in the JavaLua
+and PHPLua compositions. Lua's table\footnote{Often called associative arrays,
+hashmaps, or dictionaries in other languages.} constructors have the syntax
+`\texttt{\{e1, ..., en\}}'. As soon as the initial `\texttt{\{}' is
+inserted, a Java/PHP syntax error is detected and, often, the parse tree
+rewritten in such a way that the associated token \lukas{This reparse
+allows the tree to be rewritten just enough, so that the first fragment
+token and the bracket don't share the same immediate parent anymore,
+allowing the heuristic to find this location.}\laurie{isn't the bracket the
+first fragment token?} The stack candidates heuristic, however,
 performs poorly on LuaSQL because of the nature of Lua's grammar. For example,
 in the mixed Lua/SQL program  \texttt{x = SELECT a, b FROM t}, everything up to
 `\texttt{b}' can be parsed in Lua, leading to an LR reduction action which
