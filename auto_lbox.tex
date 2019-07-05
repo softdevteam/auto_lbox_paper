@@ -1297,10 +1297,10 @@ it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
 to be inserted and derived average keypress times from that: the average
 per-keypress wall-clock time of incremental parsing (including
-everything associated with automatic language boxes) was approximately 0.015s,
-with only 1.6\% of tests experiencing an average wall-clock time above 0.1s
+everything associated with automatic language boxes) was approximately 0.003s,
+with less than 1\% of tests experiencing an average wall-clock time above 0.1s
 (roughly the threshold at which humans start to perceive some lag from typing)
-and a worst case of 2.8s. We believe that a more efficient implementation could
+which was also the worst case. We believe that a more efficient implementation could
 expect to reduce these costs by at least one order of magnitude, if not more.
 
 
