@@ -166,8 +166,8 @@ delimiters (which are awkward to work with), or by using disambiguation operator
 filter a parse forest down to a single parse tree (though, in general, we cannot
 be sure that we have covered all possible parse forests). In this paper, we
 show that default disambiguation rules, which are inappropriate for
-batch parsing, lead to a new point in the design space for online editing.
-We extend language boxes -- a delimiter-based
+batch parsing, work well in online editing, where they can be overridden if
+necessary. We extend language boxes -- a delimiter-based
 algorithm atop incremental parsing -- in such a way that default disambiguation
 rules can automatically insert, remove, or resize, language boxes, leading to
 the \emph{automatic language boxes} algorithm. The
