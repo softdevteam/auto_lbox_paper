@@ -1,6 +1,5 @@
-%\documentclass[sigplan,screen]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[sigplan,screen]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 %\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-\documentclass[sigplan,anonymous,review]{acmart}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -140,7 +139,7 @@
 % Document starts
 \begin{document}
 % Title portion. Note the short title for running heads
-\title{Automatic Language boxes}
+\title{Default disambiguation for language composition}
 
 \author{Lukas Diekmann}
 \affiliation{%
@@ -163,15 +162,15 @@
 \begin{abstract}
 Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
-delimiters, or by selecting the desired parse tree from the parse forest.  In
-this paper we show that language boxes -- a delimiter-based
-algorithm atop incremental parsing -- can be extended in a way that creates
-a new point in the design space between these two extremes. In essence, we
-retain the use of delimiters, but
-introduce an algorithm which provides a default disambiguation scheme that
-can automatically insert, remove, or resize
-language boxes -- leading to what we call \emph{automatic language
-boxes}. The very nature of the problem means that automatic language boxes
+delimiters (which are awkward to work with), or by using disambiguation operators to
+filter a parse forest down to a single parse tree (though, in general, we cannot
+be sure that we have covered all possible parse forests). In this paper, we
+show that default disambiguation rules, which are inappropriate for
+batch parsing, lead to a new point in the design space for online editing.
+We extend language boxes -- a delimiter-based
+algorithm atop incremental parsing -- in such a way that default disambiguation
+rules can automatically insert, remove, or resize, language boxes. The
+nature of the problem means that default disambiguation
 cannot always match a user's intention. However, our experimental
 evaluation shows that it behaves acceptably in \validalloverall of
 tests involving compositions of real-world programming languages.
@@ -238,7 +237,17 @@ are visually intrusive and/or awkward to work with; and one can never know if
 sufficient disambiguation operators have been used to filter all possible parse
 forests down to a single parse tree.
 
-An alternative to traditional delimiter-based approaches are \emph{language boxes}, which aim to
+In this paper we show that default disambiguation rules (i.e.~disambiguation
+rules applied equally to every language composition) provide a satisfying new
+point in the design space. Readers can be forgiven for surprise at this
+statement, since default disambiguation is clearly inappropriate in batch
+parsing, where a single incorrect disambiguation will cause dire results.
+However, when using an online parser an incorrect disambiguation can be
+easily overriden by the user. The challenge then becomes to find default
+disambiguation rules which rarely require the user to override them.
+
+In this paper we use \emph{language boxes} as the basis of a default
+disambiguation system. Language boxes aim to
 combine the advantages of explicit bracketing and syntax-based
 editing~\cite{diekmann14eco}. Editors
 which support language boxes need to use incremental parsing
@@ -251,35 +260,18 @@ tree that represents a different language, surrounded by
 explicit, but invisible, delimiters. Unlike explicit bracketing approaches,
 there are no visually intrusive delimiters; unlike traditional
 syntax-based editors, the program can be syntactically incorrect in arbitrary
-ways and places during editing.
-
-Language boxes have the virtue that they work for any possible
+ways and places during editing. Language boxes have the virtue that they work for any possible
 language composition. However, this generality comes at a cost:~users
 must explicitly, and tediously, state when they want
-to insert or remove language boxes. Interestingly, this is the exact
-opposite of the situation with generalised parsing, where language composition
-authors must disambiguate each new composition anew but users can then
-freely write text in any of the languages in the composition.
-The fundamental research question underlying this paper is thus whether it is
-possible to extend some of the benefits of generalised parsing to language
-boxes, while not losing language box's generality.
-For example, in a composition of Java and SQL, where SQL statements are allowed
-wherever a Java expression is valid, can such a system automatically insert an
-appropriate SQL language box in `\texttt{for (String n: SELECT name FROM table) \{ ...
-\}}'?
+to insert or remove language boxes.
 
-In this paper we present the \emph{automatic language boxes} algorithm, which can
-automatically insert, remove, and resize language boxes in many useful cases.
-In essence, automatic language boxes are a default disambiguation mechanism
-applied to any language composition. In other words, given several languages in
+We thus created default disambiguation rules which can
+automatically insert, remove, and resize language boxes in many useful cases
+--- leading to the \emph{automatic language boxes} algorithm.
+Given several languages in
 a composition, automatic language boxes find a non-strict subset of the
 possible ambiguous parses: in many cases, only one possibility remains, and
-language boxes are inserted or updated as appropriate. Default disambiguation may
-seem a strange choice, because it would be inappropriate in traditional batch
-parsing, where disambiguation is invisible to the user, and the consequences of
-an incorrect choice dire. However, in an incremental parsing setting, the
-results of disambiguation are visible to the user, and the consequences of an
-incorrect choice mild, since it can be simply, and permanently, overridden. The
+language boxes are inserted or updated as appropriate. The
 algorithm is comprised of several stages / heuristics: determining what user
 inputs should trigger it; finding candidate language boxes to insert, remove,
 or resize; filtering out those which would make the overall program worse; and
@@ -305,9 +297,8 @@ classified as acceptable, with the majority
 (\breakdownallvalidsame of the total) leading to a language box being inserted
 around the entire fragment, and most of the rest (\breakdownallnovalid of the total)
 being instances of the fragment being valid in both the outer and inner
-languages. We believe that this data shows that automatic language boxes
-are a practical editing mechanism for language composition.
-Our fully
+languages. We believe that this data shows that default disambiguation is
+a practical means for editing composed programs. Our fully
 repeatable experiment can be found at \emph{redacted for double blind review}
 and our extensions to the Eco editor can be found at \emph{redacted for double
 blind review}.
