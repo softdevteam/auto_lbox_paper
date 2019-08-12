@@ -1,0 +1,81 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Automatic language boxes\\Experiment}
+\maketitle
+
+This artefact provides scripts to reproduce the results from the evaluation
+section of the paper. Reviewers may run the experiment using the same setup as
+used in the paper using the VirtualBox image (Section \ref{quickstart}); run
+the experiment on their own machine (Section \ref{fromscratch}); only run a
+subset of the experiment (Section \ref{subset}); or only generate the tables
+using pre-built results from the paper (Section \ref{tablesonly}).
+
+\noindent Username and password for the virtual machine: \textbf{user} / \textbf{user}
+
+\section{Running the experiment}
+
+\subsection{Quickstart}
+\label{quickstart}
+
+Runtime: $\sim$3-4 hours
+
+\noindent To run the experiment execute \texttt{./build\_paper.sh} (located in
+\texttt{$\sim$/experiment/}). This will run all benchmarks and should take
+approximately 3-4 hours on a machine with an i7 and PyPy installed (the use of
+CPython and/or VirtualBox will likely increase this runtime). After the
+benchmarks have finished running, the results will automatically be analysed,
+and latex tables will be generated in \texttt{latex/}. The produced tables
+correspond to the paper as follows:
+
+\begin{itemize}
+    \item Table 1: \texttt{tbl\_valid.tex}
+    \item Table 2: \texttt{tbl\_breakdown.tex}
+    \item Table 3: \texttt{tbl\_bench\_all.tex}
+    \item Table 4: \texttt{tbl\_bench\_hist.tex}
+    \item Table 5: \texttt{tbl\_bench\_stack.tex}
+    \item Table 6: \texttt{tbl\_bench\_line.tex}
+\end{itemize}
+
+\subsection{Running without the VM}
+\label{fromscratch}
+
+Runtime: $\sim$3-4 hours
+
+\noindent Reviewers may alternatively clone the experiment
+repository from \url{https://github.com/softdevteam/auto_lbox_experiments} and
+run it on their own machine. Note however, that the repository does not contain
+the files necessary to run the experiment in the exact setup of the paper and
+since the tests are randomised results may differ slightly from the paper.
+
+\subsection{Running a subset}
+\label{subset}
+
+Runtime: $\sim$1 hour
+
+\noindent Reviewers may run a subset of the benchmark suite with
+\texttt{./build\_subset.sh}, which reduces the total runtime of the experiment.
+Note that in this case the results will likely differ a lot from the paper.
+
+\subsection{Produce tables using prebuilt data}
+\label{tablesonly}
+
+Runtime: $\sim$1-2 seconds
+
+\noindent Reviewers who only want to reproduce the tables without running the
+benchmarks themselves can run \texttt{./build\_tables.sh}. This will use the
+benchmark results from the paper (which come packaged with this VM) to generate
+the latex tables.
+
+\section{Using the editor}
+
+To see automatic language boxes in action, reviewers may run the editor Eco and
+try out some of the compositions. Eco can be started either by using the link
+on the desktop or executing \texttt{cd eco; ./bin/eco} in a terminal. Reviewers
+may then open any of the examples in \texttt{$\sim$/eco\_examples} (which correspond
+to Figures 1, 7, and 8 in the paper) and follow the instructions in the comments.
+
+\end{document}

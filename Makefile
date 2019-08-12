@@ -68,3 +68,7 @@ auto_lbox.pdf: ${LATEX_FILES} ${DIAGRAMS} bib.bib
 	bibtex auto_lbox
 	pdflatex auto_lbox.tex
 	pdflatex auto_lbox.tex
+
+artefact.pdf: artefact.tex
+	pdflatex artefact.tex
+	pdflatex artefact.tex
