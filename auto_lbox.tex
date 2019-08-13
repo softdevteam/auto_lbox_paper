@@ -165,11 +165,11 @@ mechanism for dealing with ambiguity: either ruling it out entirely through the 
 delimiters (which are awkward to work with), or by using disambiguation operators to
 filter a parse forest down to a single parse tree (though, in general, we cannot
 be sure that we have covered all possible parse forests). In this paper, we
-show that default disambiguation rules, which are inappropriate for
-batch parsing, work well in online editing, where they can be overridden if
+show that default disambiguation, which is inappropriate for
+batch parsing, works well for online editing, where it can be overridden by the user if
 necessary. We extend language boxes -- a delimiter-based
 algorithm atop incremental parsing -- in such a way that default disambiguation
-rules can automatically insert, remove, or resize, language boxes, leading to
+can automatically insert, remove, or resize, language boxes, leading to
 the \emph{automatic language boxes} algorithm. The
 nature of the problem means that default disambiguation
 cannot always match a user's intention. However, our experimental
@@ -194,8 +194,9 @@ tests involving compositions of real-world programming languages.
         \put(  40,51){\textcolor{black}{\footnotesize\textbf{(e)}}}
     \end{picture}
     \vspace{-2.2em}
-    \caption{An example of automatic language boxes in action (with elided screenshots from our
-      extension to the Eco editor). Here, the user is entering text in a
+    \caption{An example of default disambiguation in action, with elided screenshots
+      from our implementation of the automatic language boxes algorithm within
+      the Eco editor. Here, the user is entering text in a
       composition of Java and SQL, where SQL statements can be used wherever
       Java expressions are valid. As the user types, language boxes (with a
       pink background) are automatically inserted, removed, or resized.
@@ -238,14 +239,16 @@ are visually intrusive and/or awkward to work with; and one can never know if
 sufficient disambiguation operators have been used to filter all possible parse
 forests down to a single parse tree.
 
-In this paper we show that default disambiguation rules (i.e.~disambiguation
-rules applied equally to every language composition) provide a satisfying new
-point in the design space. Readers can be forgiven for surprise at this
-statement, since default disambiguation is clearly inappropriate in batch
+In this paper we show that default disambiguation (i.e.~a disambiguation
+strategy applied equally to every language composition) provides a satisfying new
+point in the design space. Readers can be forgiven surprise at this
+statement, since default disambiguation is clearly inappropriate for batch
 parsing, where a single incorrect disambiguation will cause dire results.
-However, when using an online parser an incorrect disambiguation can be
-easily overriden by the user. The challenge then becomes to find default
-disambiguation rules which rarely require the user to override them.
+The realisation underlying this paper is that this is not an issue for online parsers,
+since users can manually override incorrect disambiguations. However, this
+introduces a new challenge: default disambiguation must mostly match the users
+intentions, because if they have to override it too often then the system will
+be perceived as unusable.
 
 In this paper we use \emph{language boxes} as the basis of a default
 disambiguation system. Language boxes aim to
@@ -320,7 +323,7 @@ between languages. The
 most obvious way of achieving this is to use explicit brackets to make clear a
 switch from an outer to an inner language (e.g.~`\texttt{for (String e: <<SELECT name
 FROM table>>) \{ ... \}}'), though this is visually intrusive
-(what~\cite[p.~4]{bravenboer05generalized} calls ``syntactic clutter``), and
+(what~\cite[p.~4]{bravenboer05generalized} call ``syntactic clutter``), and
 prevents the
 brackets being used within the sub-language (e.g.~in this case, the inner language
 cannot use `\texttt{>>}' as a bit-wise operator).
@@ -361,7 +364,7 @@ cannot be sure if all possible points of ambiguity have been covered.
 Furthermore, our current disambiguation operators can cause scannerless
 parsers to become context-sensitive~\cite{eijck__lets_accept_rejects}, the
 consequences of which remain unclear. Although it is possible in some cases
-to use semantic informations such as types to aid disambiguation (see
+to use semantic informationssuch as types to aid disambiguation (see
 e.g.~\cite{vinju05typedriven}), this is not applicable to all languages.
 
 
@@ -383,7 +386,7 @@ constraints on many editing operations.
 
 Parsing is traditionally a batch process: an entire file is fed through a parser
 and a parse tree created from it. Incremental parsing, in contrast,
-continually parses text and updates a parse tree as the user types.
+is an online process, continually parsing text and updating a parse tree as the user types.
 In this paper we make use of the incremental lexing and
 LR incremental parsing algorithms of~\citet{wagner98practicalalgorithms},
 taking into account the several fixes found in~\citet{diekmann18editing}.
@@ -395,7 +398,7 @@ are either \emph{nonterminals} (representing rules in the grammar) or
 \emph{tokens} (representing terminal symbols). Nonterminal nodes have an
 immutable type (e.g.~`expr') but a mutable list of child nodes.
 Tokens have a mutable type (e.g.~`int')
-and a mutable value (e.g.~`3') but cannot have children at all.
+and a mutable value (e.g.~`3') but no children.
 
 After input from the user is received, the incremental lexer is run first.
 Using lookahead information, it identifies the affected area of the change,
@@ -463,19 +466,18 @@ but when language boxes are used frequently, it is a significant usability
 issue, impeding the user's flow. Eco, an editor which supports language boxes~\cite{diekmann14eco},
 slightly eases this problem by using information from the incremental parser to
 highlight those languages valid at the point of the cursor,
-though this is a mild palliative at best. A superior solution would be
-to automatically insert, remove, and resize language boxes whenever possible.
+though this is a mild palliative at best.
 
-In an ideal world, we would be able to insert language boxes exactly, and only,
+In an ideal world, we would be able to automatically insert language boxes exactly, and only,
 when they are wanted by the user. However, this is impossible in the
 general case because language composition is really grammar composition
 in disguise, and thus subject to the same ambiguity problems as generalised
-parsing (see Section~\ref{sec:scannerless}). Even if we were to require the
-language composition author to provide a static disambiguation specification,
-we cannot guarantee that it will cover all the ambiguous
-possibilities. Annoying as this may be, it is a hard constraint that we cannot
-change. On top of this, we also assert that a realistic solution to automatic
-language boxes should satisfy several softer considerations.
+parsing (see Section~\ref{sec:scannerless}). We must thus lower our sights
+slightly, aiming to automatically insert, remove, or resize language boxes
+correctly merely in the vast majority of cases, with the remaining cases
+few enough in number that the user is willing to override them manually.
+This still leaves a broad solution space which we narrow down with the
+following soft considerations.
 
 First, a solution which requires language composition authors (i.e.~the people
 who actually compose grammars, create code generators etc.) to provide additional
@@ -486,7 +488,8 @@ to be expert in every part of it (as well as the domain they are composing
 languages for!) is unrealistic. For example, it can be difficult to know whether
 a non-LR grammar is ambiguous or not~\cite{vasudevan13detecting} and whether
 one has disambiguated it in the expected way: grammar
-composition often magnifies such concerns.
+composition magnifies such concerns, particularly as the number of languages
+in a composition grows.
 
 Second, a solution which seriously degrades performance would be unacceptable.
 For example, one simple way of finding which language boxes to insert would
@@ -499,7 +502,7 @@ a file was saved). Modern machines are fast enough that even a naive
 implementation can run comfortably on every keypress in nearly all reasonable
 cases.}.
 
-Third, a solution which inserts language boxes unpredictably would be unlikely
+Third, a solution which inserts language boxes unpredictably is unlikely
 to find favour with users. Clearly, given the hard constraint described at the
 start of this subsection, users cannot expect perfect language box insertion
 all of the time. However, a reasonable minimum expectation is that it should be
@@ -514,8 +517,8 @@ constraint above.
 
 \section{Automatic language boxes}
 
-In this section, we present the automatic language boxes algorithm. In essence
-this is a default disambiguation mechanism: given an arbitrary language
+In this section, we present a default disambiguation mechanism in the form of
+the \emph{automatic language boxes} algorithm. Given an arbitrary language
 composition, it uses several heuristics to find plausible places to insert,
 remove, or resize language boxes. The algorithm makes use of the fact that it
 has a surrounding parse tree to provide context, and also knowledge of where
@@ -539,7 +542,7 @@ Conversely, if it triggers infrequently, it will not be a useful aid to the user
 We use two related observations as the guides to our consideration heuristic.
 First, by definition, language composition always consists of an outer language
 and one or more inner languages\footnote{Note that these terms are relative:
-when we create a language box and move into it, the previously-inner language
+when we create a language box and move into it, the previously inner language
 now becomes the outer language.}. It is thus a reasonable expectation that most
 text typed in the outer language is intended to be in the outer language.
 Second, the clearest indication that recently typed text in the outer language
@@ -619,11 +622,11 @@ language boxes could start at that point. Although it would be possible to use
 the normal incremental parser to answer this question, it would require
 significant setting up and tearing down which would be tedious to program and
 slow to run. Instead we provide \emph{candidates recognisers}\footnote{Some languages
-  (e.g.~whitespace sensitive languages such as Python) need slightly customised
+(e.g.~whitespace sensitive languages such as Python) need slightly customised
 candidates recognisers.} which are able to quickly return the list of substrings valid in
 a language $L$ starting at node $n$.
 
-The main challenge for candidates recognisers is to know when to stop trying to recognise
+The main challenge for candidates recognisers is to decide when to stop trying to recognise
 further input. If we stop too early, we will fail to recognise valid language
 boxes, but if we go too far, we will degrade performance. The technique
 we use is to try recognising gradually growing substrings as valid in an inner
@@ -858,7 +861,7 @@ repeatedly inserted.
 \caption{An example of multiple language box candidates in our running Java and SQL
   composition. \textbf{(a)} The user is editing an existing Java programme,
   and has just deleted the expression after \qtt{remote}.
-  \textbf{(b)} Inserting an SQL statement leads a syntax error in Java. The
+  \textbf{(b)} Inserting an SQL statement leads to a syntax error in Java. The
   automatic language box algorithm then finds multiple valid language box
   candidates. Rather than picking one at random, the syntax error remains, and
   the existence of multiple candidates is indicated to the user by the light
@@ -921,12 +924,12 @@ we handle is as follows:
 \begin{enumerate}
   \item If an uncommitted language box has a syntax error within it, and
     if its contents are valid in the outer language, then the language box
-    should be removed.
+    is removed.
   \item If an uncommitted language box becomes part of a syntax error in the outer
     language, and if its contents are valid in the outer language, then the
-    language box should be removed.
+    language box is removed.
   \item If an uncommitted language box's content is valid in both the inner and
-    outer languages, then the language box should be removed if that would not
+    outer languages, then the language box is removed if that would not
     then cause subsequent parse errors. Following the precedent from
     Section~\ref{sec:allheuristic}, we use the first non-whitespace token after
     the language box as a proxy for this.
@@ -964,8 +967,8 @@ valid in Java and, since they are, removes the language box.}
 
 \subsubsection{Resizing}
 
-Although we do not change the starting position of uncommitted language boxes
-(which can be highly distracting), their right hand extent can be automatically
+Although we do not change the starting position of an uncommitted language box
+(which can be highly distracting), its end position can be automatically
 changed to encompass more or less content (Figure~\ref{intro_example} shows an
 example of the former). A language box is expanded to encompass more content
 if: its parse tree does not contain a syntax error; if encompassing the
@@ -1003,7 +1006,7 @@ almost any text, nearly all errors in Java can be resolved by wrapping text in
 an HTML language box, which is unlikely to match the user's intentions.
 
 To help with such cases, we thus have to relax the `no hints' constraint from
-Section~\ref{the problem} by allowing language composition authors to specify
+Section~\ref{the problem}, allowing language composition authors to specify
 either the valid or the invalid token types which can appear at the start of
 a language box. For example, in the case of the Java and HTML composition, a
 good choice is to specify HTML tags as being the only valid starting token
@@ -1215,7 +1218,7 @@ in other words, automatic language boxes match one reasonable (if slightly
 naive) expectation in the vast majority of cases. The remainder of cases are
 mostly acceptable outcomes: partial language box insertions without errors
 (i.e.~part of the fragment is put in a language box but the remainder remains
-in the outer language) and no insertions due to multiple candidates roughly
+in the outer language) and no insertions due to multiple candidates are both roughly
 equal in proportion.
 
 That leaves the two unacceptable cases. Partial insertions with errors
@@ -1241,8 +1244,8 @@ candidates heuristic is the most effective, because it correctly deals with
 nearly all insertions of expression fragments. The main exception is the
 JavaPHP composition with only \validlinejavaphp tests having an acceptable
 outcome. This is largely because the initial line of a PHP functions
-(e.g.~`function x() \{') looks like a Java function with a return type
-\texttt{function}: it is thus parsed as a Java function which leads to syntax
+(e.g.~`\texttt{function x() \{}') looks like a Java function (with a return type
+`\texttt{function}'): it is thus parsed as a Java function which leads to syntax
 errors on subsequent lines of PHP code.
 
 We expected the parse tree candidates
@@ -1287,12 +1290,12 @@ language boxes is rarely noticeable. To try and get some idea of what the
 overhead might be with a more efficient implementation, we altered Eco so that
 it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
-to be inserted and derived average keypress times from that: the average
-per-keypress wall-clock time of incremental parsing (including
+to be inserted: the average
+per-keypress wall-clock time (including
 everything associated with automatic language boxes) was approximately 0.003s,
-with less than 1\% of tests experiencing an average wall-clock time above 0.1s
+with less than 1\% of tests experiencing an average per-keypress wall-clock time above 0.1s
 (roughly the threshold at which humans start to perceive some lag from typing)
-which was also the worst case. We believe that a more efficient implementation could
+which was also the worst case \laurie{huh?}. We believe that a more efficient implementation could
 expect to reduce these costs by at least one order of magnitude, if not more.
 
 
