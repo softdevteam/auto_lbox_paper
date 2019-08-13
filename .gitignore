@@ -9,3 +9,9 @@ bib.bib
 images/*eps
 images/*pdf
 softdevbib/
+artefact.aux
+artefact.log
+artefact.out
+artefact.pdf
+corpusstats.aux
+
