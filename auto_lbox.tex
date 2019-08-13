@@ -374,7 +374,9 @@ Traditional syntax directed editing avoids parsing text entirely. In essence,
 users edit an AST directly, with incomplete parts of a program being
 represented by holes. This avoids the need for explicit delimiters, and
 sidesteps issues of ambiguity completely. However, such systems are awkward to
-use~\cite[p.~2]{khwaja93syntax}, for example only allowing whole nodes in the AST to be selected at a time,
+use~\cite[p.~2]{khwaja93syntax}, for example only allowing whole nodes in the
+AST to be selected at a time (e.g.~for the expression `2 + 3 * 4' one can
+select `2' or `3 * 4', but not `2 + 3'),
 and quickly fell out of fashion. The modern syntax directed editor
 MPS~\cite{pech13mps} alleviates some, though not all, of these problems.
 However, it requires significant expertise on the part of the language composition
@@ -524,7 +526,7 @@ remove, or resize language boxes. The algorithm makes use of the fact that it
 has a surrounding parse tree to provide context, and also knowledge of where
 the user has recently made edits, to improve the quality of its results.
 
-To ease the algorithms description, we start by considering the problem of language box
+To ease the algorithm's description, we start by considering the problem of language box
 insertion, before then adding additional functionality (e.g.~removal and
 resizing). We later validate the usefulness of automatic language boxes in
 Section~\ref{sec:evaluation}.
@@ -639,6 +641,62 @@ failed earlier than the EOS token, then we know that no further input will
 fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
 more formal version of this algorithm.
 
+
+\begin{figure*}[t]
+\begin{minipage}[t]{0.55\textwidth}
+\begin{lstdefault}[]
+def parse_tree(parser, node):
+  cnds = []
+  v = global_version - 1
+  while node is not None:
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted before \texttt{node.version(v)}}}!>:
+        cnds.extend(cnds_recogniser(node, lang))
+    node = node.parent(v)
+  return cnds
+
+def stack(parser, node):
+  cnds = []
+  for state, node in reversed(parser.stack):
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
+        t = node.next_terminal()
+        cnds.extend(cnds_recogniser(t, lang))
+  return cnds
+
+def line(parser, node):
+  cnds = []
+  while node.type_ not in ["BOS", "Newline"]:
+    for lang in <!\textrm{\textit{composition}}!>:
+      if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
+        cnds.extend(cnds_recogniser(node, lang))
+    node = node.prev_terminal()
+  return cnds
+\end{lstdefault}
+\end{minipage}
+\begin{minipage}[t]{0.44\textwidth}
+  \caption{Simplified versions of our three candidates heuristics. Each is
+  passed a \texttt{node}, which is the point at which an error is detected, and
+finds sensible points before that node in the parse tree to be the possible
+starting point of language boxes (using the candidates recogniser from
+Figure~\ref{fig:recogniser}).
+The \texttt{parse\_tree} candidates heuristic
+walks up the parse tree to find candidate language boxes (line 6--7).
+Because the parse tree is, in a sense, only partially parsed at the point the
+candidates heuristic is called, we have to view the parse tree as it was before parsing
+began (line 8).
+The \texttt{stack} candidates heuristic walks the parse
+stack, finding the node matching each point in the stack (line 13) and then
+searching for candidate language boxes (line 15) starting at the first terminal
+following that node (line 16).
+The \texttt{line} candidates heuristic searches
+backwards each token from the error node (line 26) until the beginning of
+the line which contains that node (line 22) for
+candidate language boxes (line 24).}
+\label{lst:find_candidates}
+\end{minipage}
+\end{figure*}
+
 For example, consider the fragment `\texttt{int x = SELECT 1 + 2;}' in our
 running Java and SQL composition. If we start a candidates recogniser at the
 `\texttt{SELECT}' token, we first try recognising `\texttt{SELECT}' which leads
@@ -731,67 +789,12 @@ different to \texttt{node}'s parent in the current version of the tree,
 \end{figure}
 
 In order for later stages in the algorithm to work correctly, each candidate
-needs to come with a valid parsing stack. Candidates produced by the stack
-heuristic naturally come with a valid parsing stack. However, we need to create a
-valid parsing stack for candidates from the parse tree and line heuristics which
-requires reparsing the program. Fortunately, we can do this efficiently by
+needs to have a valid parsing stack. While candidates produced by the stack
+heuristic naturally do so, we need to create a
+valid parsing stack for candidates from the parse tree and line heuristics.
+Fortunately, we can do this efficiently by
 using a similar approach to that the incremental parser uses to reparse changed
 nodes (see Figure~\ref{fig:createparsestack}).
-
-\begin{figure*}[t]
-\begin{minipage}[t]{0.55\textwidth}
-\begin{lstdefault}[]
-def parse_tree(parser, node):
-  cnds = []
-  v = global_version - 1
-  while node is not None:
-    for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted before \texttt{node.version(v)}}}!>:
-        cnds.extend(cnds_recogniser(node, lang))
-    node = node.parent(v)
-  return cnds
-
-def stack(parser, node):
-  cnds = []
-  for state, node in reversed(parser.stack):
-    for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted at \texttt{state}}}!>:
-        t = node.next_terminal()
-        cnds.extend(cnds_recogniser(t, lang))
-  return cnds
-
-def line(parser, node):
-  cnds = []
-  while node.type_ not in ["BOS", "Newline"]:
-    for lang in <!\textrm{\textit{composition}}!>:
-      if <!\textrm{\textit{lang can be shifted before \texttt{node}}}!>:
-        cnds.extend(cnds_recogniser(node, lang))
-    node = node.prev_terminal()
-  return cnds
-\end{lstdefault}
-\end{minipage}
-\begin{minipage}[t]{0.44\textwidth}
-  \caption{Simplified versions of our three candidates heuristics. Each is
-  passed a \texttt{node}, which is the point at which an error is detected, and
-finds sensible points before that node in the parse tree to be the possible
-starting point of language boxes (using the candidates recogniser from
-Figure~\ref{fig:recogniser}).
-The \texttt{parse\_tree} candidates heuristic
-walks up the parse tree to find candidate language boxes (line 6--7).
-Because the parse tree is, in a sense, only partially parsed at the point the
-candidates heuristic is called, we have to view the parse tree as it was before parsing
-began (line 8).
-The \texttt{stack} candidates heuristic walks the parse
-stack, finding the node matching each point in the stack (line 13) and then
-searching for candidate language boxes (line 15) starting at the first terminal
-following that node (line 16).
-The \texttt{line} candidates heuristic searches
-backwards each token from the error node (line 26) until the beginning of
-the line which contains that node (line 22) for
-candidate language boxes (line 24).}
-\label{lst:find_candidates}
-\end{minipage}
-\end{figure*}
 
 
 \subsection{Combining heuristics}
@@ -841,7 +844,7 @@ completes. If there is one candidate, we simply insert it to the user's
 program. If the user is unhappy with the insertion, they can remove it by
 pressing undo (conventionally \keys{Ctrl+Z}). However, implemented naively,
 the language box can simply reappear on each subsequent keypress, which is
-unlikely to de desired. Therefore removing a language box in this way marks
+unlikely to be desired. Therefore removing a language box in this way marks
 a flag \texttt{noinsert} on the node with a syntax error identified by the
 consideration heuristic. When set to \texttt{true}, the candidates heuristic
 will notice and deliberately ignore such nodes so that language boxes are not
@@ -1213,7 +1216,8 @@ sub-categories: \breakdownallvalidsame of tests insert a complete language box
 around the fragment (by definition making the program syntactically correct);
 \breakdownallnovalid of tests have fragments which are valid in the inner and
 outer language. If we exclude tests whose fragments are valid in the inner and
-outer language, that means that \breakdownallexclude of cases insert a language box around the whole fragment --
+outer language, that means that \breakdownallexclude of all possible cases
+insert a language box around the whole fragment --
 in other words, automatic language boxes match one reasonable (if slightly
 naive) expectation in the vast majority of cases. The remainder of cases are
 mostly acceptable outcomes: partial language box insertions without errors
