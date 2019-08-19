@@ -1048,7 +1048,9 @@ comment prefix, `\texttt{// 4 + 1;}' is ignored entirely, and the almost inevita
 syntax error is delayed onto the following line or later: in such cases, not even
 the line candidates heuristic can find a starting point for language boxes that
 matches a human's intuition. Fortunately, such ambiguities are
-rare.
+rare\lukas{Reviewer: Is there a solution for this? A: A different could solve
+this, e.g.~ a line heuristic that traverses two lines backwards, however, then
+we'd also need a 3, 4, etc line heuristic. Where do we stop?}.
 
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
@@ -1216,7 +1218,7 @@ sub-categories: \breakdownallvalidsame of tests insert a complete language box
 around the fragment (by definition making the program syntactically correct);
 \breakdownallnovalid of tests have fragments which are valid in the inner and
 outer language. If we exclude tests whose fragments are valid in the inner and
-outer language, that means that \breakdownallexclude of all possible cases
+outer language, that means that \breakdownallexclude \lukas{Reviewer: Where does this number come from? A: Percentage of complete insertions when removing no insertion (valid).}of all possible cases
 insert a language box around the whole fragment --
 in other words, automatic language boxes match one reasonable (if slightly
 naive) expectation in the vast majority of cases. The remainder of cases are
