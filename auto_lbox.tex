@@ -1047,10 +1047,11 @@ and they might reasonably expect a Lua language box to be put around `\texttt{3
 comment prefix, `\texttt{// 4 + 1;}' is ignored entirely, and the almost inevitable resulting
 syntax error is delayed onto the following line or later: in such cases, not even
 the line candidates heuristic can find a starting point for language boxes that
-matches a human's intuition. Fortunately, such ambiguities are
-rare\lukas{Reviewer: Is there a solution for this? A: A different could solve
-this, e.g.~ a line heuristic that traverses two lines backwards, however, then
-we'd also need a 3, 4, etc line heuristic. Where do we stop?}.
+matches a human's intuition. Although these examples could be solved by searching
+a fixed number of lines backwards, in general only an unbounded backwards
+search, with its obvious performance problems, could solve this problem.
+Fortunately, such ambiguities are sufficiently rare that maintaining the simplicity
+of the line candidates heuristic seems a reasonable choice.
 
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
@@ -1218,7 +1219,8 @@ sub-categories: \breakdownallvalidsame of tests insert a complete language box
 around the fragment (by definition making the program syntactically correct);
 \breakdownallnovalid of tests have fragments which are valid in the inner and
 outer language. If we exclude tests whose fragments are valid in the inner and
-outer language, that means that \breakdownallexclude \lukas{Reviewer: Where does this number come from? A: Percentage of complete insertions when removing no insertion (valid).}of all possible cases
+outer language (i.e.~cases where the disambiguation mechanism cannot
+expect to do anything useful), then \breakdownallexclude of the remaining cases
 insert a language box around the whole fragment --
 in other words, automatic language boxes match one reasonable (if slightly
 naive) expectation in the vast majority of cases. The remainder of cases are
@@ -1301,7 +1303,7 @@ per-keypress wall-clock time (including
 everything associated with automatic language boxes) was approximately 0.003s,
 with less than 1\% of tests experiencing an average per-keypress wall-clock time above 0.1s
 (roughly the threshold at which humans start to perceive some lag from typing)
-and a worst case of 0.1s. We believe that a more efficient implementation could
+and a worst case of 0.1s \laurie{this doesn't make sense: we say that `less than' (which is a bit vague) of tests take more than 0.1s, and the worst case is 0.1s. that suggests that the worst case is better than some other cases?!}. We believe that a more efficient implementation could
 expect to reduce these costs by at least one order of magnitude, if not more.
 
 
