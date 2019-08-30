@@ -831,9 +831,15 @@ much input subsequent tokens consume, precisely defining ``how far'' is
 surprisingly difficult. As a reasonable proxy, we use the absolute offset in
 the input (measured in characters) as the ordering mechanism. To bound the
 performance cost of this check, we check a fixed number (currently 10) of
-non-whitespace tokens forward from the inserted language box: if
-one or more candidates are successful up to that point they outrank all
-candidates which have syntax errors within that token range.
+non-whitespace tokens forward from the inserted language box. However, since
+this would disadvantage candidates with earlier start and ending locations,
+we need to make this bound dynamic. We first pick
+the candidate that is likely to parse the furthest, which we approximate by using
+the candidate whose end position has the largest absolute character offset.
+We then check how far this candidate allows parsing to continue (bound to a maximum of 10 tokens),
+and record the absolute offset in characters. For each remaining candidate, we
+then check if it can parse equally as far (or further) than that. Candidates that
+do not manage to reach this far, i.e.~have syntax errors within that range, are rejected.
 
 \subsection{Applying or Presenting Candidates}
 \label{applying and presenting}
