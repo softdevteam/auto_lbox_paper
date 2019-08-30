@@ -139,7 +139,7 @@
 % Document starts
 \begin{document}
 % Title portion. Note the short title for running heads
-\title{Default disambiguation for online parsers}
+\title{Default Disambiguation for Online Parsers}
 
 \author{Lukas Diekmann}
 \affiliation{%
@@ -316,7 +316,7 @@ programs, before giving a brief overview of incremental parsing, sufficient for
 this paper's purposes.
 
 
-\subsection{Delimiter-based approaches}
+\subsection{Delimiter-based Approaches}
 
 The traditional approach to language composition is to use delimiters
 between languages. The
@@ -347,7 +347,7 @@ one language to another), though in the general case explicit brackets must stil
 used to resolve ambiguities.
 
 
-\subsection{Scannerless parsing}
+\subsection{Scannerless Parsing}
 \label{sec:scannerless}
 
 Generalised parsing can parse any Context-Free Grammar (CFG), even those that
@@ -368,7 +368,7 @@ to use semantic informationssuch as types to aid disambiguation (see
 e.g.~\cite{vinju05typedriven}), this is not applicable to all languages.
 
 
-\subsection{Syntax directed editing}
+\subsection{Syntax Directed Editing}
 
 Traditional syntax directed editing avoids parsing text entirely. In essence,
 users edit an AST directly, with incomplete parts of a program being
@@ -384,7 +384,7 @@ author to make editing a pleasant experience, as the AST structure places
 constraints on many editing operations.
 
 
-\subsection{Incremental parsing}
+\subsection{Incremental Parsing}
 
 Parsing is traditionally a batch process: an entire file is fed through a parser
 and a parse tree created from it. Incremental parsing, in contrast,
@@ -410,7 +410,7 @@ reparsing all subtrees with changes in them, and creating or removing
 nonterminals as needed.
 
 
-\subsection{Language boxes}
+\subsection{Language Boxes}
 
 \begin{figure}[t]
 \begin{center}
@@ -456,7 +456,7 @@ editing ASTs. At all points, all languages can be manipulated as normal text
 using the incremental parsers.
 
 
-\section{The outlines of a solution}
+\section{The Outlines of a Solution}
 
 \label{the problem}
 The chief weakness of language boxes is that they must be inserted
@@ -517,7 +517,7 @@ received by users and must be reduced to the minimum possible, given the hard
 constraint above.
 
 
-\section{Automatic language boxes}
+\section{Automatic Language Boxes}
 
 In this section, we present a default disambiguation mechanism in the form of
 the \emph{automatic language boxes} algorithm. Given an arbitrary language
@@ -532,7 +532,7 @@ resizing). We later validate the usefulness of automatic language boxes in
 Section~\ref{sec:evaluation}.
 
 
-\subsection{The consideration heuristic}
+\subsection{The Consideration Heuristic}
 
 The first challenge with automatic language boxes is to decide upon a sensible
 heuristic for considering if/when to insert a language box -- what we call the
@@ -571,7 +571,7 @@ occur~\cite[p.~93]{wagner98practicalalgorithms}, so that there is no
 possibility of old syntax errors being considered a second time.
 
 
-\subsection{The candidates heuristic}
+\subsection{The Candidates Heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
 plausible nodes in the parse tree, around the point of the syntax error, at which
@@ -708,7 +708,7 @@ and continue. `\texttt{SELECT 1 + }' errors at the EOS token, so we continue.
 terminates, even if there is input after the fragment.
 
 
-\subsubsection{The parse tree, stack, and line heuristics}
+\subsubsection{The Parse Tree, Stack, and Line Heuristics}
 
 We eventually created three distinct candidates heuristics, each of which has
 different strengths and weaknesses. We now describe each candidates heuristic
@@ -797,7 +797,7 @@ using a similar approach to that the incremental parser uses to reparse changed
 nodes (see Figure~\ref{fig:createparsestack}).
 
 
-\subsection{Combining heuristics}
+\subsection{Combining Heuristics}
 \label{sec:allheuristic}
 
 As we shall see in Section~\ref{sec:evaluation}, each of the candidates
@@ -835,7 +835,7 @@ non-whitespace tokens forward from the inserted language box: if
 one or more candidates are successful up to that point they outrank all
 candidates which have syntax errors within that token range.
 
-\subsection{Applying or presenting candidates}
+\subsection{Applying or Presenting Candidates}
 \label{applying and presenting}
 
 Once the `all' candidates heuristic has run, we will have zero or more possible
@@ -899,7 +899,7 @@ on each (batch) parse.
 \end{center}
 
 
-\subsection{Removing and resizing}
+\subsection{Removing and Resizing}
 
 Automatically inserted language boxes start life in the \emph{uncommitted}
 state, which means that they can then be considered possible candidates for
@@ -998,7 +998,7 @@ we resize the language box appropriately; if more than one remains, we present
 the multiple options to the user in the same way as in Section~\ref{multiple candidates}.
 
 
-\subsection{Highly ambiguous compositions}
+\subsection{Highly Ambiguous Compositions}
 \label{sec:highly ambiguous compositions}
 
 Some language compositions are so fundamentally ambiguous that normal automatic
@@ -1127,7 +1127,7 @@ If automatic language boxes are to be useful, we would need to see a high value
 for the acceptable group and a low value for the unacceptable group.
 
 
-\subsubsection{Language compositions}
+\subsubsection{Language Compositions}
 
 To create our 12 language compositions, we used the grammars of 4 real-world
 languages (Java 5, Lua 5.3, PHP 5.6, and SQLite 3.27).
@@ -1146,7 +1146,7 @@ particular language compositions we created can be seen as the $x$-axis labels
 in Table~\ref{tbl:valid}.
 
 
-\subsubsection{Program corpus}
+\subsubsection{Program Corpus}
 
 We then collected a corpus of inputs in each language.
 For PHP, we used the source code of Wordpress 4.6.13, which consists of \corpusphpfiles files that are
@@ -1272,7 +1272,7 @@ removes \texttt{SELECT} from the parsing stack, making it impossible for the
 heuristic to identify that as a valid location to insert a language box at.
 
 
-\subsection{Threats to validity}
+\subsection{Threats to Validity}
 
 There are two overall threats to validity to our evaluation.
 
