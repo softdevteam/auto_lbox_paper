@@ -828,19 +828,21 @@ the context surrounding a candidate language box.
 We then rank candidates by how far we can parse successfully after them without encountering
 a syntax error. However, since different language boxes can encompass different
 parts of the input, and since inserting different language boxes can change how
-much input subsequent tokens consume, precisely defining ``how far'' is
-surprisingly difficult. As a reasonable proxy, we use the absolute offset in
-the input (measured in characters) as the ordering mechanism. To bound the
-performance cost of this check, we check a fixed number (currently 10) of
-non-whitespace tokens forward from the inserted language box. However, since
-this would disadvantage candidates with earlier start and ending locations,
-we need to make this bound dynamic. We first pick
-the candidate that is likely to parse the furthest, which we approximate by using
-the candidate whose end position has the largest absolute character offset.
-We then check how far this candidate allows parsing to continue (bound to a maximum of 10 tokens),
-and record the absolute offset in characters. For each remaining candidate, we
-then check if it can parse equally as far (or further) than that. Candidates that
-do not manage to reach this far, i.e.~have syntax errors within that range, are rejected.
+much input subsequent tokens consume, finding a simple definition of ``how
+far'' is surprisingly difficult. Our high-level solution is to use the absolute
+character offset that each candidate language box can parse successfully up to
+as a reasonable proxy for ``how far''. In order to bound this check, we take
+all the candidates and select one of those whose end character offset is the
+equal furthest: we then parse 10 further tokens beyond that language box and
+use that as the absolute extent to which we will check other language boxes.
+For each other candidate language boxes we then continue parsing until, and
+unless, it reaches that extent: any candidate language box which hits an
+unsuccessful parse point before that extent is discarded; any candidate
+language box which parses successfully up to, or beyond, that extent are
+considered equally good. Note that the `up to, or beyond' clause is needed
+because different candidate language boxes may end at different positions in
+the input and thus cause the remaining input being tokenised in different ways.
+
 
 \subsection{Applying or Presenting Candidates}
 \label{applying and presenting}
