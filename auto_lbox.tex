@@ -1258,9 +1258,9 @@ problem as for partial insertions with errors, and, since it is such a small
 proportion, is not a significant issue.
 
 Both Tables~\ref{tbl:valid} and \ref{tbl:breakdown} present the statistics for
-our individual candidates heuristics. Unsurprisingly, the \texttt{lines}
+our individual candidates heuristics. One might assume that the \texttt{lines}
 candidates heuristic is the most effective, because it correctly deals with
-nearly all insertions of expression fragments. The main exception is the
+nearly all insertions of expression fragments. However, its weakness is the
 JavaPHP composition with only \validlinejavaphp tests having an acceptable
 outcome. This is largely because the initial line of a PHP functions
 (e.g.~`\texttt{function x() \{}') looks like a Java function (with a return type
@@ -1311,10 +1311,10 @@ it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
 to be inserted: the average
 per-keypress wall-clock time (including
-everything associated with automatic language boxes) was approximately 0.003s,
+everything associated with automatic language boxes) was approximately 0.005s,
 with less than 1\% of tests experiencing an average per-keypress wall-clock time above 0.1s
 (roughly the threshold at which humans start to perceive some lag from typing)
-and a worst case of 0.1s \laurie{this doesn't make sense: we say that `less than' (which is a bit vague) of tests take more than 0.1s, and the worst case is 0.1s. that suggests that the worst case is better than some other cases?!}. We believe that a more efficient implementation could
+and a worst case of 3.6s. We believe that a more efficient implementation could
 expect to reduce these costs by at least one order of magnitude, if not more.
 
 
