@@ -831,17 +831,17 @@ parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, finding a simple definition of ``how
 far'' is surprisingly difficult. Our high-level solution is to use the absolute
 character offset that each candidate language box can parse successfully up to
-a reasonable proxy for ``how far''. In order to bound this check, we take
-all the candidates and select one of those whose end character offset is the
-largest: we then parse 10 further tokens beyond that language box and
-use that as the absolute extent to which we will check other language boxes.
-For each other candidate language box we then continue parsing until, and
-unless, it reaches that extent: any candidate language box which hits a
-parsing error before that extent is discarded; any candidate
-language box which parses successfully up to, or beyond, that extent is
-considered equally good. Note that the `up to, or beyond' clause is needed
-because different candidate language boxes may end at different positions in
-the input and thus cause the remaining input being tokenised in different ways.
+as a reasonable proxy for ``how far''. In order to bound this check, we take
+all the candidates and \laurie{non-deterministically?} select one of those whose end character offset is the
+equal largest: we then parse 10 further tokens beyond that language box's end
+to find the `maximal parse point'. For each remaining candidate language
+box, we then try parsing beyond it. If we hit a parsing error before the
+maximal parse point, we discard the candidate language box; if we parse up to, or beyond,
+the maximal parse point, we consider the candidate language box equally
+good to the initial candidate language box. Note that the `or beyond' clause is needed
+because different candidate language boxes may lead to the remaining input
+being lexed in different ways, which may lead to tokens of different lengths
+being created.
 
 
 \subsection{Applying or Presenting Candidates}
