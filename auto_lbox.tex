@@ -832,7 +832,7 @@ much input subsequent tokens consume, finding a simple definition of ``how
 far'' is surprisingly difficult. Our high-level solution is to use the absolute
 character offset that each candidate language box can parse successfully up to
 as a reasonable proxy for ``how far''. In order to bound this check, we take
-all the candidates and \laurie{non-deterministically?} select one of those whose end character offset is the
+all the candidates and non-deterministically select one of those whose end character offset is the
 equal largest: we then parse 10 further tokens beyond that language box's end
 to find the `maximal parse point'. For each remaining candidate language
 box, we then try parsing beyond it. If we hit a parsing error before the
