@@ -831,14 +831,14 @@ parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, finding a simple definition of ``how
 far'' is surprisingly difficult. Our high-level solution is to use the absolute
 character offset that each candidate language box can parse successfully up to
-as a reasonable proxy for ``how far''. In order to bound this check, we take
+a reasonable proxy for ``how far''. In order to bound this check, we take
 all the candidates and select one of those whose end character offset is the
-equal furthest: we then parse 10 further tokens beyond that language box and
+largest: we then parse 10 further tokens beyond that language box and
 use that as the absolute extent to which we will check other language boxes.
-For each other candidate language boxes we then continue parsing until, and
-unless, it reaches that extent: any candidate language box which hits an
-unsuccessful parse point before that extent is discarded; any candidate
-language box which parses successfully up to, or beyond, that extent are
+For each other candidate language box we then continue parsing until, and
+unless, it reaches that extent: any candidate language box which hits a
+parsing error before that extent is discarded; any candidate
+language box which parses successfully up to, or beyond, that extent is
 considered equally good. Note that the `up to, or beyond' clause is needed
 because different candidate language boxes may end at different positions in
 the input and thus cause the remaining input being tokenised in different ways.
