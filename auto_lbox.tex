@@ -306,9 +306,8 @@ around the entire fragment, and most of the rest (\breakdownallnovalid of the to
 being instances of the fragment being valid in both the outer and inner
 languages. We believe that this data shows that default disambiguation is
 a practical means for editing composed programs. Our fully
-repeatable experiment can be found at \emph{redacted for double blind review}
-and our extensions to the Eco editor can be found at \emph{redacted for double
-blind review}.
+repeatable experiment can be found at \url{https://github.com/softdevteam/auto\_lbox\_experiments}
+and our extensions to the Eco editor can be found at \url{http://github.com/softdevteam/eco}.
 
 
 \section{Background}
@@ -367,7 +366,7 @@ cannot be sure if all possible points of ambiguity have been covered.
 Furthermore, our current disambiguation operators can cause scannerless
 parsers to become context-sensitive~\cite{eijck__lets_accept_rejects}, the
 consequences of which remain unclear. Although it is possible in some cases
-to use semantic informationssuch as types to aid disambiguation (see
+to use semantic information such as types to aid disambiguation (see
 e.g.~\cite{vinju05typedriven}), this is not applicable to all languages.
 
 
@@ -433,7 +432,7 @@ nonterminals as needed.
 \end{center}
 \end{figure}
 
-Language boxes allow users users to embed one language inside another in the
+Language boxes allow users to embed one language inside another in the
 context of an incremental parser. From the perspective of an outer language, a
 language box is a terminal. Since
 parsers care only about the type of a terminal, this is a natural fit. In
@@ -833,7 +832,7 @@ parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, finding a simple definition of ``how
 far'' is surprisingly difficult. Our high-level solution is to use the absolute
 character offset that each candidate language box can parse successfully up to
-as a reasonable proxy for ``how far''. In order to bound this check, we take
+a reasonable proxy for ``how far''. In order to bound this check, we take
 all the candidates and non-deterministically select one of those whose end character offset is the
 equal largest: we then parse 10 further tokens beyond that language box's end
 to find the `maximal parse point'. For each remaining candidate language
@@ -1204,7 +1203,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 
     \vspace{7pt}
     \caption{The total percentage of outcomes by category. See
-    page~\pageref{detailed categories} for a detailed description of each category.
+    page~\pageref{detailed categories}\lukas{the page number is missing, possible because we removed page numbers as per requirement} for a detailed description of each category.
   The largest categories by far are `complete insertion (no errors)', which
   means that a language box was inserted around the entire input and `no
   insertion (valid)' which means that no language box was inserted because the
