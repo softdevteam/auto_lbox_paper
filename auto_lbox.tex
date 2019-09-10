@@ -747,9 +747,7 @@ structure. The \emph{line} candidates heuristic is therefore very different,
 and captures the intuition that many language
 boxes are intra-line: it searches
 backwards for candidates, one node at a time, from the error node to the beginning of the line
-that contains the error (note that the line heuristic does not distinguish
-between normal newlines or those within multiline comments or strings, even if
-the editor chooses to presented the latter as a single node). This heuristic
+that contains the error. This heuristic
 ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown.
@@ -1066,7 +1064,6 @@ search, with its obvious performance problems, could solve this problem.
 Fortunately, such ambiguities are sufficiently rare that maintaining the simplicity
 of the line candidates heuristic seems a reasonable choice.
 
-\laurie{is this where we describe the newish optimisation?}
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
 `\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
