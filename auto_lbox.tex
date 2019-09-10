@@ -239,13 +239,13 @@ editing); or using a generalised parsing algorithm that can create a parse
 forest, capturing all ambiguities
 (e.g.~\cite{visser97scannerless}). Each has different trade-offs: delimiters
 are visually intrusive and/or awkward to work with; and one can never know if
-sufficient disambiguation operators have been used to filter all possible parse
+enough disambiguation operators have been used to filter all possible parse
 forests down to a single parse tree.
 
 In this paper we show that default disambiguation (i.e.~a disambiguation
 strategy applied equally to every language composition) provides a satisfying new
-point in the design space. Readers can be forgiven surprise at this
-statement, since default disambiguation is clearly inappropriate for batch
+point in the design space. This may seem surprising,
+since default disambiguation is clearly inappropriate for batch
 parsing, where a single incorrect disambiguation will cause dire results.
 The realisation underlying this paper is that this is not an issue for online parsers,
 since users can manually override incorrect disambiguations. However, this
@@ -306,7 +306,7 @@ around the entire fragment, and most of the rest (\breakdownallnovalid of the to
 being instances of the fragment being valid in both the outer and inner
 languages. We believe that this data shows that default disambiguation is
 a practical means for editing composed programs. Our fully
-repeatable experiment can be found at \url{https://github.com/softdevteam/auto\_lbox\_experiments}
+repeatable experiment can be found at \url{https://github.com/softdevteam/auto\_lbox\_experiments} \laurie{this should be the archive link. probably we should include the version of eco we used there as well so that we don't need to have a link to any github repo (particularly because github probably isn't a long-term way of distributing materials)}
 and our extensions to the Eco editor can be found at \url{http://github.com/softdevteam/eco}.
 
 
@@ -376,7 +376,7 @@ Traditional syntax directed editing avoids parsing text entirely. In essence,
 users edit an AST directly, with incomplete parts of a program being
 represented by holes. This avoids the need for explicit delimiters, and
 sidesteps issues of ambiguity completely. However, such systems are awkward to
-use~\cite[p.~2]{khwaja93syntax}, for example only allowing whole nodes in the
+use~\cite[p.~2]{khwaja93syntax}, for example only allowing complete subtrees in the
 AST to be selected at a time (e.g.~for the expression `2 + 3 * 4' one can
 select `2' or `3 * 4', but not `2 + 3'),
 and quickly fell out of fashion. The modern syntax directed editor
@@ -462,7 +462,7 @@ using the incremental parsers.
 
 \label{the problem}
 The chief weakness of language boxes is that they must be inserted
-manually by the user --- this involves pressing a special key combination,
+manually --- this involves pressing a special key combination,
 selecting the desired inner language from a list, typing the content, and (in
 general) pressing a second special key combination to complete the language box.
 When language boxes are used infrequently, this is merely irritating,
@@ -515,8 +515,7 @@ inserted, removed, or
 resized; and, ideally, largely predictable as to what the effects of such
 actions are. Furthermore, false negatives (i.e.~when the system inserts, removes,
 or resizes language boxes incorrectly) are likely to be particularly harshly
-received by users and must be reduced to the minimum possible, given the hard
-constraint above.
+received by users and must be reduced to the minimum possible.
 
 
 \section{Automatic Language Boxes}
@@ -525,7 +524,7 @@ In this section, we present a default disambiguation mechanism in the form of
 the \emph{automatic language boxes} algorithm. Given an arbitrary language
 composition, it uses several heuristics to find plausible places to insert,
 remove, or resize language boxes. The algorithm makes use of the fact that it
-has a surrounding parse tree to provide context, and also knowledge of where
+has a surrounding parse tree to provide context, and knowledge of where
 the user has recently made edits, to improve the quality of its results.
 
 To ease the algorithm's description, we start by considering the problem of language box
@@ -576,7 +575,7 @@ possibility of old syntax errors being considered a second time.
 \subsection{The Candidates Heuristic}
 
 Once the consideration heuristic has triggered, we then have to search for
-plausible nodes in the parse tree, around the point of the syntax error, at which
+plausible nodes in the parse treeat which
 language boxes could be inserted -- we call this the
 \emph{candidates heuristic}. The trade-off here is that identifying too many
 locations slows down the search and overwhelms the user with possibilities; but
@@ -798,15 +797,15 @@ needs to have a valid parsing stack. While candidates produced by the stack
 heuristic naturally do so, we need to create a
 valid parsing stack for candidates from the parse tree and line heuristics.
 Fortunately, we can do this efficiently by
-using a similar approach to that the incremental parser uses to reparse changed
+using a similar approach to that used by the incremental parser to reparse
 nodes (see Figure~\ref{fig:createparsestack}).
 
 
 \subsection{Combining Heuristics}
 \label{sec:allheuristic}
 
-As we shall see in Section~\ref{sec:evaluation}, each of the candidates
-heuristics presented above has strengths and weaknesses. We therefore combine them into a
+As we shall see in Section~\ref{sec:evaluation}, each of our candidates
+heuristics has strengths and weaknesses. We therefore combine them into a
 single candidates heuristic imaginatively called \emph{all}. This aggregates
 the candidates from the individual heuristics, filters out those which
 immediately break the surrounding context, ranks the remainder, and filters out all
@@ -833,9 +832,10 @@ We then rank candidates by how far we can parse successfully after them without 
 a syntax error. However, since different language boxes can encompass different
 parts of the input, and since inserting different language boxes can change how
 much input subsequent tokens consume, finding a simple definition of ``how
-far'' is surprisingly difficult. Our high-level solution is to use the absolute
-character offset that each candidate language box can parse successfully up to
-a reasonable proxy for ``how far''. In order to bound this check, we take
+far'' is surprisingly difficult. Our high-level solution is to continue
+parsing after each candidate language box and use the absolute character
+offset of the first subsequent parsing error as
+a reasonable proxy for ``how far''. In order to bound this check, we first take
 all the candidates and non-deterministically select one of those whose end character offset is the
 equal largest: we then parse 10 further tokens beyond that language box's end
 to find the `maximal parse point'. For each remaining candidate language
@@ -858,7 +858,7 @@ program. If the user is unhappy with the insertion, they can remove it by
 pressing undo (conventionally \keys{Ctrl+Z}). However, implemented naively,
 the language box can simply reappear on each subsequent keypress, which is
 unlikely to be desired. Therefore removing a language box in this way marks
-a flag \texttt{noinsert} on the node with a syntax error identified by the
+a flag \texttt{noinsert} on the error node identified by the
 consideration heuristic. When set to \texttt{true}, the candidates heuristic
 will notice and deliberately ignore such nodes so that language boxes are not
 repeatedly inserted.
@@ -889,7 +889,7 @@ repeatedly inserted.
 \end{figure*}
 
 \label{multiple candidates}
-However, if there are multiple candidates, then we have two choices: we could
+However, if there are multiple candidates, we then have two choices: we could
 insert one of the candidates and present the others to the users as choices; or
 simply present all the candidates as choices without inserting
 any of them. The former approach is surprisingly hard to do well. If we were to
@@ -901,8 +901,8 @@ often enough to be worthwhile. We therefore simply present all the candidates
 as options to the user from which they must choose one (see Figure~\ref{fig:multiplecnds}). As we shall see in
 Section~\ref{sec:evaluation}, this happens rarely enough that it is not a
 significant problem. It is also worth noting that this is an
-example of a fundamental difference between traditional batch parsing and
-incremental parsing: it is entirely feasible for us
+example of a fundamental difference between batch and online parsing:
+it is entirely feasible for us
 to ask the user for their help in choosing language boxes as that choice can
 be made once and recorded permanently, rather than having to be made anew
 on each (batch) parse.
@@ -931,7 +931,7 @@ automatically removed or resized by the algorithm.
 The simplest example of when we might want an automatic language box to be removed is if
 the user deletes a character immediately after an automatic language box has
 been inserted. For example, if an SQL language box is inserted as soon as the
-user types `\texttt{int x = SELECT * FROM t}` and the user then presses
+user types `\texttt{int x = SELECT * FROM t}' and the user then presses
 backspace, the automatic language box should disappear because `\texttt{SELECT
 * FROM}' is valid Java and we want to prioritise the outer language in a
 composition (see Figure~\ref{fig_autoremoval}). The full set of situations that
@@ -1056,9 +1056,9 @@ valid wherever Java expressions are valid and then input `\texttt{int x = 3 //
 this statement and no automatic language boxes are inserted. However, this is
 confusing for users, since `\texttt{//}' is Lua's integer division operator,
 and they might reasonably expect a Lua language box to be put around `\texttt{3
-// 4}' and/or `\texttt{3 // 4 + 1}'. However, since \texttt{//} is the Java
+// 4}' and/or `\texttt{3 // 4 + 1}'. However, since `\texttt{//}' is the Java
 comment prefix, `\texttt{// 4 + 1;}' is ignored entirely, and the almost inevitable resulting
-syntax error is delayed onto the following line or later: in such cases, not even
+syntax error is postponed to the following line or later: in such cases, not even
 the line candidates heuristic can find a starting point for language boxes that
 matches a human's intuition. Although these examples could be solved by searching
 a fixed number of lines backwards, in general only an unbounded backwards
@@ -1066,6 +1066,7 @@ search, with its obvious performance problems, could solve this problem.
 Fortunately, such ambiguities are sufficiently rare that maintaining the simplicity
 of the line candidates heuristic seems a reasonable choice.
 
+\laurie{is this where we describe the newish optimisation?}
 Automatic language boxes inherit incremental parsing's weaknesses on multiline
 comments and strings. For example, in a naive Java grammar, typing
 `\texttt{/*}' without the matching `\texttt{*/}' causes the entire rest of the
@@ -1164,8 +1165,8 @@ in Table~\ref{tbl:valid}.
 We then collected a corpus of inputs in each language.
 For PHP, we used the source code of Wordpress 4.6.13, which consists of \corpusphpfiles files that are
 valid when parsed with our PHP grammar, which total \corpusphploc LoC after we
-have stripped out the embedded HTML which is not part of the PHP
-language as such. For Java, we used the Java Standard Library 5 which consists
+have stripped out the embedded HTML (which is not part of the PHP
+language as such). For Java, we used the Java Standard Library 5 which consists
 of \corpusjavafiles files and \corpusjavaloc LoC.
 For Lua, we used Lua's test suite, which consists of \corpusluafiles files totalling \corpuslualoc LoC.
 For SQL, we used SQLite's test suite, consisting of \corpussqlfiles test files which
@@ -1253,7 +1254,7 @@ around part of the fragment, but some was left in the outer language, causing a
 syntax error later in the file. One solution to this might seem to be to
 increase our search of the parse tree for errors after a language box has been
 inserted, but this would come at a cost: it is difficult to distinguish syntax
-errors caused by the language box insertion from syntax errors caused by
+errors caused by language box insertion from syntax errors caused by
 incomplete or deliberately incorrect user input. A better solution might be to
 experiment with comparing the number and location of syntax errors before and
 after candidate language box insertion, though this can only lessen, not fully
