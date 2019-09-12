@@ -166,10 +166,10 @@
 Since composed grammars are often ambiguous, grammar composition requires a
 mechanism for dealing with ambiguity: either ruling it out entirely through the use of
 delimiters (which are awkward to work with), or by using disambiguation operators to
-filter a parse forest down to a single parse tree (though, in general, we cannot
+filter a parse forest down to a single parse tree (where, in general, we cannot
 be sure that we have covered all possible parse forests). In this paper, we
 show that default disambiguation, which is inappropriate for
-batch parsing, works well for online editing, where it can be overridden by the user if
+batch parsing, works well for online parsing, where it can be overridden by the user if
 necessary. We extend language boxes -- a delimiter-based
 algorithm atop incremental parsing -- in such a way that default disambiguation
 can automatically insert, remove, or resize, language boxes, leading to
