@@ -1314,7 +1314,7 @@ overhead might be with a more efficient implementation, we altered Eco so that
 it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
 to be inserted. The average per-keypress wall-clock time (including everything
-associated with automatic language boxes) was 0.004s. Less than 1\% had a per-keypress wall-clock time above 0.1s (often
+associated with automatic language boxes) was 0.004s. \laurie{i would prefer to say ``X out of Y'' rather than ``less than 1\%''} Less than 1\% had a per-keypress wall-clock time above 0.1s (often
 considered the threshold at which humans start to perceive some lag from
 typing), with a worst case of 0.30s. These times are good on their own, but we
 believe that a more efficient implementation could reduce these costs by at
