@@ -354,10 +354,9 @@ used to resolve ambiguities.
 Generalised parsing can parse any Context-Free Grammar (CFG), even those that
 are ambiguous. Scannerless parsing~\cite{visser97scannerless} extends this such
 that lexing and parsing are specified together. This removes the need for
-explicit brackets entirely, but does so at the expense of causing many more
-ambiguities (since traditional lexers implicitly resolve many ambiguities before parsing, such
-as between identifiers and keywords).
-This is challenging because ambiguity is, in general,
+explicit brackets entirely, but leads to more ambiguities, since
+traditional lexers resolve many ambiguities (e.g.~between identifiers and keywords)
+before parsing. This is challenging because ambiguity is, in general,
 undecidable~\cite{cantor62ambiguity} and even the best ambiguity heuristics fail
 to find all possible sources of ambiguity~\cite{vasudevan13detecting}. Thus,
 no matter how many static disambiguation operators one uses, in general one
