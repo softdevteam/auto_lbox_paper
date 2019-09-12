@@ -212,7 +212,7 @@ tests involving compositions of real-world programming languages.
       language box. It is thus too early to insert an automatic language box
       around the SQL as it would cause a syntax error in the first non-whitespace token
       afterwards (`\texttt{\}}'). \textbf{(b)} After typing `\texttt{,}' an SQL
-      language box is automatically inserted since the next non-whitespace Java token
+      language box is automatically inserted since the first non-whitespace Java token
       (`\texttt{,}') is now syntactically valid. \textbf{(c)} The user continues
       typing a (now incomplete) SQL statement. This causes syntax errors in the
       outer language which cannot yet be resolved by inserting, removing, or
@@ -242,8 +242,8 @@ are visually intrusive and/or awkward to work with; and one can never know if
 enough disambiguation operators have been used to filter all possible parse
 forests down to a single parse tree.
 
-In this paper we show that default disambiguation (i.e.~a disambiguation
-strategy applied equally to every language composition) provides a satisfying new
+In this paper we show that default disambiguation -- i.e.~a disambiguation
+strategy applied equally to every language composition -- provides a satisfying new
 point in the design space. This may seem surprising,
 since default disambiguation is clearly inappropriate for batch
 parsing, where a single incorrect disambiguation will cause dire results.
@@ -258,8 +258,8 @@ disambiguation system. Language boxes aim to
 combine the advantages of explicit bracketing and syntax-based
 editing~\cite{diekmann14eco}. Editors
 which support language boxes need to use incremental parsing
-(we assume use of the~\citet{wagner98practicalalgorithms} algorithm), which provides an
-online editing experience: unlike traditional editors, users do not directly edit
+(we assume use of the~\citet{wagner98practicalalgorithms} algorithm):
+unlike traditional editors, users do not directly edit
 a contiguous block of text in memory, but instead
 indirectly edit a parse tree, which is continuously updated as they type.
 A language box is then simply a node in the parse
@@ -362,7 +362,7 @@ undecidable~\cite{cantor62ambiguity} and even the best ambiguity heuristics fail
 to find all possible sources of ambiguity~\cite{vasudevan13detecting}. Thus,
 no matter how many static disambiguation operators one uses, in general one
 cannot be sure if all possible points of ambiguity have been covered.
-Furthermore, our current disambiguation operators can cause scannerless
+Furthermore, disambiguation operators can cause scannerless
 parsers to become context-sensitive~\cite{eijck__lets_accept_rejects}, the
 consequences of which remain unclear. Although it is possible in some cases
 to use semantic information such as types to aid disambiguation (see
@@ -421,7 +421,7 @@ nonterminals as needed.
   have a type (top) and a value (bottom). The composition in question is,
   again, (outer) Java and (inner) SQL. Here, the outer Java code is an
   assignment (`\texttt{type name = ...;}'). The right-hand side of the
-  assignment is an SQL language box (the node with type \texttt{<sql>}): from the
+  assignment is an SQL language box (the node with type `\texttt{<SQL>}'): from the
   perspective of the outer Java code, the SQL node is a terminal (and hence its
   value is irrelevant). In reality, the SQL node has a complete SQL parse tree
   underneath it: the special Root, BOS (Beginning Of String), and EOS (End Of
@@ -565,7 +565,8 @@ This is an entirely predictable heuristic from a user perspective, though it
 does have two consequences: the point of a syntax error is not always at the
 beginning or end of the text that a user expects to be put in a language box
 (see Figure~\ref{fig:consideration}); and this heuristic clearly works better
-for languages whose syntaxes don't overlap a great deal. Happily, we can rely
+for languages whose syntaxes don't overlap a great deal (see
+Section~\ref{sec:highly ambiguous compositions}). Happily, we can rely
 on the fact that the incremental parser isolates syntax errors after they
 occur~\cite[p.~93]{wagner98practicalalgorithms}, so that there is no
 possibility of old syntax errors being considered a second time.
@@ -575,7 +576,7 @@ possibility of old syntax errors being considered a second time.
 
 Once the consideration heuristic has triggered, we then have to search for
 plausible nodes in the parse tree at which
-language boxes could be inserted -- we call this the
+language boxes could be inserted -- what we call the
 \emph{candidates heuristic}. The trade-off here is that identifying too many
 locations slows down the search and overwhelms the user with possibilities; but
 identifying too few locations means that useful candidates are missed. We thus
@@ -613,7 +614,8 @@ def cnds_recogniser(node, lang):
   state. If we reach the end of the parse tree we are complete
   (lines 7--8). If we successfully parse a substring, we add a candidate to the
   list (lines 10--11). If a substring causes a parse error on anything but the
-  implicit EOS (End Of String) token, we know that further input cannot fix the parse
+  implicit EOS (End Of String) token, we know that growing the substring
+  further cannot fix the parse
     and terminate the search (lines 12--13).}
 \label{fig:recogniser}
 \end{figure}
@@ -635,15 +637,15 @@ we use is to try recognising gradually growing substrings as valid in an inner
 language, making use of the fact that the recogniser parser implicitly
 reuses state from the previous token.
 If a substring is not valid, we then check where the parse failed:
-if it failed on the EOS (End Of String) token, then we know that more input
-would be needed to find a valid parse, so we continue the search; but if it
-failed earlier than the EOS token, then we know that no further input will
-fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
+if it failed on the EOS (End Of String) token, then it is possible that
+extending the substring might lead to a valid parse, so we continue the search; but if it
+failed earlier than the EOS token, then we know that extending the substring
+cannot fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
 more formal version of this algorithm.
 
 
 \begin{figure*}[t]
-\begin{minipage}[t]{0.55\textwidth}
+\begin{minipage}[t]{0.5\textwidth}
 \begin{lstdefault}[]
 def parse_tree(parser, node):
   cnds = []
@@ -663,7 +665,10 @@ def stack(parser, node):
         t = node.next_terminal()
         cnds.extend(cnds_recogniser(t, lang))
   return cnds
-
+\end{lstdefault}
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\begin{lstdefault}[firstnumber=19]
 def line(parser, node):
   cnds = []
   while node.type_ not in ["BOS", "Newline"]:
@@ -674,7 +679,7 @@ def line(parser, node):
   return cnds
 \end{lstdefault}
 \end{minipage}
-\begin{minipage}[t]{0.44\textwidth}
+
   \caption{Simplified versions of our three candidates heuristics. Each is
   passed a \texttt{node}, which is the point at which an error is detected, and
 finds sensible points before that node in the parse tree to be the possible
@@ -687,14 +692,13 @@ candidates heuristic is called, we have to view the parse tree as it was before 
 began (line 8).
 The \texttt{stack} candidates heuristic walks the parse
 stack, finding the node matching each point in the stack (line 13) and then
-searching for candidate language boxes (line 15) starting at the first terminal
+searches for candidate language boxes (line 15) starting at the first terminal
 following that node (line 16).
 The \texttt{line} candidates heuristic searches
-backwards each token from the error node (line 26) until the beginning of
-the line which contains that node (line 22) for
-candidate language boxes (line 24).}
+backwards each token from the error node (line 25) until the beginning of
+the line which contains that node (line 21) for
+candidate language boxes (line 23).}
 \label{lst:find_candidates}
-\end{minipage}
 \end{figure*}
 
 For example, consider the fragment `\texttt{int x = SELECT 1 + 2;}' in our
@@ -803,7 +807,7 @@ nodes (see Figure~\ref{fig:createparsestack}).
 
 As we shall see in Section~\ref{sec:evaluation}, each of our candidates
 heuristics has strengths and weaknesses. We therefore combine them into a
-single candidates heuristic imaginatively called \emph{all}. This aggregates
+single candidates heuristic, imaginatively called \emph{all}. This aggregates
 the candidates from the individual heuristics, filters out those which
 immediately break the surrounding context, ranks the remainder, and filters out all
 of the non-best candidates.
@@ -856,9 +860,10 @@ pressing undo (conventionally \keys{Ctrl+Z}). However, implemented naively,
 the language box can simply reappear on each subsequent keypress, which is
 unlikely to be desired. Therefore removing a language box in this way marks
 a flag \texttt{noinsert} on the error node identified by the
-consideration heuristic. When set to \texttt{true}, the candidates heuristic
-will notice and deliberately ignore such nodes so that language boxes are not
-repeatedly inserted.
+consideration heuristic. The consideration heuristic ignores nodes where
+this flag is set to true so that language boxes are not
+reinserted at a point where the user has explicitly indicated they do not
+want them.
 
 \begin{figure*}
 \begin{center}
@@ -878,7 +883,7 @@ repeatedly inserted.
   automatic language box algorithm then finds multiple valid language box
   candidates. Rather than picking one at random, the syntax error remains, and
   the existence of multiple candidates is indicated to the user by the light
-  bulb image.
+  bulb icon next to line 3.
   \textbf{(c)} Clicking on the light bulb displays the candidate language boxes
   that could be inserted. In this example, the user clicks on the first in the
   drop-down list. \textbf{(d)} The appropriate language box is inserted.}
@@ -972,8 +977,8 @@ the second \qtt{*} after \qtt{from}: thus an SQL language box
 was inserted.
 \textbf{(b)} The user moves the cursor to before \qtt{from} and inserts the
 missing \qtt{*}. This makes the contents of the SQL language box syntactically
-invalid; the automatic language boxes algorithm then sees if the contents are
-valid in Java and, since they are, removes the language box.}
+invalid. Since its contents are, however, valid in the outer language (Java),
+the language box is removed.}
 \label{fig_autoremoval}
 \end{figure*}
 
@@ -1015,7 +1020,7 @@ Some language compositions are so fundamentally ambiguous that normal automatic
 language boxes do not work well. For example, consider a composition of Java
 (or any other programming language!) with HTML, where HTML language boxes can
 be used wherever Java expressions are valid. Since HTML's lexer can match
-almost any text, nearly all errors in Java can be resolved by wrapping text in
+almost any text, nearly all syntax errors in Java can be resolved by wrapping text in
 an HTML language box, which is unlikely to match the user's intentions.
 
 To help with such cases, we thus have to relax the `no hints' constraint from
@@ -1044,7 +1049,7 @@ Java expressions are valid wherever HTML tags are valid, automatic language
 boxes almost never trigger, since there are few ways of making a syntax error
 in HTML. The only way this can be solved is by using a consideration
 heuristic which is not triggered by syntax errors, but it is not clear to
-us what a sensible alternative might be.
+us what a good heuristic along these lines might look like.
 
 Lexical ambiguities between languages can also cause subtle problems. For
 example, imagine that we compose Java and Lua, such that Lua expressions are
@@ -1057,9 +1062,9 @@ and they might reasonably expect a Lua language box to be put around `\texttt{3
 comment prefix, `\texttt{// 4 + 1;}' is ignored entirely, and the almost inevitable resulting
 syntax error is postponed to the following line or later: in such cases, not even
 the line candidates heuristic can find a starting point for language boxes that
-matches a human's intuition. Although these examples could be solved by searching
-a fixed number of lines backwards, in general only an unbounded backwards
-search, with its obvious performance problems, could solve this problem.
+matches a human's intuition. Although this example could be solved by searching
+a fixed number of lines backwards, only an unbounded backwards
+search, with its obvious performance problems, can solve the general case.
 Fortunately, such ambiguities are sufficiently rare that maintaining the simplicity
 of the line candidates heuristic seems a reasonable choice.
 
@@ -1075,8 +1080,7 @@ unlikely to be a performance problem in practice. First, this can only happen
 if an inner language has sufficient lexical overlap with the outer language
 (e.g.~sharing the same syntax for comments) and the rest of a file matches both
 language's lexing rules.  Second, lexing is a fast activity in general and
-particularly fast in the recogniser because we are not altering the parse tree
-in any way.
+particularly fast in the recogniser because we are not mutating the parse tree.
 
 
 \section{Evaluation}
@@ -1229,9 +1233,9 @@ and~\ref{tbl:breakdown}.
 \fi
 
 The results of Table~\ref{tbl:valid} are clear: \validalloverall of tests have
-an acceptable outcome. Table~\ref{tbl:breakdown} allows us to explore the
-sub-categories: \breakdownallvalidsame of tests insert a complete language box
-around the fragment (by definition making the program syntactically correct);
+an acceptable outcome with the `all' candidates heuristic. Table~\ref{tbl:breakdown} allows us to explore the
+sub-categories. \breakdownallvalidsame of tests insert a complete language box
+around the fragment (by definition making the program syntactically correct) and
 \breakdownallnovalid of tests have fragments which are valid in the inner and
 outer language. If we exclude tests whose fragments are valid in the inner and
 outer language (i.e.~cases where the disambiguation mechanism cannot
@@ -1244,20 +1248,20 @@ mostly acceptable outcomes: partial language box insertions without errors
 in the outer language) and no insertions due to multiple candidates are both roughly
 equal in proportion.
 
-That leaves the two unacceptable cases. Partial insertions with errors
+That leaves the two unacceptable cases. `Partial insertions (errors)'
 (\breakdownallinvaliddiff of tests) are cases where a language box was inserted
 around part of the fragment, but some was left in the outer language, causing a
 syntax error later in the file. One solution to this might seem to be to
 increase our search of the parse tree for errors after a language box has been
-inserted, but this would come at a cost: it is difficult to distinguish syntax
+inserted, but this would come at a cost since we cannot reliably distinguish syntax
 errors caused by language box insertion from syntax errors caused by
 incomplete or deliberately incorrect user input. A better solution might be to
 experiment with comparing the number and location of syntax errors before and
 after candidate language box insertion, though this can only lessen, not fully
-solve, the problem. No insertions with errors means that a language box was not
+solve, the problem. `No insertions (errors)' (\breakdownallnoerror of tests) means that a language box was not
 inserted around the fragment because it seemed to be valid in the outer
-language even though it caused a syntax error later in the program
-(\breakdownallnoerror of tests). Solving this problem suffers from the same
+language even though it caused a syntax error later in the program.
+Solving this problem suffers from the same
 problem as for partial insertions with errors, and, since it is such a small
 proportion, is not a significant issue.
 
@@ -1281,12 +1285,12 @@ inserted in the middle of the grammar rule. This defeats the parse tree
 heuristic entirely, though the stack heuristic works as per human intuition.
 The stack candidates heuristic, however,
 performs poorly on LuaSQL because of the nature of Lua's grammar. For example,
-in the mixed Lua/SQL program  \texttt{x = SELECT a, b FROM t}, everything up to
+in the mixed Lua/SQL program `\texttt{x = SELECT a, b FROM t}', everything up to
 `\texttt{b}' can be parsed in Lua, leading to an LR reduction action which
-removes \texttt{SELECT} from the parsing stack, making it impossible for the
+removes `\texttt{SELECT}' from the parsing stack, making it impossible for the
 heuristic to identify that as a valid location to insert a language box at.
 
-\balance
+
 \subsection{Threats to Validity}
 
 There are two overall threats to validity to our evaluation.
@@ -1294,10 +1298,10 @@ There are two overall threats to validity to our evaluation.
 First, it is possible that our suite of language compositions and corpus of
 programs are unrepresentative. We have reduced these chances somewhat by using
 4 real-world programming languages and a fairly large number of well-known
-programs written in those languages, but of course it is possible to compose
+programs written in those languages, but it is possible to compose
 very different styles of languages, and to compose them in very different ways.
 It is possible that doing so might change our view of the effectiveness of
-automatic language boxes.
+the automatic language boxes algorithm.
 
 Second, we have made various suggestions about performance needs in this paper, but Eco is
 a poor vehicle for evaluating whether automatic language boxes match such claims:
@@ -1314,7 +1318,7 @@ overhead might be with a more efficient implementation, we altered Eco so that
 it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
 to be inserted. The average per-keypress wall-clock time (including everything
-associated with automatic language boxes) was 0.004s. Out of 5100 tests,
+associated with automatic language boxes) was 0.004s. Out of \totalinsertions tests,
 7 (0.14\%) had an average per-keypress wall-clock time above 0.1s (often
 considered the threshold at which humans start to perceive some lag from
 typing), with a worst case of 0.30s. These results are fairly good as-is,
