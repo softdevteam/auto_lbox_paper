@@ -1316,8 +1316,9 @@ it can be run without the GUI on PyPy, a faster implementation of Python. On a
 Xeon CPU E3-1270 3.60GHz machine, we then recorded the time each fragment took
 to be inserted: the average
 per-keypress wall-clock time (including
-everything associated with automatic language boxes) was approximately 0.003s,
-with only 1 test experiencing an average per-keypress wall-clock time above 0.1s (0.15s)
+everything associated with automatic language boxes) was approximately 0.006s,
+with only 2 tests experiencing an average per-keypress wall-clock time above 0.1s
+and a worst case of 0.17s.
 (roughly the threshold at which humans start to perceive some lag from typing).
 We believe that a more efficient implementation could
 expect to reduce these costs by at least one order of magnitude, if not more.
