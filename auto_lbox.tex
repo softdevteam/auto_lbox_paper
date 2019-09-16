@@ -297,7 +297,7 @@ language boxes are inserted or updated as appropriate. The
 algorithm is comprised of several stages / heuristics: determining what user
 inputs should trigger it; finding candidate language boxes to insert, remove,
 or resize; filtering out those which would make the overall program worse; and
-then applying the remaining candidates. Figure \ref{intro_example} shows a
+then applying the remaining candidates. Figure~\ref{intro_example} shows a
 simple example and walks readers through the high-level parts of the algorithm
 and accompanying heuristics.
 
@@ -644,20 +644,6 @@ slow to run. Instead we provide \emph{candidates recognisers}\footnote{Some lang
 candidates recognisers.} which are able to quickly return the list of substrings valid in
 a language $L$ starting at node $n$.
 
-The main challenge for candidates recognisers is to decide when to stop trying to recognise
-further input. If we stop too early, we will fail to recognise valid language
-boxes, but if we go too far, we will degrade performance. The technique
-we use is to try recognising gradually growing substrings as valid in an inner
-language, making use of the fact that the recogniser parser implicitly
-reuses state from the previous token.
-If a substring is not valid, we then check where the parse failed:
-if it failed on the EOS (End Of String) token, then it is possible that
-extending the substring might lead to a valid parse, so we continue the search; but if it
-failed earlier than the EOS token, then we know that extending the substring
-cannot fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
-more formal version of this algorithm.
-
-
 \begin{figure*}[t]
 \begin{minipage}[t]{0.5\textwidth}
 \begin{lstdefault}[]
@@ -715,6 +701,20 @@ candidate language boxes (line 23).}
 \label{lst:find_candidates}
 \end{figure*}
 
+The main challenge for candidates recognisers is to decide when to stop trying to recognise
+further input. If we stop too early, we will fail to recognise valid language
+boxes, but if we go too far, we will degrade performance. The technique
+we use is to try recognising gradually growing substrings as valid in an inner
+language, making use of the fact that the recogniser parser implicitly
+reuses state from the previous token.
+If a substring is not valid, we then check where the parse failed:
+if it failed on the EOS (End Of String) token, then it is possible that
+extending the substring might lead to a valid parse, so we continue the search; but if it
+failed earlier than the EOS token, then we know that extending the substring
+cannot fix the parse and we stop the search. Figure~\ref{fig:recogniser} shows a
+more formal version of this algorithm.
+
+
 For example, consider the fragment `\texttt{int x = SELECT 1 + 2;}' in our
 running Java and SQL composition. If we start a candidates recogniser at the
 `\texttt{SELECT}' token, we first try recognising `\texttt{SELECT}' which leads
@@ -769,6 +769,14 @@ ensures that all
 candidate locations close to the error node are searched, but bounds the search
 in a way that is unlikely to cause a noticeable slowdown.
 
+In order for later stages in the algorithm to work correctly, each candidate
+needs to have a valid parsing stack. While candidates produced by the stack
+heuristic naturally do so, we need to create a
+valid parsing stack for candidates from the parse tree and line heuristics.
+Fortunately, we can do this efficiently by
+using a similar approach to that used by the incremental parser to reparse
+nodes (see Figure~\ref{fig:createparsestack}).
+
 \begin{figure}
 \begin{lstdefault}[]
 def recreate_parsing_stack(lbox):
@@ -806,14 +814,6 @@ different to \texttt{node}'s parent in the current version of the tree,
 \texttt{global\_version}).}
 \label{fig:createparsestack}
 \end{figure}
-
-In order for later stages in the algorithm to work correctly, each candidate
-needs to have a valid parsing stack. While candidates produced by the stack
-heuristic naturally do so, we need to create a
-valid parsing stack for candidates from the parse tree and line heuristics.
-Fortunately, we can do this efficiently by
-using a similar approach to that used by the incremental parser to reparse
-nodes (see Figure~\ref{fig:createparsestack}).
 
 
 \subsection{Combining Heuristics}
@@ -1186,6 +1186,19 @@ For Lua, we used Lua's test suite, which consists of \corpusluafiles files total
 For SQL, we used SQLite's test suite, consisting of \corpussqlfiles test files which
 contain \corpussqltests tests totalling \corpussqlloc LoC.
 
+\begin{table*}[tb]
+    \input{tables/tbl_valid.tex}
+
+    \vspace{7pt}
+    \caption{The total percentage of acceptable outcomes for each benchmark and
+      heuristic. Acceptable outcomes are that: an automatic language box
+      (covering all or part of the fragment) was inserted, causing no syntax
+      errors; no language box was inserted since the fragment was also valid in
+      the outer language; or there were multiple candidates which were presented to the
+      user. Unacceptable outcomes are those which lead to syntax errors.}
+    \label{tbl:valid}
+\end{table*}
+
 We then ran each file in the corpus through a parser to identify the offsets and spans
 of function definitions and expressions, collecting the longest match when an
 expression contained several subexpressions. For PHP and Java
@@ -1202,19 +1215,6 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 
 
 \subsection{Results}
-
-\begin{table*}[tb]
-    \input{tables/tbl_valid.tex}
-
-    \vspace{7pt}
-    \caption{The total percentage of acceptable outcomes for each benchmark and
-      heuristic. Acceptable outcomes are that: an automatic language box
-      (covering all or part of the fragment) was inserted, causing no syntax
-      errors; no language box was inserted since the fragment was also valid in
-      the outer language; or there were multiple candidates which were presented to the
-      user. Unacceptable outcomes are those which lead to syntax errors.}
-    \label{tbl:valid}
-\end{table*}
 
 \begin{table*}[tb]
     \input{tables/tbl_breakdown.tex}
