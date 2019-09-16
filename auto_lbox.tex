@@ -169,7 +169,7 @@
 
 \begin{abstract}
 Since composed grammars are often ambiguous, grammar composition requires a
-mechanism for dealing with ambiguity: either ruling it out entirely through the use of
+mechanism for dealing with ambiguity: either ruling it out by using
 delimiters (which are awkward to work with), or by using disambiguation operators to
 filter a parse forest down to a single parse tree (where, in general, we cannot
 be sure that we have covered all possible parse forests). In this paper, we
@@ -196,8 +196,6 @@ tests involving compositions of real-world programming languages.
 \end{CCSXML}
 
 \ccsdesc[500]{Software and its engineering~Parsers}
-
-\keywords{Parsing, language composition, programming languages}
 
 \maketitle
 
@@ -886,12 +884,12 @@ want them.
 \includegraphics[width=1\textwidth]{images/autobox_multioption_java_sql.png}
 \end{center}
 \begin{picture}(0,0)
-    \put(-254,96){\textcolor{black}{\footnotesize\textbf{(a)}}}
-    \put(3,96){\textcolor{black}{\footnotesize\textbf{(b)}}}
-    \put(-254,53){\textcolor{black}{\footnotesize\textbf{(c)}}}
-    \put(3,53){\textcolor{black}{\footnotesize\textbf{(d)}}}
+    \put(-254,90.5){\textcolor{black}{\footnotesize\textbf{(a)}}}
+    \put(3,90.5){\textcolor{black}{\footnotesize\textbf{(b)}}}
+    \put(-254,45.3){\textcolor{black}{\footnotesize\textbf{(c)}}}
+    \put(3,46){\textcolor{black}{\footnotesize\textbf{(d)}}}
 \end{picture}
-\vspace{-1.7em}
+\vspace{-2.4em}
 \caption{An example of multiple language box candidates in our running Java and SQL
   composition. \textbf{(a)} The user is editing an existing Java programme,
   and has just deleted the expression after \qtt{remote}.
@@ -984,7 +982,7 @@ implications trivial.
     \put(-375,5.5){\textcolor{black}{\textbf{(a)}}}
     \put(-175,5.5){\textcolor{black}{\textbf{(b)}}}
 \end{picture}
-\vspace{-0.8em}
+\vspace{-1.1em}
 \end{center}
 \caption{A (slightly contrived) example showing automatic language box removal
   in our Java and SQL composition.
@@ -1150,9 +1148,9 @@ break these down into six categories: \label{detailed categories}
     there were multiple candidates.
 \end{description*}
 
-We then group these into `acceptable' -- complete insertion, partial insertion
+We then group these under `acceptable' -- complete insertion, partial insertion
 (no errors), no insertion (valid), and no insertion (multi) -- and
-`unacceptable' -- partial insertion (errors), no insertion (errors) -- groups.
+`unacceptable' -- partial insertion (errors), no insertion (errors).
 If automatic language boxes are to be useful, we would need to see a high value
 for the acceptable group and a low value for the unacceptable group.
 
@@ -1234,6 +1232,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
   categories (`partial insertion (error)' and `no insertion (error)') constitute
   a very small portion of the total.}
     \label{tbl:breakdown}
+    \vspace{-5pt}
 \end{table*}
 
 We break the results of our experiment down in two ways: by acceptable results
@@ -1316,12 +1315,11 @@ programs are unrepresentative. We have reduced these chances somewhat by using
 4 real-world programming languages and a fairly large number of well-known
 programs written in those languages, but it is possible to compose
 very different styles of languages, and to compose them in very different ways.
-It is possible that doing so might change our view of the effectiveness of
-the automatic language boxes algorithm.
+Doing so might change our view of the automatic language boxes algorithm.
 
 Second, we have made various suggestions about performance needs in this paper, but Eco is
 a poor vehicle for evaluating whether automatic language boxes match such claims:
-it is written in Python, a relatively slow language; the GUI runs only
+it is written in Python and the GUI runs only
 in CPython, a particularly slow implementation; and Eco's data-structures
 were originally designed to aid experimentation, and not performance. For example, nodes in Eco's
 parse tree are very heavy weight (with a base size of around 2KiB per node, which grows
@@ -1344,7 +1342,7 @@ timings by at least an order of magnitude.
 
 \section{Conclusions}
 
-In this paper we showed that a default disambiguation mechanism within an
+In this paper we showed that default disambiguation within an
 incremental parser works well for language composition, providing a new point
 in the editing design space.
 
