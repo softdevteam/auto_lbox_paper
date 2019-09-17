@@ -81,6 +81,10 @@
 \newcommand{\hotkeynewlbox}[0]{\keys{Ctrl+L}\xspace}
 \newcommand{\hotkeyleavelbox}[0]{\keys{Ctrl+Shift+L}\xspace}
 
+% Toggle arxiv/submission version, enabling/disabling the appendix.
+\newif\ifarxiv
+\arxivtrue
+
 \include{experimentstats}
 \include{corpusstats}
 
@@ -1222,7 +1226,7 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 
     \vspace{7pt}
     \caption{The total percentage of outcomes by category.
-\iffalse
+\ifarxiv
   See
     page~\pageref{detailed categories} for a detailed description of each category.
 \fi
@@ -1241,7 +1245,7 @@ per language composition (Table~\ref{tbl:valid}); and by detailed outcome in the
 overall benchmark suite (Table~\ref{tbl:breakdown}). In both cases we show
 the differences in the various candidates heuristics, which shows that while
 each has strengths and weaknesses, collectively they work well.
-\iffalse
+\ifarxiv
 Appendix~\ref{apdx:tables}
 contains several tables that give a more detailed breakdown of information
 that is, in a sense, a combination of that between Tables~\ref{tbl:valid}
@@ -1355,7 +1359,7 @@ This research was funded by the EPSRC Fellowship \emph{Lecture} (EP/L02344X/1).
 
 \bibliography{bib}
 
-\iffalse
+\ifarxiv
 \appendix
 \clearpage
 \onecolumn
