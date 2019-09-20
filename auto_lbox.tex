@@ -83,7 +83,7 @@
 
 % Toggle arxiv/submission version, enabling/disabling the appendix.
 \newif\ifarxiv
-\arxivtrue
+\arxivfalse
 
 \include{experimentstats}
 \include{corpusstats}
@@ -203,6 +203,8 @@ tests involving compositions of real-world programming languages.
 
 \ccsdesc[500]{Software and its engineering~Parsers}
 \fi
+
+\keywords{Parsing, language composition}
 
 \maketitle
 
@@ -1195,9 +1197,6 @@ For SQL, we used SQLite's test suite, consisting of \corpussqlfiles test files w
 contain \corpussqltests tests totalling \corpussqlloc LoC.
 
 \begin{table*}[tb]
-    \input{tables/tbl_valid.tex}
-
-    \vspace{7pt}
     \caption{The total percentage of acceptable outcomes for each benchmark and
       heuristic. Acceptable outcomes are that: an automatic language box
       (covering all or part of the fragment) was inserted, causing no syntax
@@ -1205,7 +1204,9 @@ contain \corpussqltests tests totalling \corpussqlloc LoC.
       the outer language; or there were multiple candidates which were presented to the
       user. Unacceptable outcomes are those which lead to syntax errors.}
     \label{tbl:valid}
-    \vspace{-6pt}
+    \vspace{-3pt}
+    \input{tables/tbl_valid.tex}
+    \vspace{10pt}
 \end{table*}
 
 We then ran each file in the corpus through a parser to identify the offsets and spans
@@ -1226,9 +1227,6 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
 \subsection{Results}
 
 \begin{table*}[tb]
-    \input{tables/tbl_breakdown.tex}
-
-    \vspace{7pt}
     \caption{The total percentage of outcomes by category.
 \ifarxiv
   See
@@ -1240,8 +1238,10 @@ Java, \corpusluaexprs expressions and \corpusluafuncs functions for Lua, and \co
   fragment was valid in the outer language. Significantly, the unacceptable
   categories (`partial insertion (error)' and `no insertion (error)') constitute
   a very small portion of the total.}
+    \vspace{-3pt}
+    \input{tables/tbl_breakdown.tex}
     \label{tbl:breakdown}
-    \vspace{-5pt}
+    \vspace{10pt}
 \end{table*}
 
 We break the results of our experiment down in two ways: by acceptable results
